@@ -326,16 +326,35 @@ STL surface actually used in class layouts (`<cstdint>`, `<utility>` for
   for without the force-instantiation preprocessing step
   (`scripts/generate_forced_instantiations.py`) actually being wired into
   the real parse call — confirmed via debug tracing, not guessed.
-  **One wiring attempt was made tonight and did not work** — see
-  `patches/0002-fix-forward-decl-overwrite.md`'s final section for exactly
-  what was tried (`using` alias + `sizeof` to force-instantiate
-  `stl::enumeration<...>` after the real headers) and why it likely failed
-  (probably `-fdelayed-template-parsing` + `skipFunctionBodies()`/
-  `parseIncomplete()` preventing the implicit specialization from ever
-  becoming a walkable AST cursor — untested hypothesis, needs an
-  `-ast-dump` investigation before the next attempt). Not a solved
-  problem — the concrete next step, with the dead end already marked so
-  the next session doesn't retread it.
+  **Root cause now precisely confirmed** via `c-index-test` (libclang's own
+  cursor-inspection tool): a class template specialization is *never*
+  exposed as a visitable declaration cursor by `clang_visitChildren` —
+  traversal only ever reaches the uninstantiated primary template plus a
+  `TemplateRef` at the use site. This is an architectural fact about
+  libclang, not a flag or timing issue — confirmed by inspecting both
+  Clang's internal AST (`-ast-dump`, which DOES show a
+  `ClassTemplateSpecializationDecl`) and libclang's actual cursor tree
+  (`c-index-test`, which does NOT expose it anywhere). No amount of
+  source-level force-instantiation trickery can fix this by itself — the
+  `using` alias + `sizeof` attempt above was a source-level trick and was
+  correctly ruled out.
+  **Partial fix applied and verified**
+  (`patches/0003-inline-template-specialization-fields.{patch,md}`):
+  resolve the field's `Type.declaration()` directly (`clang_getTypeDeclaration`,
+  a different API that CAN reach the specialization) instead of relying on
+  traversal, and inline it via the same anonymous-struct-embedding
+  mechanism (which already bypasses the string-keyed dependency system).
+  This correctly reaches a real `CLASS_DECL` cursor for the specialization
+  — but visiting ITS children still finds zero fields, for essentially
+  every templated type checked (`stl::enumeration`, `vector`, `optional`,
+  `BSTArray`, etc.) — the template class body itself is apparently never
+  instantiated/parsed under this codebase's `-fdelayed-template-parsing` +
+  `parseIncomplete()`/`skipFunctionBodies()` combination unless something
+  else forces it. **Not solved — see patch 0003's writeup for the precise
+  next investigation step** (check whether `-fdelayed-template-parsing` is
+  actually needed for something else, and/or look for a libclang call that
+  forces `Type` instantiation as a side effect, e.g. around
+  `clang_Type_getSizeOf`).
 - Third-party tool bugs found and fixed in `GhidraClangPoweredParse`
   tonight, beyond the redundant-vptr one below: **forward-declaration
   overwrite** — `TypePool.addParsedType` let a later, empty forward

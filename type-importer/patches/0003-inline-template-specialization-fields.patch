@@ -1,0 +1,101 @@
+--- a/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 03:52:31.016733893 -0400
++++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 03:52:54.460119464 -0400
+@@ -279,6 +279,7 @@
+ 
+                     // For anonymous struct/union fields, recursively parse the inner type
+                     ParsedType anonType = null;
++                    boolean inlineEmbed = isAnon;
+                     if (isAnon) {
+                         Type fieldType = cursor.type().unwrap();
+                         TypeKind typeKind = fieldType.kind();
+@@ -291,6 +292,62 @@
+                                 anonType = parseAnonymousUnion(pool, anonDecl, category);
+                             }
+                         }
++                    } else {
++                        // Class template specializations (e.g. stl::enumeration<Flag, U>)
++                        // are NEVER exposed by libclang as a visitable declaration cursor
++                        // via clang_visitChildren -- confirmed with c-index-test on a
++                        // minimal repro: the AST traversal only ever reaches the
++                        // uninstantiated ClassTemplate plus a TemplateRef at the use
++                        // site, never a STRUCT_DECL/CLASS_DECL for the specialization
++                        // itself (that node exists internally, visible via -ast-dump,
++                        // but is not a libclang cursor-tree child of anything). Any
++                        // field of such a type can therefore never be resolved through
++                        // top-down declaration traversal or force-instantiation tricks
++                        // (tried and confirmed not to work -- see
++                        // patches/0002-fix-forward-decl-overwrite.md's final section).
++                        //
++                        // Fix: resolve the field's own Type instead of relying on
++                        // traversal -- Type.declaration() (clang_getTypeDeclaration)
++                        // CAN reach the specialization even though clang_visitChildren
++                        // never surfaces it as a namespace/class child -- and inline its
++                        // fields directly via the same embedding mechanism already used
++                        // for anonymous struct/union members, which conveniently already
++                        // bypasses the string-keyed dependency-resolution system
++                        // entirely (ParsedStructure.getDependencies() filters out
++                        // isAnonymous() fields). This sidesteps the whole "would need a
++                        // mangled synthetic name registered in the pool, matching
++                        // whatever raw spelling every other reference to the same
++                        // instantiation uses" problem -- each field just gets its own
++                        // private inline copy of the specialization's layout, which is
++                        // all a layout-only pass (this project's actual goal) needs.
++                        //
++                        // Note: template specializations report as TypeKind.UNEXPOSED,
++                        // not RECORD, in libclang's C API (a known quirk -- confirmed
++                        // via debug tracing against real CommonLibSSE-NG headers).
++                        //
++                        // STILL INCOMPLETE as of 2026-08-24 -- see
++                        // patches/0003-inline-template-specialization-fields.md: this
++                        // correctly reaches a CLASS_DECL cursor for the specialization,
++                        // but visiting its children finds zero fields in practice,
++                        // because the template's class body is apparently never
++                        // instantiated/parsed at all under this codebase's
++                        // -fdelayed-template-parsing + parseIncomplete()/
++                        // skipFunctionBodies() combination unless something else in the
++                        // same translation unit forces that specific specialization's
++                        // body to materialize (e.g. a real sizeof/member-access use).
++                        // This patch is real, tested infrastructure and a necessary
++                        // step, but by itself does not yet produce non-empty inlined
++                        // fields for CommonLibSSE-NG's stl::enumeration<...> usage.
++                        Type fieldType = cursor.type().unwrap();
++                        if ((fieldType.kind() == TypeKind.RECORD || fieldType.kind() == TypeKind.UNEXPOSED)
++                            && fieldType.spelling().contains("<")) {
++                            Cursor declCursor = fieldType.declaration();
++                            CursorKind declKind = declCursor.kind();
++                            if (declKind == CursorKind.STRUCT_DECL || declKind == CursorKind.CLASS_DECL) {
++                                anonType = parseAnonymousStruct(pool, declCursor, category);
++                                inlineEmbed = true;
++                            }
++                        }
+                     }
+ 
+                     fields.add(new ParsedStructure.FieldInfo(
+@@ -298,7 +355,7 @@
+                         cursor.type().spelling(),
+                         isBitField,
+                         bitWidth,
+-                        isAnon,
++                        inlineEmbed,
+                         anonType
+                     ));
+                 }
+--- a/src/main/java/playday3008/gcpp/processing/ParsedStructure.java	2026-08-24 03:46:23.433311178 -0400
++++ b/src/main/java/playday3008/gcpp/processing/ParsedStructure.java	2026-08-24 03:53:01.997366993 -0400
+@@ -56,7 +56,15 @@
+             } else if (field.isAnonymous() && field.anonymousType() != null) {
+                 DataType anonDt = field.anonymousType().createDataType(pool);
+                 if (anonDt != null) {
+-                    struct.add(anonDt, "", null);
++                    // A genuinely anonymous struct/union member has no field name of
++                    // its own (Ghidra flattens it in). But this same inline-embedding
++                    // slot is also reused for named fields whose type is a class
++                    // template specialization (see SourceParser.parseStruct's
++                    // FIELD_DECL case) -- those DO have a real field name, and it
++                    // needs to be preserved rather than flattened.
++                    String fieldName = (field.name() != null && !field.name().isEmpty())
++                        ? field.name() : "";
++                    struct.add(anonDt, fieldName, null);
+                 }
+             } else {
+                 DataType fieldType = pool.getType(field.typeName());
