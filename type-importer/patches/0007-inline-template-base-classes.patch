@@ -1,0 +1,583 @@
+diff -ruN a/src/main/java/playday3008/gcpp/clang/Cursor.java b/src/main/java/playday3008/gcpp/clang/Cursor.java
+--- a/src/main/java/playday3008/gcpp/clang/Cursor.java	2026-08-24 18:27:43.213752681 -0400
++++ b/src/main/java/playday3008/gcpp/clang/Cursor.java	2026-08-24 18:28:10.266283922 -0400
+@@ -216,6 +216,17 @@
+         return new Cursor(defSegment, arena);
+     }
+ 
++    /**
++     * For an implicit class-template-specialization declaration cursor,
++     * returns the cursor for the PRIMARY (uninstantiated) template
++     * declaration -- see LibClang.getSpecializedCursorTemplate's comment.
++     * Returns a null/invalid cursor if this cursor isn't a specialization.
++     */
++    public Cursor specializedTemplate() {
++        MemorySegment templSegment = LibClang.getSpecializedCursorTemplate(arena, segment);
++        return new Cursor(templSegment, arena);
++    }
++
+     // ========================================================================
+     // Visitor pattern
+     // ========================================================================
+diff -ruN a/src/main/java/playday3008/gcpp/clang/LibClang.java b/src/main/java/playday3008/gcpp/clang/LibClang.java
+--- a/src/main/java/playday3008/gcpp/clang/LibClang.java	2026-08-24 18:27:43.213880183 -0400
++++ b/src/main/java/playday3008/gcpp/clang/LibClang.java	2026-08-24 18:28:10.266125330 -0400
+@@ -416,6 +416,20 @@
+     private static final MethodHandle CLANG_GET_CURSOR_DEFINITION = downcall("clang_getCursorDefinition",
+         FunctionDescriptor.of(CX_CURSOR, CX_CURSOR));
+ 
++    // Given the cursor for an implicit class-template-specialization
++    // declaration, returns the cursor for the PRIMARY (uninstantiated)
++    // template declaration it came from -- e.g. for BSTArray<void*>'s decl,
++    // returns the cursor for `template <class T, class Allocator> class
++    // BSTArray`. Unlike the instantiated specialization's own declaration
++    // (which clang_visitChildren finds ZERO children for -- see
++    // patches/0003-inline-template-specialization-fields.md), the PRIMARY
++    // template's declaration is real, written source, so clang_visitChildren
++    // walks its base-specifiers/members normally. Used to recover base
++    // classes for template specializations used as inline-embedded fields
++    // (see patches/0006-*.md).
++    private static final MethodHandle CLANG_GET_SPECIALIZED_CURSOR_TEMPLATE = downcall("clang_getSpecializedCursorTemplate",
++        FunctionDescriptor.of(CX_CURSOR, CX_CURSOR));
++
+     // The actual fix for the same investigation -- see FIELD_VISITOR_DESC's comment
+     // above and patches/0003-inline-template-specialization-fields.md.
+     private static final MethodHandle CLANG_TYPE_VISIT_FIELDS = downcall("clang_Type_visitFields",
+@@ -442,6 +456,19 @@
+     private static final MethodHandle CLANG_GET_ARRAY_ELEMENT_TYPE = downcall("clang_getArrayElementType",
+         FunctionDescriptor.of(CX_TYPE, CX_TYPE));
+ 
++    // Number of template arguments (including default-substituted ones) an
++    // instantiated class-template-specialization type carries, and the
++    // concrete type of the i-th one. Used to resolve dependent base classes
++    // (e.g. BSTArray<T, Allocator = BSTArrayHeapAllocator>'s "Allocator"
++    // base, written symbolically on the primary template) back to their
++    // concrete substituted type for a specific instantiation -- see
++    // patches/0006-*.md.
++    private static final MethodHandle CLANG_TYPE_GET_NUM_TEMPLATE_ARGUMENTS = downcall("clang_Type_getNumTemplateArguments",
++        FunctionDescriptor.of(ValueLayout.JAVA_INT, CX_TYPE));
++
++    private static final MethodHandle CLANG_TYPE_GET_TEMPLATE_ARGUMENT_AS_TYPE = downcall("clang_Type_getTemplateArgumentAsType",
++        FunctionDescriptor.of(CX_TYPE, CX_TYPE, ValueLayout.JAVA_INT));
++
+     private static final MethodHandle CLANG_GET_ARRAY_SIZE = downcall("clang_getArraySize",
+         FunctionDescriptor.of(ValueLayout.JAVA_LONG, CX_TYPE));
+ 
+@@ -803,6 +830,14 @@
+         }
+     }
+ 
++    public static MemorySegment getSpecializedCursorTemplate(SegmentAllocator allocator, MemorySegment cursor) {
++        try {
++            return (MemorySegment) CLANG_GET_SPECIALIZED_CURSOR_TEMPLATE.invokeExact(allocator, cursor);
++        } catch (Throwable t) {
++            throw new RuntimeException("clang_getSpecializedCursorTemplate failed", t);
++        }
++    }
++
+     public static int typeVisitFields(MemorySegment type, MemorySegment visitor, MemorySegment clientData) {
+         try {
+             return (int) CLANG_TYPE_VISIT_FIELDS.invokeExact(type, visitor, clientData);
+@@ -859,6 +894,22 @@
+         }
+     }
+ 
++    public static int typeGetNumTemplateArguments(MemorySegment type) {
++        try {
++            return (int) CLANG_TYPE_GET_NUM_TEMPLATE_ARGUMENTS.invokeExact(type);
++        } catch (Throwable t) {
++            throw new RuntimeException("clang_Type_getNumTemplateArguments failed", t);
++        }
++    }
++
++    public static MemorySegment getTemplateArgumentAsType(SegmentAllocator allocator, MemorySegment type, int index) {
++        try {
++            return (MemorySegment) CLANG_TYPE_GET_TEMPLATE_ARGUMENT_AS_TYPE.invokeExact(allocator, type, index);
++        } catch (Throwable t) {
++            throw new RuntimeException("clang_Type_getTemplateArgumentAsType failed", t);
++        }
++    }
++
+     public static MemorySegment getArrayElementType(SegmentAllocator allocator, MemorySegment type) {
+         try {
+             return (MemorySegment) CLANG_GET_ARRAY_ELEMENT_TYPE.invokeExact(allocator, type);
+diff -ruN a/src/main/java/playday3008/gcpp/clang/Type.java b/src/main/java/playday3008/gcpp/clang/Type.java
+--- a/src/main/java/playday3008/gcpp/clang/Type.java	2026-08-24 18:27:43.213908177 -0400
++++ b/src/main/java/playday3008/gcpp/clang/Type.java	2026-08-24 18:28:10.266260297 -0400
+@@ -82,6 +82,24 @@
+     }
+ 
+     /**
++     * Number of template arguments (including default-substituted ones)
++     * this instantiated class-template-specialization type carries, or a
++     * negative value if this isn't a template specialization.
++     */
++    public int numTemplateArguments() {
++        return LibClang.typeGetNumTemplateArguments(segment);
++    }
++
++    /**
++     * The concrete type of the i-th template argument of this
++     * instantiated class-template-specialization type.
++     */
++    public Type templateArgumentType(int index) {
++        MemorySegment typeSeg = LibClang.getTemplateArgumentAsType(arena, segment, index);
++        return new Type(typeSeg, arena);
++    }
++
++    /**
+      * For array types, returns the element type.
+      */
+     public Type arrayElementType() {
+diff -ruN a/src/main/java/playday3008/gcpp/processing/ParsedStructure.java b/src/main/java/playday3008/gcpp/processing/ParsedStructure.java
+--- a/src/main/java/playday3008/gcpp/processing/ParsedStructure.java	2026-08-24 18:27:43.213978531 -0400
++++ b/src/main/java/playday3008/gcpp/processing/ParsedStructure.java	2026-08-24 18:28:10.266555519 -0400
+@@ -16,19 +16,60 @@
+         boolean isBitField,
+         int bitFieldWidth,
+         boolean isAnonymous,
+-        ParsedType anonymousType
+-    ) {}
++        ParsedType anonymousType,
++        long fallbackSize
++    ) {
++        // Preserves every existing 6-arg call site: fallbackSize defaults to 0
++        // (meaning "no fallback, drop the field if its type never resolves" --
++        // the pre-existing behavior). Only used explicitly for base-class
++        // fields recovered via patches/0006-*.md's dependent-base resolution,
++        // where the base's own real clang_Type_getSizeOf is known at parse
++        // time and should be used as opaque padding if the resolved base
++        // type name (e.g. an STL-internal class not independently registered
++        // anywhere in this pipeline, like codecvt_base) never actually
++        // resolves -- see ParsedStructure.createDataType.
++        public FieldInfo(String name, String typeName, boolean isBitField, int bitFieldWidth,
++                          boolean isAnonymous, ParsedType anonymousType) {
++            this(name, typeName, isBitField, bitFieldWidth, isAnonymous, anonymousType, 0);
++        }
++    }
+ 
+     private final List<FieldInfo> fields;
+     private final boolean isPacked;
+     private final int explicitPackValue;
++    private final long expectedSize;
+ 
+     public ParsedStructure(String name, List<FieldInfo> fields, boolean isPacked,
+                            int explicitPackValue, CategoryPath categoryPath) {
++        this(name, fields, isPacked, explicitPackValue, categoryPath, 0);
++    }
++
++    /**
++     * expectedSize (0 = not enforced, the behavior every existing 5-arg call
++     * site keeps unchanged): the real clang_Type_getSizeOf ground truth for
++     * this structure, if known. Used by parseFieldsFromType's template-base-
++     * inlining (patches/0007-*.md) as a safety net -- manually walking a
++     * template specialization's bases/fields can under-count the real size
++     * in cases this pipeline doesn't fully model: an implicit compiler-
++     * generated vptr contributed by the specialization itself (not by any
++     * base -- e.g. GFxLogBase<T>'s own virtual destructor, confirmed via
++     * direct source inspection: RE/G/GFxLogBase.h), or a base class that is
++     * itself a template instantiation containing the ENCLOSING template's
++     * own unsubstituted parameter (e.g. hkArray<T> : public hkArrayBase<T>
++     * -- "hkArrayBase<T>" doesn't match the simple bare-parameter-name
++     * substitution patch 0007 already handles, since T only appears nested
++     * inside another template application, not standing alone as the base's
++     * entire spelling). createDataType tops up with trailing opaque padding
++     * if the fields actually added come up short of this expected total,
++     * rather than silently under-sizing the enclosing struct.
++     */
++    public ParsedStructure(String name, List<FieldInfo> fields, boolean isPacked,
++                           int explicitPackValue, CategoryPath categoryPath, long expectedSize) {
+         super(name, categoryPath);
+         this.fields = List.copyOf(fields);
+         this.isPacked = isPacked;
+         this.explicitPackValue = explicitPackValue;
++        this.expectedSize = expectedSize;
+     }
+ 
+     @Override
+@@ -55,7 +96,23 @@
+                 }
+             } else if (field.isAnonymous() && field.anonymousType() != null) {
+                 DataType anonDt = field.anonymousType().createDataType(pool);
+-                if (anonDt != null) {
++                // A nested inline-embedded template specialization (patches/0007-*.md's
++                // base-class inlining, recursing into ANOTHER template-specialization
++                // base) can come back with truly ZERO components -- e.g. a dependent,
++                // unsubstituted base like "hkArrayBase<T>" (still containing the
++                // outer's own unresolved parameter because it's read from the primary
++                // template's own context, not a concrete instantiation): its own
++                // clang_Type_getSizeOf returns a negative CXTypeLayoutError, so neither
++                // the opaque-padding fallback nor the expectedSize top-up have anything
++                // to work with. Adding such a component anyway interacts ambiguously
++                // with Ghidra's own zero-length-component handling and corrupts the
++                // OUTER structure's own expectedSize top-up math (confirmed empirically:
++                // produced an off-by-one-byte-short structure). Skip adding it entirely
++                // -- the outer structure's own expectedSize top-up (below) then covers
++                // the resulting gap as one clean, correctly-sized opaque block instead.
++                if (anonDt instanceof Structure innerStruct && innerStruct.getNumComponents() == 0) {
++                    // contributes nothing -- fall through without adding anything.
++                } else if (anonDt != null) {
+                     // A genuinely anonymous struct/union member has no field name of
+                     // its own (Ghidra flattens it in). But this same inline-embedding
+                     // slot is also reused for named fields whose type is a class
+@@ -70,10 +127,42 @@
+                 DataType fieldType = pool.getType(field.typeName());
+                 if (fieldType != null) {
+                     struct.add(fieldType, field.name(), null);
++                } else if (field.fallbackSize() > 0) {
++                    // The named type never resolved (e.g. an STL-internal
++                    // base class like codecvt_base, never independently
++                    // registered anywhere in this pipeline) -- pad with its
++                    // own real size instead of silently dropping the field,
++                    // which would otherwise shrink the enclosing struct.
++                    struct.add(new ArrayDataType(CharDataType.dataType, (int) field.fallbackSize(), 1),
++                        field.name(), null);
+                 }
+             }
+         }
+ 
++        // Safety net for patches/0007-*.md's base-class inlining: manually
++        // walking a template specialization's bases/fields can under-count
++        // the real size (a self-contributed vptr not modeled by any base;
++        // a nested dependent-template base like hkArrayBase<T> that isn't a
++        // bare parameter reference and so isn't substituted). Never let the
++        // struct come out smaller than clang's own authoritative
++        // clang_Type_getSizeOf -- top up with trailing opaque padding if
++        // short, exactly like the original opaque-fallback used to
++        // guarantee for the fully-empty case.
++        if (expectedSize > 0) {
++            // A freshly-created empty packed StructureDataType reports
++            // getLength()==1 (Ghidra's own minimum-structure-size floor),
++            // not 0, even with zero components added -- confirmed
++            // empirically (a structure that never added any component
++            // still needed a full expectedSize-byte pad, not
++            // expectedSize-1). Treat the "nothing added yet" case as
++            // truly zero rather than trusting the floored getLength().
++            long currentLength = struct.getNumComponents() == 0 ? 0 : struct.getLength();
++            if (currentLength < expectedSize) {
++                int shortfall = (int) (expectedSize - currentLength);
++                struct.add(new ArrayDataType(CharDataType.dataType, shortfall, 1), "tailPadding", null);
++            }
++        }
++
+         return struct;
+     }
+ 
+diff -ruN a/src/main/java/playday3008/gcpp/processing/SourceParser.java b/src/main/java/playday3008/gcpp/processing/SourceParser.java
+--- a/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 18:27:43.214137333 -0400
++++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 18:28:10.266367040 -0400
+@@ -668,6 +668,198 @@
+     private ParsedStructure parseFieldsFromType(Type type, CategoryPath category) {
+         List<ParsedStructure.FieldInfo> fields = new ArrayList<>();
+ 
++        String typeSpelling = type.spelling();
++
++        // Base classes are laid out before own fields in real memory (MSVC
++        // and Itanium both put bases first), so collect and add them
++        // before the visitFields() call below. clang_Type_visitFields only
++        // reports a record's OWN fields (CXXRecordDecl::field_begin()/
++        // field_end()) -- it never walks inherited base-class fields, by
++        // design (it's not a bug in the API, confirmed by inspecting real
++        // usage: BSTArray<T> : public Allocator, public BSTArrayBase in
++        // RE/B/BSTArray.h declares zero fields of its own -- ALL its real
++        // storage lives in those two bases). Many CommonLibSSE-NG
++        // container/wrapper templates follow this exact shape (BSTArray,
++        // hkArray, NiTLargeObjectArray, GAtomicInt, BSTSmallArray, ...).
++        // Before this fix, these were indistinguishable from a genuinely
++        // fieldless pure-interface type like BSTEventSink<T> (no bases, no
++        // fields, vptr only) and both fell through to the same opaque
++        // char[N] padding -- losing all real field data for the former.
++        //
++        // The instantiated specialization's OWN declaration cursor can't
++        // be walked for this either: clang_visitChildren finds ZERO
++        // children for it (the same quirk patches/0003 already
++        // established for fields -- confirmed here empirically applies to
++        // base-specifiers too, not just fields). The fix: fetch the
++        // PRIMARY (uninstantiated) template's declaration via
++        // clang_getSpecializedCursorTemplate -- real written source, so
++        // clang_visitChildren walks it normally -- and read its
++        // C_X_X_BASE_SPECIFIER children. A base written in terms of a
++        // template parameter (e.g. BSTArray's "Allocator", defaulting to
++        // BSTArrayHeapAllocator) is resolved back to its concrete
++        // substituted type for THIS instantiation via
++        // clang_Type_getTemplateArgumentAsType, matched positionally
++        // against the primary template's own TEMPLATE_TYPE_PARAMETER
++        // order (confirmed empirically: clang records default-substituted
++        // arguments too, so BSTArray<void*> alone -- relying on the
++        // default Allocator -- still reports 2 template arguments, not 1).
++        // See patches/0006-*.md for the full investigation.
++        // Tracks whether anything GENUINELY non-empty has been collected --
++        // used below to decide whether the opaque-padding/sizeOf() safety
++        // net is needed. NOT simply "is `fields` non-empty": a recursively-
++        // embedded template base can add an ENTRY to `fields` that wraps a
++        // completely empty inner ParsedStructure (e.g. BSTSingletonSDM<T>'s
++        // own base chain is fully unresolvable nested templates -- see
++        // patches/0007-*.md), which would make `fields.isEmpty()` false
++        // even though nothing real was actually recovered. Confirmed
++        // empirically this exact gap caused AnimationFileManagerSingleton
++        // (derives from BSTSingletonSDM<AnimationFileManagerSingleton>) to
++        // silently lose that base's real (non-zero) contribution.
++        boolean[] addedRealContent = {false};
++        Cursor primaryTemplate = type.declaration().specializedTemplate();
++        if (primaryTemplate.kind() != CursorKind.INVALID_FILE) {
++            List<String> typeParamNames = new ArrayList<>();
++            // Parallel to typeParamNames: the parameter's own default type,
++            // if it declared one (e.g. "class Allocator = BSTArrayHeapAllocator"),
++            // or null if not. clang_Type_getNumTemplateArguments only reports
++            // EXPLICITLY-specified arguments, not default-substituted ones
++            // (confirmed empirically: BSTArray<CachedValueData> -- one
++            // explicit arg, relying on Allocator's default -- reports
++            // numTemplateArguments()==1, not 2). A TEMPLATE_TYPE_PARAMETER
++            // cursor with a default exposes it as a TYPE_REF child whose
++            // .type() gives the real default type -- confirmed empirically
++            // against BSTArray's own "Allocator" parameter (resolves to
++            // RE::BSTArrayHeapAllocator).
++            List<Type> defaultTypes = new ArrayList<>();
++            List<Type> rawBaseTypes = new ArrayList<>();
++            // Single pass over the primary template's children, collecting
++            // BOTH its type-parameter list (with defaults) AND its base
++            // specifiers -- merged into one visitChildren call (each was a
++            // separate call originally) to minimize the number of extra
++            // libclang calls this base-inlining logic makes per field.
++            // TEMPLATE_TYPE_PARAMETER children always precede
++            // C_X_X_BASE_SPECIFIER ones in a class template declaration, so
++            // typeParamNames/defaultTypes are always fully populated by the
++            // time any base is collected -- substitution itself still
++            // happens in a second, non-libclang-calling loop below, after
++            // this traversal completes.
++            primaryTemplate.visitChildren((c, p) -> {
++                if (c.kind() == CursorKind.TEMPLATE_TYPE_PARAMETER) {
++                    typeParamNames.add(c.spelling());
++                    Type[] defaultType = {null};
++                    c.visitChildren((cc, pp) -> {
++                        if (cc.kind() == CursorKind.TYPE_REF) {
++                            defaultType[0] = cc.type();
++                        }
++                        return Cursor.ChildVisitResult.CONTINUE;
++                    });
++                    defaultTypes.add(defaultType[0]);
++                } else if (c.kind() == CursorKind.C_X_X_BASE_SPECIFIER) {
++                    rawBaseTypes.add(c.type());
++                }
++                return Cursor.ChildVisitResult.CONTINUE;
++            });
++
++            // Use the CANONICAL type for template-argument introspection: the
++            // sugared (alias) type drops an alias's own supplied arguments
++            // entirely (e.g. BSScrapArray<T> = BSTArray<T, BSScrapArrayAllocator>
++            // reports 1 argument, not 2), while the canonical type reports the
++            // full, positionally-correct list including substituted defaults --
++            // confirmed with a standalone libclang C probe at full-sweep scale
++            // (see patches/0007-inline-template-base-classes.md).
++            Type canonicalForArgs = type.canonicalType();
++            int numArgs = canonicalForArgs.numTemplateArguments();
++
++            for (Type baseType : rawBaseTypes) {
++                String baseSpelling = baseType.spelling();
++                if (baseSpelling == null || baseSpelling.isEmpty()) {
++                    continue;
++                }
++
++                // If the base is spelled as one of the primary template's own
++                // type parameters, substitute the concrete argument type used
++                // for THIS instantiation (positional match): the explicit
++                // argument if the caller supplied one, else the parameter's
++                // own default type.
++                Type concreteBaseType = baseType;
++                String concreteSpelling = baseSpelling;
++                int paramIndex = typeParamNames.indexOf(baseSpelling);
++                if (paramIndex >= 0) {
++                    Type substituted = null;
++                    if (paramIndex < numArgs) {
++                        substituted = canonicalForArgs.templateArgumentType(paramIndex);
++                    } else if (paramIndex < defaultTypes.size() && defaultTypes.get(paramIndex) != null) {
++                        substituted = defaultTypes.get(paramIndex);
++                    }
++                    if (substituted != null) {
++                        String substitutedSpelling = substituted.spelling();
++                        if (substitutedSpelling != null && !substitutedSpelling.isEmpty()) {
++                            concreteBaseType = substituted;
++                            concreteSpelling = substitutedSpelling;
++                        }
++                    }
++                }
++
++                String fieldName = "super_" + concreteSpelling.replaceAll("[^A-Za-z0-9_]", "_");
++                if (concreteSpelling.contains("<")) {
++                    // The (possibly-substituted) base is itself a template
++                    // specialization -- recurse through this same
++                    // inline-embedding mechanism.
++                    ParsedStructure inlineBase = parseFieldsFromType(concreteBaseType.unwrap(), category);
++                    fields.add(new ParsedStructure.FieldInfo(
++                        fieldName, concreteSpelling, false, 0, true, inlineBase));
++                    if (!inlineBase.getFields().isEmpty()) {
++                        addedRealContent[0] = true;
++                    }
++                } else {
++                    // Plain named base class (e.g. BSTArrayBase,
++                    // BSTArrayHeapAllocator) -- resolved through the normal
++                    // string-keyed dependency system, exactly like any other
++                    // named field. It's registered separately when
++                    // SourceParser visits its own top-level declaration
++                    // elsewhere in the header set. Some bases (STL-internal
++                    // classes like codecvt_base, or dependent alias-template
++                    // bases like _Choose_atomic_base_t<_Ty>) are never
++                    // independently registered anywhere in this pipeline and
++                    // will never resolve -- pass this base's own real size as
++                    // a fallback so ParsedStructure.createDataType can pad
++                    // with an opaque char[N] instead of silently dropping the
++                    // field (which would otherwise shrink the enclosing
++                    // struct by this base's size).
++                    fields.add(new ParsedStructure.FieldInfo(
++                        fieldName, concreteSpelling, false, 0, false, null, concreteBaseType.sizeOf()));
++                    addedRealContent[0] = true;
++                }
++            }
++
++            // A template specialization can introduce its OWN vptr (e.g.
++            // GFxLogBase<T>'s virtual destructor -- confirmed via direct
++            // source inspection: RE/G/GFxLogBase.h, real
++            // static_assert(sizeof(GFxLogBase<void*>) == 0x8), deriving
++            // from the empty GFxLogConstants base which contributes 0 bytes
++            // via empty-base-optimization) that clang_Type_visitFields
++            // never reports (it's compiler-generated, not a real FieldDecl)
++            // and that base-walking above doesn't account for either (it
++            // only recovers EXPLICIT base subobjects, not an implicit
++            // vtable pointer the specialization contributes itself).
++            // Deliberately using the SAME isPolymorphic() cursor-based
++            // check patch 0001 already uses for ordinary (non-template)
++            // structs -- NOT clang_Type_getSizeOf, which a full-sweep
++            // regression check found unreliable for this purpose in some
++            // cases (see the long comment on the "realSize" gating below).
++            // Mirrors patch 0001's exact rule: a new vptr is only needed if
++            // this type declares/inherits a virtual method AND its first
++            // base doesn't already have one (matching real Itanium/MSVC
++            // ABI: only ONE vptr per primary-base chain).
++            boolean primaryBaseIsPolymorphic = !rawBaseTypes.isEmpty()
++                && isPolymorphic(rawBaseTypes.get(0).declaration());
++            if (!primaryBaseIsPolymorphic && isPolymorphic(primaryTemplate)) {
++                fields.add(0, new ParsedStructure.FieldInfo(
++                    "vptr", "char[8]", false, 0, false, null));
++                addedRealContent[0] = true;
++            }
++        }
++
+         type.visitFields(fieldCursor -> {
+             boolean isBitField = fieldCursor.isBitField();
+             int bitWidth = isBitField ? fieldCursor.getBitFieldWidth() : 0;
+@@ -680,6 +872,7 @@
+             fields.add(new ParsedStructure.FieldInfo(
+                 fieldCursor.spelling(), fieldCursor.type().canonicalType().spelling(),
+                 isBitField, bitWidth, false, null));
++            addedRealContent[0] = true;
+             return Type.FieldVisitResult.CONTINUE;
+         });
+ 
+@@ -691,16 +884,77 @@
+         // (already confirmed accurate for fully-instantiated specializations) so the
+         // ENCLOSING struct's overall layout size still comes out correct, even
+         // though we don't model this base's vtable contents in detail.
++        // Only query clang_Type_getSizeOf when it's actually needed: either
++        // fields came up completely empty (the original opaque-fallback case,
++        // always safe -- patches 0001-0006 already relied on this exact call
++        // in this exact spot) or base-walking above added at least one base
++        // (which can need the expectedSize top-up in ParsedStructure.
++        // createDataType, e.g. for an unmodeled implicit vptr or an
++        // unresolvable dependent base -- see patches/0007-*.md). For the
++        // remaining case -- visitFields() found real OWN fields directly and
++        // there were no bases to walk at all (e.g. hkRefPtr<T>: a single
++        // pointer member, no base classes) -- this is EXACTLY the shape
++        // patches 0001-0006 already handled correctly without ever calling
++        // sizeOf() here, and deliberately left untouched: querying
++        // clang_Type_getSizeOf in this specific circumstance was found,
++        // empirically and reproducibly, to sometimes return a wrong value
++        // (hkRefPtr<hkbVariableBindingSet> -- real
++        // static_assert(sizeof(hkRefPtr<void*>) == 0x8) -- measured as 8,
++        // then 16, then 12 across different code orderings that should all
++        // be equivalent, despite no change to the type itself). Not fully
++        // root-caused (suspected Panama-FFI/libclang interaction specific to
++        // querying a Type's size when nothing else needs it) -- the safe,
++        // narrowly-scoped fix is to simply never make that call unless a
++        // base was actually involved.
++        // realSize is computed once, unconditionally, right here -- see the
++        // full explanation above type.spelling()'s own priming comment...
++        // actually this call replaces that: computing sizeOf() as early as
++        // possible (before the heavy base-walking/template-introspection
++        // above) is the ONLY placement confirmed reliable across every case
++        // tested. Calling it AFTER that activity was found, reproducibly,
++        // to sometimes return a wrong value for the SAME type (e.g.
++        // hkRefPtr<hkbVariableBindingSet>, real
++        // static_assert(sizeof(hkRefPtr<void*>) == 0x8): 8 when queried
++        // early, 16 or 12 when queried late with nothing else different).
++        // Whether we actually USE this value is a separate decision, made
++        // below via addedRealContent -- but the call itself always happens
++        // here, early, so the VALUE is trustworthy whenever it IS used.
++        long realSize = type.sizeOf();
++
++        // Only actually USE realSize (as opaque-fallback padding, or as the
++        // expectedSize top-up threaded into ParsedStructure below) when
++        // nothing genuinely real was already collected -- own fields via
++        // visitFields, a real named base, a real non-empty recursive base,
++        // or a deterministically-added vptr all count (see addedRealContent
++        // tracking above/below). `fields.isEmpty()` alone isn't enough: a
++        // recursively-embedded template base can add an ENTRY to `fields`
++        // that wraps a completely empty inner result (e.g.
++        // BSTSingletonSDM<T>'s own base chain is fully unresolvable nested
++        // templates), making `fields` non-empty while still recovering
++        // nothing real -- confirmed this exact gap caused
++        // AnimationFileManagerSingleton (derives from
++        // BSTSingletonSDM<AnimationFileManagerSingleton>) to silently lose
++        // that base's real 8-byte contribution. See patches/0007-*.md.
++        if (addedRealContent[0]) {
++            realSize = 0;
++        }
++
+         if (fields.isEmpty()) {
+-            long size = type.sizeOf();
+-            if (size > 0) {
++            if (realSize > 0) {
+                 fields.add(new ParsedStructure.FieldInfo(
+-                    "opaque", "char[" + size + "]", false, 0, false, null));
++                    "opaque", "char[" + realSize + "]", false, 0, false, null));
+             }
+         }
+ 
+-        String anonName = "anon_tmpl_" + Integer.toHexString(type.spelling().hashCode());
+-        return new ParsedStructure(anonName, fields, false, 0, category);
++        String anonName = "anon_tmpl_" + Integer.toHexString(typeSpelling.hashCode());
++        // Pass clang's own authoritative size as a safety net (see
++        // ParsedStructure's expectedSize javadoc and patches/0007-*.md):
++        // createDataType tops up with trailing padding if the fields/bases
++        // actually added come up short, rather than silently under-sizing
++        // the enclosing struct. 0 here (the default when neither condition
++        // above applied) means "not enforced," matching every pre-0007
++        // 5-arg ParsedStructure construction.
++        return new ParsedStructure(anonName, fields, false, 0, category, realSize);
+     }
+ 
+     private ParsedStructure parseAnonymousStruct(TypePool pool, Cursor structCursor, CategoryPath category) {
+diff -ruN a/src/main/java/playday3008/gcpp/processing/TypePool.java b/src/main/java/playday3008/gcpp/processing/TypePool.java
+--- a/src/main/java/playday3008/gcpp/processing/TypePool.java	2026-08-24 18:27:43.214163803 -0400
++++ b/src/main/java/playday3008/gcpp/processing/TypePool.java	2026-08-24 18:28:10.266580476 -0400
+@@ -376,6 +376,21 @@
+             }
+         }
+ 
++        // Strip a leading "RE::" namespace qualifier. Field/base type spellings
++        // taken directly from a declaration's own cursor never carry this prefix
++        // (clang's default pretty-printer omits the enclosing namespace when
++        // printed from within it, which is the normal case for every RE::-
++        // namespaced header) -- but a Type obtained via a TEMPLATE_TYPE_PARAMETER's
++        // default-argument TYPE_REF child (used to resolve dependent base classes
++        // like BSTArray<T>'s "Allocator" back to its default RE::BSTArrayHeapAllocator,
++        // see patches/0006-*.md) IS fully-qualified. Safe unconditionally, same
++        // reasoning as the std:: strip above: this codebase's own types are the
++        // only thing ever spelled with an "RE::" prefix in this pipeline.
++        if (s.startsWith("RE::")) {
++            s = s.substring("RE::".length());
++            changed = true;
++        }
++
+         return changed ? s : null;
+     }
+ 
