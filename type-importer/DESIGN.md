@@ -325,9 +325,17 @@ STL surface actually used in class layouts (`<cstdint>`, `<utility>` for
   uninstantiated template spellings this tool can't create a `DataType`
   for without the force-instantiation preprocessing step
   (`scripts/generate_forced_instantiations.py`) actually being wired into
-  the real parse call — confirmed via debug tracing, not guessed. That
-  wiring is the concrete next step, not a new open question — the design
-  for it already exists in this doc's template flattening table.
+  the real parse call — confirmed via debug tracing, not guessed.
+  **One wiring attempt was made tonight and did not work** — see
+  `patches/0002-fix-forward-decl-overwrite.md`'s final section for exactly
+  what was tried (`using` alias + `sizeof` to force-instantiate
+  `stl::enumeration<...>` after the real headers) and why it likely failed
+  (probably `-fdelayed-template-parsing` + `skipFunctionBodies()`/
+  `parseIncomplete()` preventing the implicit specialization from ever
+  becoming a walkable AST cursor — untested hypothesis, needs an
+  `-ast-dump` investigation before the next attempt). Not a solved
+  problem — the concrete next step, with the dead end already marked so
+  the next session doesn't retread it.
 - Third-party tool bugs found and fixed in `GhidraClangPoweredParse`
   tonight, beyond the redundant-vptr one below: **forward-declaration
   overwrite** — `TypePool.addParsedType` let a later, empty forward

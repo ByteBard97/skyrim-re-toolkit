@@ -94,16 +94,51 @@ as a struct field) ahead of time, any class using one as a field member
 will never resolve through this tool, regardless of how correct everything
 else is.**
 
-## Next step this points to (not done tonight)
+## Next step this points to — one attempt made tonight, didn't work
 
-Wire `generate_forced_instantiations.py`'s output into the actual
-`SourceParser.parseFiles` call (as extra source content ahead of the real
-headers, or as a separate forced-instantiation header included first) and
-re-run this same `TESObjectREFR` real-header test to confirm `TESForm`
-(and the rest of the hierarchy) fully resolves with real field data instead
-of an empty placeholder. This is the natural next session's first task —
-tracked here rather than in `DESIGN.md`'s open questions to keep the
-patches self-contained.
+Wiring `generate_forced_instantiations.py`'s output into the actual
+`SourceParser.parseFiles` call was the obvious next step, so one attempt
+was made (2026-08-24, same session): appended
+`using _f = stl::enumeration<TESForm::InGameFormFlag, std::uint16_t>;`
+plus `sizeof(_f)` (and the same for `stl::enumeration<FormType,
+std::uint8_t>`) inside `namespace RE { ... }`, *after* the real header
+includes in the test's translation unit, and re-ran.
+
+**Result: no change.** Same 3731 resolved types, `TESForm` still empty.
+The resolved-type *count* not changing at all is the interesting part — if
+the forced instantiation had even partially worked (e.g., registered the
+enumeration type but something else still blocked `TESForm`), the count
+should have gone up by at least the new `stl::enumeration<...>`
+specializations themselves. It didn't move, which suggests the `using` +
+`sizeof` trick isn't producing a cursor that `SourceParser`'s
+`visitDeclarations`/`visitChildren` traversal ever sees as a child of the
+namespace at all — plausible culprits, untested:
+
+- `ArchitectureMapping.TargetEnvironment.WINDOWS` sets
+  `-fdelayed-template-parsing` (`ArchitectureMapping.java:114-119`), an
+  MSVC-compatibility flag that defers template body parsing/instantiation.
+  Combined with `.parseIncomplete()` and `.skipFunctionBodies()` on the
+  `TranslationUnit.Builder` (`SourceParser.java:117-118`), the implicit
+  specialization triggered by `sizeof` may simply never get materialized
+  into a walkable AST node in this parse mode.
+- Alternatively, implicit template instantiations may need explicit
+  cursor-visitor handling (e.g. checking
+  `CursorKind.CLASS_TEMPLATE`/specialization-related kinds, or visiting via
+  a different traversal option) that `visitDeclarations`/`parseStruct`
+  simply doesn't have — they only handle `STRUCT_DECL`/`CLASS_DECL`, and an
+  implicit specialization might report a different kind, or might not be
+  enumerated as a syntactic child of the namespace the way an explicit
+  declaration is.
+
+**Not chased further tonight** — this needs actual investigation (dumping
+the AST via `clang -Xclang -ast-dump` for a minimal repro of `using X =
+SomeTemplate<Args>; sizeof(X);` to see whether/how the instantiation shows
+up as a cursor, then checking whether `-fdelayed-template-parsing` changes
+that) rather than more blind trial-and-error. This is the concrete starting
+point for whoever picks this up next, including which two things were
+already ruled out (the STL-availability problem and the RTTI/VTABLE-stub
+problem — both solved by `stubs/layout_pch.h`) so the search space is
+narrower than it looks.
 
 ## How this was verified
 
