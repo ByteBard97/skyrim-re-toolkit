@@ -109,7 +109,7 @@ jobs:
           cd type-importer/scripts
           SCRATCH="$RUNNER_TEMP/coverage-sweep"
           mkdir -p "$SCRATCH"
-          HEADERS=$(cd ../vendor/CommonLibSSE-NG/include && find RE -name '*.h' | sort)
+          HEADERS=$(./list_re_headers.sh ../vendor/CommonLibSSE-NG/include)
 
           JAVA_HOME="$JAVA_HOME" \
           GHIDRA_INSTALL_DIR="$HOME/tools/ghidra" \

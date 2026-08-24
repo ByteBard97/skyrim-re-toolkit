@@ -158,14 +158,30 @@ public class GenerateGdt {
         }
         fileDtMgr.endTransaction(txId, true);
         fileDtMgr.save();
-        fileDtMgr.close();
 
         System.out.println("Committed " + added + " types (" + failed + " failed) to "
             + gdtFile.getAbsolutePath() + " (" + gdtFile.length() + " bytes)");
 
         if (reportCsv != null) {
-            writeCoverageReport(reportCsv, dataTypes, result.getUnresolvedDependencies());
+            // Read sizes back from the FileDataTypeManager itself, NOT the
+            // pre-commit `dataTypes` list. Ghidra recomputes/finalizes a
+            // Structure's length when it's actually added to a real
+            // DataTypeManager (component offsets/padding that were already
+            // set can still change the reported getLength() before vs.
+            // after this step) -- measuring pre-commit was found to
+            // silently misreport sizes for a large fraction of otherwise-
+            // correctly-parsed classes (e.g. AMMO_DATA measured as 12
+            // pre-commit, but the actual committed .gdt has it at the
+            // correct 16), which would have falsely inflated the MISMATCH
+            // bucket in coverage_report.py. See COVERAGE_SWEEP_PLAN.md.
+            List<DataType> committed = new ArrayList<>();
+            java.util.Iterator<DataType> it = fileDtMgr.getAllDataTypes();
+            while (it.hasNext()) {
+                committed.add(it.next());
+            }
+            writeCoverageReport(reportCsv, committed, result.getUnresolvedDependencies());
         }
+        fileDtMgr.close();
     }
 
     /**
