@@ -12,51 +12,45 @@ This is a collection of tools, type archives, and runtime instrumentation that l
 
 ```
 skyrim-re-toolkit/
-├── type-importer/      # C++ headers → Ghidra / IDA type archives
-├── symbol-archive/     # Pre-built .gdt / .til files per game version
-└── runtime-harness/    # SKSE plugins for live engine inspection
+├── type-importer/          # C++ headers → Ghidra / IDA type archives
+│   ├── DESIGN.md           # Full investigation log: root-causes, verification, open questions
+│   ├── patches/            # 5 fixes for the vendored parser, each with a .md writeup
+│   ├── scripts/            # generate_gdt.sh + supporting tooling (mining, layout dumps)
+│   ├── tools/              # GenerateGdt.java — the real CLI
+│   ├── stubs/              # Minimal headers so real CommonLibSSE-NG parses without a full build
+│   └── vendor/             # CommonLibSSE-NG + GhidraClangPoweredParse (git submodules)
+├── symbol-archive/         # Pre-built .gdt / .til files per game version (not started)
+└── runtime-harness/        # SKSE plugins for live engine inspection (not started)
 ```
 
 ### 1. type-importer
 
 **The problem:** CommonLibSSE-NG contains thousands of reverse-engineered C++ class definitions, struct layouts, vtables, and bitfields. Getting them into Ghidra currently means either (a) hunting for a floating `types.h` file in a Discord server, or (b) manually recreating every struct by hand.
 
-**The solution:** A parser pipeline that reads CommonLibSSE-NG headers and emits Ghidra Data Type Archives (`.gdt`) and IDA Type Libraries (`.til`).
+**The solution:** A parser pipeline that reads CommonLibSSE-NG headers and emits Ghidra Data Type Archives (`.gdt`) and IDA Type Libraries (`.til`), built on [`playday3008/GhidraClangPoweredParse`](https://github.com/playday3008/GhidraClangPoweredParse) (a libclang-based Ghidra extension), vendored as a submodule and patched with **five fixes** developed and verified against real CommonLibSSE-NG headers (see `type-importer/patches/`).
 
-- **Primary approach:** libclang / CastXML preprocessing → flattened C-compatible structs → Ghidra API
-- **Fallback approach:** MSVC debug PDB import (when you need the compiler's exact layout)
-- **Handles:** `BSTArray<T>`, `REL::Relocation`, `stl::enumeration`, multiple inheritance, MSVC bitfield packing
+- **Primary approach:** libclang preprocessing → flattened C-compatible structs → Ghidra's Java type-manager API
+- **Handles:** `BSTArray<T>`, `REL::Relocation`, `stl::enumeration`, multiple inheritance (including template-specialization base classes), MSVC bitfield packing, `std::`-qualified builtin types
 
-**Status:** MVP in development. See `type-importer/README.md` for the current parser matrix and known limitations.
+**Status: working v0.1 MVP, verified against real headers.** The `TESForm → TESObject → TESBoundObject → TESObjectREFR` hierarchy (AE 1.6.1170) now parses and resolves to byte-accurate layouts — cross-checked three independent ways: the headers' own `static_assert`s, hand-derived offset math, and real `clang-cl` compilation. Full investigation, root-causes, and verification methodology in `type-importer/DESIGN.md` and `type-importer/patches/*.md`. Not yet done: IDA `.til` output, other runtimes (SE/VR/GOG), CI automation.
+
+**Try it now:** see [Quick Start](#quick-start) below — `type-importer/scripts/generate_gdt.sh` runs the whole pipeline end to end in one command.
 
 ### 2. symbol-archive
 
 **The problem:** Every time Bethesda ships a patch, class layouts shift, Address Library format changes (ask anyone who hit `Unsupported address library format: 5` on 1.7.99), and the community's accumulated Ghidra databases become stale. There is no canonical, versioned archive of pre-built type files.
 
-**The solution:** A CI-driven repository that publishes pre-built type archives for every supported Skyrim runtime:
+**The solution (planned):** A CI-driven repository that publishes pre-built type archives for every supported Skyrim runtime — SE 1.5.97, AE 1.6.640/1.6.1170/1.7.99, VR 1.4.15, GOG 1.6.1179.
 
-| Game Version | SKSE | Address Library | GDT | TIL |
-|-------------|------|----------------|-----|-----|
-| SE 1.5.97 | 2.0.20 | v1 | ✅ | ✅ |
-| AE 1.6.640 | 2.2.0 | v1 | ✅ | ✅ |
-| AE 1.6.1170 | 2.2.6 | v1 | ✅ | ✅ |
-| AE 1.7.99 | 2.3.0 | v2 (format 5) | ✅ | ✅ |
-| VR 1.4.15 | 2.0.12 | VR | ✅ | ✅ |
-| GOG 1.6.1179 | 2.2.6 | v1 | ✅ | ✅ |
-
-**Status:** Automated builds via GitHub Actions. See `symbol-archive/README.md` for download links and load instructions.
+**Status: not started.** This directory doesn't exist yet. `type-importer/scripts/generate_gdt.sh` already produces real `.gdt` files on demand (see Quick Start) — this project would be the CI wrapper that runs it automatically per-runtime and publishes the artifacts. Natural next step once type-importer covers more of the class hierarchy.
 
 ### 3. runtime-harness
 
 **The problem:** The Skyrim RE community has excellent static tooling (IDA, Ghidra, BinDiff) and excellent animation introspection (Open Animation Replacer). But the engine's **AI scheduler**, **Havok physics step**, and **savegame serializer** have zero purpose-built runtime visibility. Every finding about them arrives as static RE embedded in patch code.
 
-**The solution:** SKSE plugins that hook into under-instrumented subsystems and log their internal state:
+**The solution (planned):** SKSE plugins that hook into under-instrumented subsystems and log their internal state — e.g. an `AIProcessInspector` for package evaluation and scheduler decisions, a `HavokStepLogger` for collision/ragdoll state, a `SavegameTracer` for `BGSSaveLoadManager` serialization.
 
-- `AIProcessInspector` — logs package evaluation, reference-handle allocation, and scheduler decisions
-- `HavokStepLogger` — captures collision callbacks, ragdoll state transitions, and character proxy data
-- `SavegameTracer` — traces `BGSSaveLoadManager` serialization to diagnose bloat and corruption
-
-**Status:** Early prototypes. Windows + MSVC required. See `runtime-harness/README.md` for build instructions.
+**Status: not started.** This directory doesn't exist yet. Requires Windows + Visual Studio + SKSE64 — unlike `type-importer`, this piece cannot be built or tested on Linux (see `type-importer/DESIGN.md`'s platform-constraints note).
 
 ---
 
@@ -85,52 +79,60 @@ skyrim-re-toolkit/
 
 ## Quick Start
 
-### I just want the pre-built Ghidra types
+### Clone (this repo uses git submodules)
 
 ```bash
-# Download the latest GDT for your game version
-# See symbol-archive/releases for per-version assets
-
-# In Ghidra:
-# File → Import File → (select SkyrimSE.exe)
-# Window → Data Type Manager → File → Add Archive
-# Select: CommonLibSSE_AE_1.7.99.gdt
-# Right-click → Apply Function Data Types
+git clone --recurse-submodules https://github.com/ByteBard97/skyrim-re-toolkit.git
+# Already cloned without --recurse-submodules? Run:
+#   git submodule update --init --recursive
 ```
 
-### I want to generate types from CommonLibSSE-NG myself
+### Prerequisites for the type-importer
+
+None of these are vendored in-repo (large and/or license-bearing — see `type-importer/DESIGN.md`'s toolchain note):
+
+| Requirement | Why | Notes |
+|---|---|---|
+| JDK 21+ | Panama FFI (used by the Ghidra extension) | Temurin works fine |
+| Ghidra 12+ | Provides the type-manager Java API this pipeline runs against headlessly | No GUI/project needed |
+| A real `libclang.so`, Clang **19+** | MSVC STL's own headers reject older Clang versions | The `libclang-14` that ships with many Linux distros is **not** sufficient — grab a recent LLVM release tarball and point `LD_LIBRARY_PATH` at a directory containing a `libclang.so` symlink to it |
+| Windows SDK + MSVC CRT/STL headers | CommonLibSSE-NG's headers need real `<cstdint>` etc. to lay out correctly | Acquire via [`xwin`](https://github.com/Jake-Shadle/xwin): `xwin --accept-license splat --output <dir>` (Microsoft's own license terms apply — don't commit or redistribute the output) |
+
+### Generate a `.gdt` yourself
 
 ```bash
-cd type-importer
-pip install -r requirements.txt
-python generate_gdt.py   --commonlib /path/to/CommonLibSSE-NG   --runtime AE_1.7.99   --output CommonLibSSE_AE_1.7.99.gdt
+cd type-importer/scripts
+JAVA_HOME=/path/to/jdk-21 \
+GHIDRA_INSTALL_DIR=/path/to/ghidra_12 \
+LD_LIBRARY_PATH=/path/to/dir-containing-libclang.so \
+  ./generate_gdt.sh /path/to/xwin-splat-dir /tmp/CommonLibSSE_AE.gdt \
+  RE/T/TESForm.h RE/T/TESObject.h RE/T/TESBoundObject.h RE/T/TESObjectREFR.h
 ```
 
-See `type-importer/docs/PARSER_MATRIX.md` for which constructs are supported and which need manual fixup.
+This patches the vendored `GhidraClangPoweredParse` submodule (from `type-importer/patches/`), builds it, runs the parser against the requested headers, writes a real `.gdt`, and reverts the submodule back to pristine when it's done. See `type-importer/tools/GenerateGdt.java`'s header comment for the full requirement list and manual-invocation form.
 
-### I want to build the runtime inspection plugins
+### Load the `.gdt` into Ghidra
 
-**Requires:** Windows, Visual Studio 2022, SKSE64 2.3.0, CommonLibSSE-NG
+In Ghidra: **File → Import File** (select `SkyrimSE.exe`) → **Window → Data Type Manager → File → Add Archive** → select your generated `.gdt` → right-click → **Apply Function Data Types**.
 
-```powershell
-cd runtime-harness
-# Edit xmake.lua or CMakePresets.json to point at your SKSE + CommonLib paths
-xmake f -m release
-xmake
-# Copy build/*.dll to Data/SKSE/Plugins/
-```
+### `symbol-archive` and `runtime-harness`
+
+Not started yet — see their sections above. `runtime-harness` in particular will require Windows + Visual Studio + SKSE64 once work begins; it can't be built on Linux the way `type-importer` can.
 
 ---
 
 ## Roadmap
 
-| Milestone | Target | Blockers |
+| Milestone | Status | Notes / Blockers |
 |-----------|--------|----------|
-| v0.1 — GDT for AE 1.7.99 | 2 weeks | Template flattening for `BSTArray` / `REL::Relocation` |
-| v0.2 — CI auto-build on CommonLibSSE-NG releases | 4 weeks | GitHub Actions Windows runner for MSVC debug builds |
-| v0.3 — AIProcessInspector plugin | 6 weeks | Validation against live game behavior |
-| v0.4 — Cross-game type propagation (Skyrim → Fallout 4 → Starfield) | 3 months | `libxse/commonlib-shared` header unification |
-| v1.0 — Stable release with full documentation | 6 months | Community validation; maintainer feedback |
+| v0.1 — GDT for `TESForm`→`TESObjectREFR` chain (AE 1.6.1170) | ✅ **Done, verified** | See `type-importer/DESIGN.md` and `type-importer/patches/` |
+| v0.1.1 — Extend to more of the class hierarchy | In progress | Same tooling now works generally — needs applying to more headers |
+| v0.1.2 — IDA `.til` output | Not started | `.gdt` path is proven; `.til` export is a separate code path |
+| v0.2 — Other runtimes (SE 1.5.97, AE 1.7.99, VR, GOG) | Not started | Tooling is runtime-agnostic; needs per-runtime validation against real binaries (Address Library cross-check) |
+| v0.3 — CI auto-build on CommonLibSSE-NG releases | Not started | GitHub Actions Windows runner, or a Linux runner using this repo's own Linux-native pipeline |
+| v0.4 — AIProcessInspector / runtime-harness plugin | Not started | Requires Windows + MSVC; blocked on hardware access |
+| v0.5 — Cross-game type propagation (Skyrim → Fallout 4 → Starfield) | Not started | `libxse/commonlib-shared` header unification |
+| v1.0 — Stable release with full documentation | Not started | Community validation; maintainer feedback |
 
 ---
 
@@ -141,8 +143,6 @@ We are not looking for novel research. We are looking for **reliable engineering
 - **Type importer:** If you know libclang, Ghidra's Java API, or MSVC ABI quirks, we need you.
 - **Symbol archive:** If you can write GitHub Actions workflows or validate struct layouts against live binaries, we need you.
 - **Runtime harness:** If you have built SKSE plugins and know your way around `AIProcess`, `hkpCharacterProxy`, or `BGSSaveLoadManager`, we need you.
-
-See `CONTRIBUTING.md` for the development setup, coding style, and how to submit a PR.
 
 **Ground rules:**
 - No console exploits, no DRM circumvention, no redistribution of game binaries.
@@ -171,7 +171,7 @@ If we have done our job right, the next generation of reversers will never know 
 
 This project is licensed under the MIT License. 
 
-Type archives generated from CommonLibSSE-NG inherit the GPL-3.0 license of their source headers. See `symbol-archive/LICENSE-GPL3` for the terms under which pre-built `.gdt` files are distributed.
+Type archives generated from CommonLibSSE-NG inherit the GPL-3.0 license of their source headers (see `type-importer/DESIGN.md`'s licensing note).
 
 > **Note:** We do not ship game binaries, PDBs, or copyrighted assets. The symbol archive contains only community-derived type definitions (struct layouts, enum values, function signatures) which are facts about the game's memory layout, not copies of Bethesda's code.
 
@@ -179,6 +179,6 @@ Type archives generated from CommonLibSSE-NG inherit the GPL-3.0 license of thei
 
 ## Contact
 
-- Issues: [GitHub Issues](https://github.com/YOURNAME/skyrim-re-toolkit/issues)
-- Discussion: [GitHub Discussions](https://github.com/YOURNAME/skyrim-re-toolkit/discussions)
+- Issues: [GitHub Issues](https://github.com/ByteBard97/skyrim-re-toolkit/issues)
+- Discussion: [GitHub Discussions](https://github.com/ByteBard97/skyrim-re-toolkit/discussions)
 - Real-time: We monitor the Skyrim SE RE and xSE Discord servers (same handles as GitHub)
