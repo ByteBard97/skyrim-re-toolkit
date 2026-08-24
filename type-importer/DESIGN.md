@@ -355,14 +355,39 @@ STL surface actually used in class layouts (`<cstdint>`, `<utility>` for
   program against the same C API before assuming the binding layer is at
   fault.
 
-  **What this does NOT fix:** `TESForm` as a whole still doesn't fully
-  resolve in the real header test, but for a completely separate reason —
-  `FormID` (`using FormID = std::uint32_t;`) appears stuck as an
-  unresolved dependency, suggesting a distinct bug in how namespace-
-  qualified builtin type spellings resolve. Not investigated this session
-  — flagged in `patches/0003-inline-template-specialization-fields.md`'s
-  "What this does NOT fix" section as a separate, freshly-discovered
-  thread for a future session.
+  **Follow-up, same session — also solved (patch 0005):** the `FormID`
+  blocker turned out to be much bigger than `FormID` alone — `TypePool`
+  never stripped a leading `std::` namespace qualifier when normalizing
+  type names, so **every plain `std::uint32_t`/`std::uint8_t` field
+  anywhere in the codebase** (an extremely common pattern) was stuck
+  unresolved. Fixed by stripping `std::` in `normalizeTypeName`, safe
+  unconditionally since this codebase's own types never carry that
+  prefix. This was the single highest-leverage fix of the whole
+  investigation: resolved-type count jumped from 3746 to 3895 from this
+  one change, and **`TESForm` immediately came out at exactly `0x20`
+  bytes**, matching its `static_assert` field-for-field (see
+  `patches/0005-fix-std-namespace-and-base-class-templates.md`).
+
+  A second, related gap surfaced immediately after: `TESObjectREFR` still
+  didn't resolve, blocked on `BSTEventSink<BSAnimationGraphEvent>` — the
+  *same* template-specialization problem patch 0003 solved for fields,
+  but this time as a **base class**, which goes through an entirely
+  separate code path. Extended the same `Type.visitFields()`-based
+  inlining to base classes, plus a padding fix for vtable-only template
+  bases (which have zero explicit fields but a real, non-zero
+  `clang_Type_getSizeOf`) and a canonical-type fix for template members
+  typed via a nested alias (`stl::enumeration`'s own `underlying_type`).
+  **Result: `TESObject` and `TESBoundObject` also now match their
+  `static_assert`s exactly, and `TESObjectREFR`'s full multi-base layout
+  matches this doc's independently clang-cl-verified offsets exactly**
+  (`TESForm@0x00`, `BSHandleRefObject@0x20`, `BSTEventSink@0x30`,
+  `IAnimationGraphManagerHolder@0x38`, `data@0x40`, `parentCell@0x60`,
+  `loadedData@0x68`, `extraList@0x70`) — with one small, already-
+  understood discrepancy remaining (`0x70` vs. the real compiler's
+  `0x78`, a C++ struct-alignment padding artifact for `extraList`'s
+  trailing empty-class contribution, not a new bug — see patch 0005's
+  writeup for the precise explanation, which ties directly back to the
+  "invisible relocated member" pattern already documented above).
 - Third-party tool bugs found and fixed in `GhidraClangPoweredParse`
   tonight, beyond the redundant-vptr one below: **forward-declaration
   overwrite** — `TypePool.addParsedType` let a later, empty forward

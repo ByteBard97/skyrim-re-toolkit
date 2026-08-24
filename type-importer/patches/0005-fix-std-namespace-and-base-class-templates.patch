@@ -1,0 +1,110 @@
+--- a/src/main/java/playday3008/gcpp/processing/TypePool.java	2026-08-24 07:16:38.082456491 -0400
++++ b/src/main/java/playday3008/gcpp/processing/TypePool.java	2026-08-24 07:16:38.073465732 -0400
+@@ -306,6 +306,21 @@
+             }
+         }
+ 
++        // Strip a leading "std::" namespace qualifier from builtin integer typedef
++        // spellings (e.g. "std::uint32_t" -> "uint32_t"). Ghidra's DataTypeParser
++        // doesn't resolve "std::"-qualified names at all -- confirmed empirically:
++        // every plain std::uintN_t/std::intN_t field in CommonLibSSE-NG headers
++        // (an extremely common pattern -- e.g. TESForm::formFlags) was stuck as an
++        // unresolved dependency, blocking its containing struct from ever resolving,
++        // with no diagnostic pointing at this as the cause. Safe to strip
++        // unconditionally: this codebase's own types are never spelled with a
++        // "std::" prefix (they live in the RE:: namespace), so this can only ever
++        // match real standard-library builtins.
++        if (s.startsWith("std::")) {
++            s = s.substring("std::".length());
++            changed = true;
++        }
++
+         return changed ? s : null;
+     }
+ 
+--- a/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 07:16:38.083286931 -0400
++++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 07:16:38.074459813 -0400
+@@ -266,6 +266,7 @@
+         boolean[] packed = {false};
+         List<String[]> baseClasses = new ArrayList<>(); // [fieldName, typeName]
+         List<Cursor> baseDeclCursors = new ArrayList<>(); // parallel to baseClasses, for polymorphism checks
++        List<ParsedType> baseInlineTypes = new ArrayList<>(); // parallel to baseClasses; non-null when the base is a template specialization that must be inline-embedded
+         List<ParsedVtable.VtableEntry> virtualMethods = new ArrayList<>();
+ 
+         structCursor.visitChildren((cursor, parent) -> {
+@@ -356,6 +357,24 @@
+                             ? "super_" + baseDeclName : "super_" + baseTypeName;
+                         baseClasses.add(new String[]{fieldName, baseTypeName});
+                         baseDeclCursors.add(baseType.declaration());
++
++                        // A base class that is itself a template specialization (e.g.
++                        // BSTEventSink<BSAnimationGraphEvent>) hits the exact same
++                        // problem as template-typed fields (see the FIELD_DECL case
++                        // below and patches/0003-inline-template-specialization-fields.md):
++                        // no ParsedType is ever registered for the raw specialization
++                        // spelling, so hasType(baseTypeName) can never succeed and the
++                        // whole derived class stays unresolved forever. Inline it the
++                        // same way: real fields via Type.visitFields() where available,
++                        // padded out to the type's real clang_Type_getSizeOf() when
++                        // visitFields finds none (the common case for these bases in
++                        // practice -- e.g. BSTEventSink<T> is a pure vtable interface
++                        // with no explicit data members; the padding covers its vptr).
++                        ParsedType inlineBaseType = null;
++                        if (baseTypeName.contains("<")) {
++                            inlineBaseType = parseFieldsFromType(baseType.unwrap(), category);
++                        }
++                        baseInlineTypes.add(inlineBaseType);
+                     }
+                 }
+ 
+@@ -425,9 +444,12 @@
+                 + "(no new vptr field emitted)", name, virtualMethods.size());
+         }
+ 
+-        for (String[] base : baseClasses) {
++        for (int i = 0; i < baseClasses.size(); i++) {
++            String[] base = baseClasses.get(i);
++            ParsedType inlineType = baseInlineTypes.get(i);
++            boolean inlineEmbedBase = inlineType != null;
+             allFields.add(new ParsedStructure.FieldInfo(
+-                base[0], base[1], false, 0, false, null));
++                base[0], base[1], false, 0, inlineEmbedBase, inlineType));
+         }
+ 
+         allFields.addAll(fields);
+@@ -649,12 +671,34 @@
+         type.visitFields(fieldCursor -> {
+             boolean isBitField = fieldCursor.isBitField();
+             int bitWidth = isBitField ? fieldCursor.getBitFieldWidth() : 0;
++            // Use the canonical type spelling, not the raw one: template members
++            // are commonly typed via a nested alias (e.g. stl::enumeration's own
++            // "using underlying_type = Underlying;"), which is never independently
++            // registered as a resolvable type anywhere -- clang_getCanonicalType
++            // resolves through it to the real underlying type (e.g. "unsigned
++            // short"), which Ghidra's DataTypeParser can actually find.
+             fields.add(new ParsedStructure.FieldInfo(
+-                fieldCursor.spelling(), fieldCursor.type().spelling(),
++                fieldCursor.spelling(), fieldCursor.type().canonicalType().spelling(),
+                 isBitField, bitWidth, false, null));
+             return Type.FieldVisitResult.CONTINUE;
+         });
+ 
++        // No explicit data members found (the common case when this specialization
++        // is used as a base class, e.g. BSTEventSink<T> -- a pure vtable interface
++        // with no explicit fields, just an implicit compiler-generated vptr, which
++        // clang_Type_visitFields correctly does not report since it isn't a real
++        // FieldDecl). Pad with an opaque byte array sized from clang_Type_getSizeOf
++        // (already confirmed accurate for fully-instantiated specializations) so the
++        // ENCLOSING struct's overall layout size still comes out correct, even
++        // though we don't model this base's vtable contents in detail.
++        if (fields.isEmpty()) {
++            long size = type.sizeOf();
++            if (size > 0) {
++                fields.add(new ParsedStructure.FieldInfo(
++                    "opaque", "char[" + size + "]", false, 0, false, null));
++            }
++        }
++
+         String anonName = "anon_tmpl_" + Integer.toHexString(type.spelling().hashCode());
+         return new ParsedStructure(anonName, fields, false, 0, category);
+     }
