@@ -302,12 +302,42 @@ STL surface actually used in class layouts (`<cstdint>`, `<utility>` for
 
 - ~~Does Linux clang produce MSVC-ABI-correct record layouts?~~ **Resolved: yes**,
   confirmed via `clang-cl` synthetic test, see toolchain note above.
-- Real CommonLibSSE-NG headers pull in real STL (`<cstdint>`, `std::pair`,
-  `std::atomic_ref`, etc.) and Windows SDK types. `clang-cl` has no libc++/MSVC
-  STL to find on this Linux box. Need either a vendored minimal Windows SDK +
-  MSVC STL header set (e.g. via `xwin` or a partial `mingw-w64` substitute), or
-  hand-written stub headers for just the STL surface that appears in class
-  layouts. Not yet solved — next concrete step.
+- ~~Real CommonLibSSE-NG headers pull in real STL... Not yet solved~~
+  **Resolved.** `stubs/layout_pch.h` (real STL includes + minimal stand-ins
+  for `REL::Relocation`, `stl::enumeration`, etc.) plus `xwin`-acquired
+  Windows SDK/CRT headers solves this for `clang-cl` layout verification.
+  Confirmed real CommonLibSSE-NG headers (`TESForm.h` through
+  `TESObjectREFR.h`) compile with **zero errors** through this stub.
+- **MAJOR MILESTONE (2026-08-24): produced a real `.gdt` file from actual
+  CommonLibSSE-NG headers using the actual (patched) `GhidraClangPoweredParse`
+  extension** — not just a clang-cl layout dump. Installed JDK 21 + Ghidra
+  12.1.3 (both user-local), applied both patches in `patches/`, and ran
+  `SourceParser.parseFiles` directly (via a standalone harness, same
+  technique as the patch verification tests) against `TESForm.h`,
+  `TESObject.h`, `TESBoundObject.h`, `TESObjectREFR.h`, force-including
+  `stubs/layout_pch.h`. Result: **zero clang diagnostics**, 3731 real data
+  types resolved and committed to an actual `.gdt` file via
+  `FileDataTypeManager.createFileArchive` (the same API path the real
+  Ghidra UI plugin uses). One important caveat found in the process — see
+  `patches/0002-fix-forward-decl-overwrite.md`'s "What this patch does NOT
+  fix" section: `TESForm` itself still comes out as an empty placeholder in
+  this particular run, because its `stl::enumeration<...>` fields are
+  uninstantiated template spellings this tool can't create a `DataType`
+  for without the force-instantiation preprocessing step
+  (`scripts/generate_forced_instantiations.py`) actually being wired into
+  the real parse call — confirmed via debug tracing, not guessed. That
+  wiring is the concrete next step, not a new open question — the design
+  for it already exists in this doc's template flattening table.
+- Third-party tool bugs found and fixed in `GhidraClangPoweredParse`
+  tonight, beyond the redundant-vptr one below: **forward-declaration
+  overwrite** — `TypePool.addParsedType` let a later, empty forward
+  declaration of an already-fully-parsed class silently clobber the real
+  definition with no diagnostic (extremely common pattern; CommonLibSSE-NG
+  forward-declares classes like `TESForm` in dozens of files). Fixed in
+  `patches/0002-fix-forward-decl-overwrite.patch`, verified not to regress
+  anything, though it turned out not to be the cause of the `TESForm`
+  emptiness above (that's the template-instantiation issue) — it's a real,
+  separate, correctly-fixed bug in its own right.
 - ~~`GhidraClangPoweredParse`'s redundant-vptr bug: no workaround found~~
   **Root-caused (2026-08-24)**, read directly from source
   (`src/main/java/playday3008/gcpp/processing/SourceParser.java:308-369`):

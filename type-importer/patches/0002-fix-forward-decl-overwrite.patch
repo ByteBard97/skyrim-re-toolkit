@@ -1,0 +1,45 @@
+--- a/src/main/java/playday3008/gcpp/processing/TypePool.java	2026-08-24 01:25:14.614307112 -0400
++++ b/src/main/java/playday3008/gcpp/processing/TypePool.java	2026-08-24 01:30:16.475136826 -0400
+@@ -120,7 +120,42 @@
+         return new ResolutionResult(List.copyOf(allTypes), Set.copyOf(unresolvedDependencies));
+     }
+ 
++    /**
++     * Registers a parsed type, keyed by name.
++     * <p>
++     * Bug fix: {@code SourceParser.parseStruct} is called for every
++     * {@code STRUCT_DECL}/{@code CLASS_DECL} cursor, including bare forward
++     * declarations ({@code class Foo;}) that have no children at all -- it has
++     * no {@code isDefinition()} check to skip them (no such binding exists on
++     * {@code Cursor} yet). In any codebase where a class is forward-declared
++     * again *after* its full definition is visited in the same translation
++     * unit -- extremely common; CommonLibSSE-NG alone forward-declares
++     * classes like {@code TESForm} in dozens of files -- the forward
++     * declaration produces an empty {@code ParsedStructure} (zero fields)
++     * that used to unconditionally overwrite the real, already-parsed
++     * definition here, silently truncating it to a zero-size stub with no
++     * diagnostic. Confirmed live: parsing CommonLibSSE-NG's TESForm/
++     * TESObject/TESBoundObject/TESObjectREFR chain produced zero clang
++     * errors, yet TESForm ended up as an empty struct in the final archive.
++     * <p>
++     * Fix: when both the existing and incoming entries are
++     * {@link ParsedStructure}s, keep whichever has more fields -- a real
++     * definition always has at least as many fields as any forward
++     * declaration of the same class (which always has zero), so this needs
++     * no new libclang binding and can't misfire the other direction (a
++     * struct never "loses" fields between two full-definition visits of the
++     * same translation unit).
++     */
+     public void addParsedType(ParsedType type) {
++        ParsedType existing = this.parsedTypes.get(type.getName());
++        if (existing instanceof ParsedStructure existingStruct
++            && type instanceof ParsedStructure incomingStruct
++            && incomingStruct.getFields().size() < existingStruct.getFields().size()) {
++            LOGGER.debug("Keeping existing definition of '{}' ({} fields) over incoming "
++                + "forward declaration ({} fields)", type.getName(),
++                existingStruct.getFields().size(), incomingStruct.getFields().size());
++            return;
++        }
+         this.parsedTypes.put(type.getName(), type);
+     }
+ 
