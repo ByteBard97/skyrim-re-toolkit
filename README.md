@@ -14,12 +14,12 @@ This is a collection of tools, type archives, and runtime instrumentation that l
 skyrim-re-toolkit/
 ├── type-importer/          # C++ headers → Ghidra / IDA type archives
 │   ├── DESIGN.md           # Full investigation log: root-causes, verification, open questions
-│   ├── patches/            # 5 fixes for the vendored parser, each with a .md writeup
-│   ├── scripts/            # generate_gdt.sh + supporting tooling (mining, layout dumps)
+│   ├── patches/            # 7 accepted fixes for the vendored parser (+ deferred investigations), each with a .md writeup
+│   ├── scripts/            # generate_gdt.sh, coverage sweep + supporting tooling (mining, layout dumps)
 │   ├── tools/              # GenerateGdt.java — the real CLI
 │   ├── stubs/              # Minimal headers so real CommonLibSSE-NG parses without a full build
 │   └── vendor/             # CommonLibSSE-NG + GhidraClangPoweredParse (git submodules)
-├── symbol-archive/         # Pre-built .gdt / .til files per game version (not started)
+├── symbol-archive/         # CI-built AE .gdt workflow artifact (early scaffold, see its README)
 └── runtime-harness/        # SKSE plugins for live engine inspection (not started)
 ```
 
@@ -27,12 +27,12 @@ skyrim-re-toolkit/
 
 **The problem:** CommonLibSSE-NG contains thousands of reverse-engineered C++ class definitions, struct layouts, vtables, and bitfields. Getting them into Ghidra currently means either (a) hunting for a floating `types.h` file in a Discord server, or (b) manually recreating every struct by hand.
 
-**The solution:** A parser pipeline that reads CommonLibSSE-NG headers and emits Ghidra Data Type Archives (`.gdt`) and IDA Type Libraries (`.til`), built on [`playday3008/GhidraClangPoweredParse`](https://github.com/playday3008/GhidraClangPoweredParse) (a libclang-based Ghidra extension), vendored as a submodule and patched with **five fixes** developed and verified against real CommonLibSSE-NG headers (see `type-importer/patches/`).
+**The solution:** A parser pipeline that reads CommonLibSSE-NG headers and emits Ghidra Data Type Archives (`.gdt`) and IDA Type Libraries (`.til`), built on [`playday3008/GhidraClangPoweredParse`](https://github.com/playday3008/GhidraClangPoweredParse) (a libclang-based Ghidra extension), vendored as a submodule and patched with **seven accepted fixes** (patches 0001–0006 and 0009; an eighth, template base-class inlining, is deferred pending a type-registration fix — see `type-importer/patches/`) developed and verified against real CommonLibSSE-NG headers.
 
 - **Primary approach:** libclang preprocessing → flattened C-compatible structs → Ghidra's Java type-manager API
 - **Handles:** `BSTArray<T>`, `REL::Relocation`, `stl::enumeration`, multiple inheritance (including template-specialization base classes), MSVC bitfield packing, `std::`-qualified builtin types
 
-**Status: working v0.1 MVP, verified against real headers.** The `TESForm → TESObject → TESBoundObject → TESObjectREFR` hierarchy (AE 1.6.1170) now parses and resolves to byte-accurate layouts — cross-checked three independent ways: the headers' own `static_assert`s, hand-derived offset math, and real `clang-cl` compilation. Full investigation, root-causes, and verification methodology in `type-importer/DESIGN.md` and `type-importer/patches/*.md`. Not yet done: IDA `.til` output, other runtimes (SE/VR/GOG), CI automation.
+**Status: working v0.1 MVP, verified against real headers — now with a full-namespace coverage sweep.** The `TESForm → TESObject → TESBoundObject → TESObjectREFR` hierarchy (AE 1.6.1170) resolves to byte-accurate layouts, cross-checked three independent ways: the headers' own `static_assert`s, hand-derived offset math, and real `clang-cl` compilation. Beyond that hierarchy, a coverage sweep (`type-importer/scripts/coverage_report.py`) checks every class in `RE/` against its own `static_assert` — as of the last full sweep, ~45% of checkable classes are byte-accurate, with a CI regression gate (`.github/workflows/type-importer-coverage.yml`) ensuring future patches can't silently break a previously-correct class. Full investigation, root-causes, and verification methodology in `type-importer/DESIGN.md` and `type-importer/patches/*.md`. Not yet done: IDA `.til` output, other runtimes (SE/VR/GOG), closing the remaining coverage gaps.
 
 **Try it now:** see [Quick Start](#quick-start) below — `type-importer/scripts/generate_gdt.sh` runs the whole pipeline end to end in one command.
 
@@ -42,7 +42,7 @@ skyrim-re-toolkit/
 
 **The solution (planned):** A CI-driven repository that publishes pre-built type archives for every supported Skyrim runtime — SE 1.5.97, AE 1.6.640/1.6.1170/1.7.99, VR 1.4.15, GOG 1.6.1179.
 
-**Status: not started.** This directory doesn't exist yet. `type-importer/scripts/generate_gdt.sh` already produces real `.gdt` files on demand (see Quick Start) — this project would be the CI wrapper that runs it automatically per-runtime and publishes the artifacts. Natural next step once type-importer covers more of the class hierarchy.
+**Status: early scaffold, AE only.** A GitHub Actions workflow (`.github/workflows/symbol-archive-build.yml`, manual dispatch) wraps `type-importer/scripts/generate_gdt.sh` to build a full-namespace AE `.gdt` and publish it as a workflow artifact. See `symbol-archive/README.md` for the honest accuracy caveat — `type-importer`'s own coverage sweep currently shows ~45% of checkable classes as byte-accurate, so this is a real, traceable build artifact for testing, not yet a "trust every struct" release. SE/VR/GOG runtimes and versioned GitHub Releases are not started.
 
 ### 3. runtime-harness
 
@@ -126,10 +126,10 @@ Not started yet — see their sections above. `runtime-harness` in particular wi
 | Milestone | Status | Notes / Blockers |
 |-----------|--------|----------|
 | v0.1 — GDT for `TESForm`→`TESObjectREFR` chain (AE 1.6.1170) | ✅ **Done, verified** | See `type-importer/DESIGN.md` and `type-importer/patches/` |
-| v0.1.1 — Extend to more of the class hierarchy | In progress | Same tooling now works generally — needs applying to more headers |
+| v0.1.1 — Extend to more of the class hierarchy | In progress | Full-namespace coverage sweep built and running (see `type-importer/scripts/coverage_report.py`); ~45% of checkable classes byte-accurate as of the last sweep, with a prioritized punch list tracked for follow-up patches |
 | v0.1.2 — IDA `.til` output | Not started | `.gdt` path is proven; `.til` export is a separate code path |
 | v0.2 — Other runtimes (SE 1.5.97, AE 1.7.99, VR, GOG) | Not started | Tooling is runtime-agnostic; needs per-runtime validation against real binaries (Address Library cross-check) |
-| v0.3 — CI auto-build on CommonLibSSE-NG releases | Not started | GitHub Actions Windows runner, or a Linux runner using this repo's own Linux-native pipeline |
+| v0.3 — CI auto-build on CommonLibSSE-NG releases | In progress | `type-importer` has a CI regression gate (`.github/workflows/type-importer-coverage.yml`); `symbol-archive` has a manual-dispatch AE build (`.github/workflows/symbol-archive-build.yml`). Both Linux-native GitHub Actions runners. Automatic rebuild on submodule bump not started |
 | v0.4 — AIProcessInspector / runtime-harness plugin | Not started | Requires Windows + MSVC; blocked on hardware access |
 | v0.5 — Cross-game type propagation (Skyrim → Fallout 4 → Starfield) | Not started | `libxse/commonlib-shared` header unification |
 | v1.0 — Stable release with full documentation | Not started | Community validation; maintainer feedback |

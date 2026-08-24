@@ -1,0 +1,124 @@
+name: symbol-archive build (AE)
+
+# Builds a real CommonLibSSE-NG type archive (.gdt) for the AE runtime and
+# publishes it as a workflow artifact -- see symbol-archive/README.md.
+#
+# This is NOT a quality gate (unlike type-importer-coverage.yml, which
+# fails the build on regression). type-importer's own coverage sweep
+# currently shows ~45% of checkable classes as byte-accurate (see
+# type-importer/COVERAGE_SWEEP_PLAN.md) -- this workflow exists to
+# produce a real, traceable build artifact for testing/dogfooding, not to
+# assert the archive is fully trustworthy. Don't gate this on the
+# coverage sweep passing; that would block every build indefinitely
+# until type-importer's pass rate is much higher.
+#
+# Manual dispatch only for now -- see symbol-archive/README.md's roadmap
+# for why this isn't push-triggered yet.
+#
+# Toolchain versions match type-importer-coverage.yml (keep them in sync
+# if either is bumped): Ghidra 12.1.3, LLVM/libclang 19.1.0, JDK 25
+# (Temurin), xwin 0.10.0. Fully Linux-native.
+
+on:
+  workflow_dispatch: {}
+
+env:
+  GHIDRA_VERSION: "12.1.3"
+  GHIDRA_ASSET: "ghidra_12.1.3_PUBLIC_20260817.zip"
+  LLVM_VERSION: "19.1.0"
+  XWIN_VERSION: "0.10.0"
+
+jobs:
+  build-ae-archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Cache Ghidra
+        id: cache-ghidra
+        uses: actions/cache@v4
+        with:
+          path: ~/tools/ghidra
+          key: ghidra-${{ env.GHIDRA_VERSION }}
+
+      - name: Download Ghidra
+        if: steps.cache-ghidra.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/tools
+          curl -fL -o /tmp/ghidra.zip \
+            "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_${GHIDRA_VERSION}_build/${GHIDRA_ASSET}"
+          unzip -q /tmp/ghidra.zip -d ~/tools/ghidra-extract
+          mv ~/tools/ghidra-extract/ghidra_${GHIDRA_VERSION}_PUBLIC ~/tools/ghidra
+
+      - name: Cache LLVM
+        id: cache-llvm
+        uses: actions/cache@v4
+        with:
+          path: ~/tools/llvm
+          key: llvm-${{ env.LLVM_VERSION }}
+
+      - name: Download LLVM (for libclang 19+ -- system libclang is too old, see type-importer/DESIGN.md)
+        if: steps.cache-llvm.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/tools
+          curl -fL -o /tmp/llvm.tar.xz \
+            "https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/LLVM-${LLVM_VERSION}-Linux-X64.tar.xz"
+          mkdir -p ~/tools/llvm
+          tar -xf /tmp/llvm.tar.xz -C ~/tools/llvm --strip-components=1
+
+      - name: Cache xwin Windows SDK/CRT splat
+        id: cache-winsdk
+        uses: actions/cache@v4
+        with:
+          path: ~/tools/winsdk
+          key: winsdk-xwin-${{ env.XWIN_VERSION }}-v1
+
+      - name: Acquire Windows SDK/CRT headers via xwin
+        if: steps.cache-winsdk.outputs.cache-hit != 'true'
+        run: |
+          # Microsoft's own license terms apply to the splat output (see
+          # type-importer/DESIGN.md's toolchain note) -- --accept-license
+          # is xwin's own documented non-interactive flag for CI use.
+          # Headers are used only for layout parsing, cached only within
+          # this repo's own CI, never redistributed.
+          curl -fL -o /tmp/xwin.tar.gz \
+            "https://github.com/Jake-Shadle/xwin/releases/download/${XWIN_VERSION}/xwin-${XWIN_VERSION}-x86_64-unknown-linux-musl.tar.gz"
+          mkdir -p /tmp/xwin-bin
+          tar -xzf /tmp/xwin.tar.gz -C /tmp/xwin-bin --strip-components=1
+          /tmp/xwin-bin/xwin --accept-license splat --output ~/tools/winsdk
+
+      - name: Record CommonLibSSE-NG submodule revision
+        id: commonlib-rev
+        run: |
+          SHA=$(git -C type-importer/vendor/CommonLibSSE-NG rev-parse --short HEAD)
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Build AE .gdt (full RE/ sweep)
+        run: |
+          set -euo pipefail
+          cd type-importer/scripts
+          HEADERS=$(./list_re_headers.sh ../vendor/CommonLibSSE-NG/include)
+
+          JAVA_HOME="$JAVA_HOME" \
+          GHIDRA_INSTALL_DIR="$HOME/tools/ghidra" \
+          LD_LIBRARY_PATH="$HOME/tools/llvm/lib" \
+            ./generate_gdt.sh "$HOME/tools/winsdk" \
+              "$RUNNER_TEMP/CommonLibSSE_AE_${{ steps.commonlib-rev.outputs.sha }}.gdt" \
+              $HEADERS
+
+      - name: Upload .gdt artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CommonLibSSE_AE_${{ steps.commonlib-rev.outputs.sha }}
+          path: ${{ runner.temp }}/CommonLibSSE_AE_${{ steps.commonlib-rev.outputs.sha }}.gdt
+          retention-days: 90
