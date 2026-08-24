@@ -1,0 +1,253 @@
+diff -ruN a/src/main/java/playday3008/gcpp/processing/SourceParser.java b/src/main/java/playday3008/gcpp/processing/SourceParser.java
+--- a/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 19:15:07.605858030 -0400
++++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 19:27:41.640325711 -0400
+@@ -255,7 +255,7 @@
+             return;
+ 
+         Type underlying = cursor.underlyingTypedefType();
+-        String underlyingSpelling = underlying.spelling();
++        String underlyingSpelling = fieldTypeSpelling(underlying);
+ 
+         // A typedef-of-a-template-specialization (e.g. `using ActorHandle =
+         // BSPointerHandle<Actor>;`, RE/B/BSPointerHandle.h) can never resolve
+@@ -275,8 +275,101 @@
+         pool.addParsedType(new ParsedTypedef(name, underlyingSpelling, category));
+     }
+ 
++
++    /**
++     * Returns the cursor's name qualified by its chain of enclosing RECORD
++     * parents (classes/structs/unions) -- namespaces are deliberately
++     * excluded (they map to CategoryPath, not the registered name). E.g.
++     * the nested struct RE::BGSSoundOutput::Data registers as
++     * "BGSSoundOutput::Data", not "Data". 25 distinct RE:: classes declare
++     * an unrelated nested struct named "Data" (and many more collide on
++     * similar nested names): registering them all under the bare name lets
++     * whichever registers first (or has the most fields -- see
++     * TypePool.addParsedType's forward-decl heuristic) silently win every
++     * reference. Confirmed root cause of the BGSSoundOutput regression in
++     * patch 0009 and the same defect family blocking patch 0007. See
++     * patches/0011-qualify-nested-record-registration.md.
++     */
++    private static String recordQualifiedName(Cursor cursor) {
++        String name = cursor.spelling();
++        if (name == null || name.isEmpty()) {
++            return name;
++        }
++        StringBuilder sb = new StringBuilder(name);
++        Cursor parent = cursor.semanticParent();
++        int guard = 0;
++        while (parent != null && guard++ < 16) {
++            CursorKind k = parent.kind();
++            if (k != CursorKind.STRUCT_DECL && k != CursorKind.CLASS_DECL
++                && k != CursorKind.UNION_DECL && k != CursorKind.CLASS_TEMPLATE) {
++                break;
++            }
++            String p = parent.spelling();
++            if (p == null || p.isEmpty()) {
++                break;
++            }
++            sb.insert(0, p + "::");
++            parent = parent.semanticParent();
++        }
++        return sb.toString();
++    }
++
++    /**
++     * Spelling to record for a field's type reference. When the referenced
++     * declaration is nested inside a record, the locally-printed sugared
++     * spelling is BARE (confirmed empirically: BGSSoundOutput's own `Data
++     * data;` field spells as "Data", while its canonical spelling is
++     * "RE::BGSSoundOutput::Data") and could never match the
++     * record-qualified registration key above -- so use the canonical
++     * (fully-qualified) spelling, which TypePool's progressive qualifier
++     * peeling resolves against the qualified key. Template spellings are
++     * left untouched (separate inline-embedding mechanism, patches
++     * 0003/0005), as are anonymous types.
++     */
++    private static String fieldTypeSpelling(Type t) {
++        String s = t.spelling();
++        if (s == null || s.contains("<")) {
++            return s;
++        }
++        Type u = t.unwrap();
++        int guard = 0;
++        while (guard++ < 8) {
++            TypeKind k = u.kind();
++            if (k == TypeKind.POINTER) {
++                u = u.pointeeType().unwrap();
++            } else if (k == TypeKind.CONSTANT_ARRAY) {
++                u = u.arrayElementType().unwrap();
++            } else {
++                break;
++            }
++        }
++        Cursor decl = u.declaration();
++        if (decl == null) {
++            return s;
++        }
++        CursorKind dk = decl.kind();
++        if (dk != CursorKind.STRUCT_DECL && dk != CursorKind.CLASS_DECL
++            && dk != CursorKind.UNION_DECL && dk != CursorKind.ENUM_DECL) {
++            return s;
++        }
++        Cursor parent = decl.semanticParent();
++        if (parent == null) {
++            return s;
++        }
++        CursorKind pk = parent.kind();
++        if (pk == CursorKind.STRUCT_DECL || pk == CursorKind.CLASS_DECL
++            || pk == CursorKind.UNION_DECL || pk == CursorKind.CLASS_TEMPLATE) {
++            String canon = t.canonicalType().spelling();
++            if (canon != null && !canon.isEmpty() && !canon.contains("<")
++                && !canon.contains("(anonymous")) {
++                return canon;
++            }
++        }
++        return s;
++    }
++
+     private void parseStruct(TypePool pool, Cursor structCursor, CategoryPath category) {
+-        String name = structCursor.spelling();
++        String name = recordQualifiedName(structCursor);
+         if (name == null || name.isEmpty())
+             return; // Skip anonymous structs (they'll be handled inline as field types)
+ 
+@@ -356,7 +449,7 @@
+ 
+                     fields.add(new ParsedStructure.FieldInfo(
+                         cursor.spelling(),
+-                        cursor.type().spelling(),
++                        fieldTypeSpelling(cursor.type()),
+                         isBitField,
+                         bitWidth,
+                         inlineEmbed,
+@@ -368,7 +461,12 @@
+                 // C++ base classes — embedded as the first fields in the struct
+                 case C_X_X_BASE_SPECIFIER -> {
+                     Type baseType = cursor.type();
+-                    String baseTypeName = baseType.spelling();
++                    // Qualified like field references: a base that is itself a
++                    // nested record (e.g. BSISoundOutputModel::
++                    // BSIAttenuationCharacteristics) is spelled BARE at the
++                    // inheritance site and must resolve against its
++                    // record-qualified registration key (patch 0011).
++                    String baseTypeName = fieldTypeSpelling(baseType);
+                     String baseDeclName = baseType.declaration().spelling();
+                     if (baseTypeName != null && !baseTypeName.isEmpty()) {
+                         String fieldName = (baseDeclName != null && !baseDeclName.isEmpty())
+@@ -476,7 +574,7 @@
+     }
+ 
+     private void parseUnion(TypePool pool, Cursor unionCursor, CategoryPath category) {
+-        String name = unionCursor.spelling();
++        String name = recordQualifiedName(unionCursor);
+         if (name == null || name.isEmpty())
+             return; // Skip anonymous unions
+ 
+@@ -489,6 +587,7 @@
+                 boolean isAnon = cursor.isAnonymous();
+ 
+                 ParsedType anonType = null;
++                boolean inlineEmbed = isAnon;
+                 if (isAnon) {
+                     Type fieldType = cursor.type().unwrap();
+                     TypeKind typeKind = fieldType.kind();
+@@ -501,14 +600,34 @@
+                             anonType = parseAnonymousUnion(pool, anonDecl, category);
+                         }
+                     }
++                } else {
++                    // Template-specialization members of UNIONS were never
++                    // routed through the inline-embedding mechanism that
++                    // struct fields got in patches 0003/0005 -- e.g.
++                    // BSScript::Variable::Value's BSTSmartPointer<Array>
++                    // member left the union permanently unresolvable. Masked
++                    // for as long as colliding bare-name registration let a
++                    // different, simpler union win the "Value" key (patch
++                    // 0011's qualified registration exposed it). Mirror
++                    // parseStruct's template-field branch exactly.
++                    Type fieldType = cursor.type().unwrap();
++                    if ((fieldType.kind() == TypeKind.RECORD || fieldType.kind() == TypeKind.UNEXPOSED)
++                        && fieldType.spelling().contains("<")) {
++                        Cursor declCursor = fieldType.declaration();
++                        CursorKind declKind = declCursor.kind();
++                        if (declKind == CursorKind.STRUCT_DECL || declKind == CursorKind.CLASS_DECL) {
++                            anonType = parseFieldsFromType(fieldType, category);
++                            inlineEmbed = true;
++                        }
++                    }
+                 }
+ 
+                 fields.add(new ParsedStructure.FieldInfo(
+                     cursor.spelling(),
+-                    cursor.type().spelling(),
++                    fieldTypeSpelling(cursor.type()),
+                     isBitField,
+                     bitWidth,
+-                    isAnon,
++                    inlineEmbed,
+                     anonType
+                 ));
+             }
+diff -ruN a/src/main/java/playday3008/gcpp/processing/TypePool.java b/src/main/java/playday3008/gcpp/processing/TypePool.java
+--- a/src/main/java/playday3008/gcpp/processing/TypePool.java	2026-08-24 19:15:07.604917841 -0400
++++ b/src/main/java/playday3008/gcpp/processing/TypePool.java	2026-08-24 19:27:41.640278832 -0400
+@@ -181,6 +181,23 @@
+         if (dt != null)
+             return dt;
+ 
++        // Progressive qualifier peeling (patch 0011): a record-parent-
++        // qualified registration ("BGSSoundOutput::Data") must win over the
++        // bare-name fallback, and a namespace-qualified reference
++        // ("RE::BGSSoundOutput::Data") must find it. Try successively
++        // shorter "::"-suffixes, longest (most qualified) first, BEFORE the
++        // legacy normalization below strips all the way to the bare name.
++        if (name.indexOf("::") >= 0 && name.indexOf('<') < 0) {
++            String peeled = name;
++            int sep;
++            while ((sep = peeled.indexOf("::")) >= 0) {
++                peeled = peeled.substring(sep + 2);
++                DataType hit = resolveType(peeled);
++                if (hit != null)
++                    return hit;
++            }
++        }
++
+         // Normalize: strip CV qualifiers and elaborated type specifiers.
+         // Clang may spell types as "const struct _FOO *" but we register them as "_FOO".
+         // Ghidra's DataTypeParser doesn't understand const/volatile qualifiers.
+@@ -279,6 +296,18 @@
+                 return dt;
+         } catch (Exception ignored) {}
+ 
++        // DataTypeParser tokenizes its input as a C-ish type expression and
++        // cannot find types whose NAME contains "::" -- which is exactly how
++        // patch 0011 registers nested records ("BGSSoundOutput::Data") and
++        // how methods were always registered ("X::~X"). Fall back to an
++        // exact-name lookup against the same DTM, which matches any name
++        // verbatim.
++        if (name.indexOf("::") >= 0) {
++            DataType byName = findTypeByName(this.dtm, name);
++            if (byName != null)
++                return byName;
++        }
++
+         // Then check the open archives the user chose to use
+         if (openArchives != null) {
+             for (DataTypeManager archive : openArchives) {
+@@ -394,8 +423,13 @@
+ 
+     private boolean checkDependenciesFulfilled(ParsedType type) {
+         for (var dependency : type.getDependencies()) {
+-            if (!this.hasType(dependency))
++            if (!this.hasType(dependency)) {
++                if (System.getenv("GCPP_DEBUG_DEPS") != null
++                    && type.getName().contains(System.getenv("GCPP_DEBUG_DEPS"))) {
++                    System.err.println("[DEPS] '" + type.getName() + "' blocked by '" + dependency + "'");
++                }
+                 return false;
++            }
+         }
+         return true;
+     }

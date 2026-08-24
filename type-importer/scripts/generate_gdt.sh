@@ -87,7 +87,8 @@ git status --short | grep -q . && {
     echo "error: $GCPP_DIR has uncommitted changes -- refusing to patch over them" >&2
     exit 1
 }
-for patch in "$TYPE_IMPORTER_DIR"/patches/000{1,2,3,4,5,6,9}-*.patch; do
+for patch in "$TYPE_IMPORTER_DIR"/patches/000{1,2,3,4,5,6,9}-*.patch \
+             "$TYPE_IMPORTER_DIR"/patches/0011-*.patch; do
     patch -p1 < "$patch"
 done
 if [ "$JAVA_MAJOR" -ge 22 ]; then

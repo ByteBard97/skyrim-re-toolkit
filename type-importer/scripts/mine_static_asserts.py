@@ -94,6 +94,10 @@ def ifdef_to_cond(directive: str, rest: str) -> str:
     return rest  # if / elif already carry a full expression
 
 
+RECORD_DECL_RE = re.compile(
+    r'\b(?:class|struct|union)\s+(?:alignas\s*\([^)]*\)\s*)?([A-Za-z_][A-Za-z0-9_]*)')
+
+
 def scan_file(path: Path, results: dict, ambiguous: dict, unevaluated: dict):
     text = path.read_text(errors="ignore")
     # Stack of frames; each frame is a list of (cond_or_None, active_bool_or_None)
@@ -102,6 +106,31 @@ def scan_file(path: Path, results: dict, ambiguous: dict, unevaluated: dict):
     # macro -- can't tell if this branch is live for our target runtime".
     stack = []  # each entry: {"taken": bool, "active": bool|None}
 
+    # Record-scope tracking so a bare `static_assert(sizeof(Data) == 0x4)`
+    # written INSIDE class BGSSoundOutput mines as "BGSSoundOutput::Data",
+    # matching patch 0011's record-parent-qualified type registration
+    # (namespaces are deliberately not part of the qualification, exactly
+    # like SourceParser.recordQualifiedName). This is a brace-depth
+    # heuristic, not a C++ parser: a pending record declaration (seen
+    # `class/struct/union NAME` with no `;` yet) claims the next `{`;
+    # frames pop when brace depth returns to their entry depth. Enum
+    # braces, method bodies etc. just move the depth symmetrically.
+    # `template`-scoped records keep the OLD bare-name behavior (their
+    # instantiations don't register under a stable qualified name).
+    record_stack = []  # {"name": str, "depth": int, "template": bool}
+    depth = 0
+    pending = None       # name of a declared-but-not-yet-opened record
+    pending_template = False
+    saw_template = False  # a `template <...>` line precedes the next decl
+    in_block_comment = False
+
+    def qualify(name):
+        if "::" in name or not record_stack:
+            return name
+        if any(f["template"] for f in record_stack):
+            return name  # old behavior for template scopes
+        return "::".join(f["name"] for f in record_stack) + "::" + name
+
     def currently_active():
         return all(frame["active"] is True for frame in stack) if stack else True
 
@@ -109,6 +138,27 @@ def scan_file(path: Path, results: dict, ambiguous: dict, unevaluated: dict):
         return any(frame["active"] is None for frame in stack)
 
     for line in text.splitlines():
+        # Strip comments before any brace counting (block comments can
+        # span lines; line comments can contain braces).
+        code = line
+        if in_block_comment:
+            end = code.find("*/")
+            if end < 0:
+                continue
+            code = code[end + 2:]
+            in_block_comment = False
+        while True:
+            start = code.find("/*")
+            if start < 0:
+                break
+            end = code.find("*/", start + 2)
+            if end < 0:
+                code = code[:start]
+                in_block_comment = True
+                break
+            code = code[:start] + code[end + 2:]
+        code = code.split("//")[0]
+
         m = DIRECTIVE_RE.match(line)
         if m:
             directive, rest = m.group(1), m.group(2)
@@ -144,8 +194,11 @@ def scan_file(path: Path, results: dict, ambiguous: dict, unevaluated: dict):
                     stack.pop()
             continue
 
+        # Asserts are qualified with the record stack as of line START
+        # (an assert never shares a line with the brace that opens its own
+        # enclosing record in this codebase's style).
         for am in ASSERT_RE.finditer(line):
-            cls, size_str = am.group(1), am.group(2)
+            cls, size_str = qualify(am.group(1)), am.group(2)
             size = int(size_str, 16) if size_str.lower().startswith("0x") else int(size_str)
             if any_unevaluated():
                 unevaluated.setdefault(cls, []).append((size, str(path)))
@@ -153,6 +206,30 @@ def scan_file(path: Path, results: dict, ambiguous: dict, unevaluated: dict):
                 results.setdefault(cls, []).append((size, str(path)))
             else:
                 ambiguous.setdefault(cls, []).append((size, str(path)))
+
+        # Record-scope bookkeeping (uses the comment-stripped line).
+        if re.search(r'\btemplate\b', code):
+            saw_template = True
+        dm = RECORD_DECL_RE.search(code)
+        if dm:
+            rest = code[dm.end():]
+            semi, brace = rest.find(";"), rest.find("{")
+            if semi >= 0 and (brace < 0 or semi < brace):
+                pending = None  # forward declaration: `class X;`
+            else:
+                pending = dm.group(1)  # opened by the next "{" (this line or later)
+                pending_template = saw_template
+            saw_template = False
+        for ch in code:
+            if ch == "{":
+                if pending is not None:
+                    record_stack.append({"name": pending, "depth": depth, "template": pending_template})
+                    pending = None
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                while record_stack and depth <= record_stack[-1]["depth"]:
+                    record_stack.pop()
 
 
 def main():

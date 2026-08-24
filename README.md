@@ -14,7 +14,7 @@ This is a collection of tools, type archives, and runtime instrumentation that l
 skyrim-re-toolkit/
 ├── type-importer/          # C++ headers → Ghidra / IDA type archives
 │   ├── DESIGN.md           # Full investigation log: root-causes, verification, open questions
-│   ├── patches/            # 7 accepted fixes for the vendored parser (+ deferred investigations), each with a .md writeup
+│   ├── patches/            # 8 accepted fixes for the vendored parser (+ deferred investigations), each with a .md writeup
 │   ├── scripts/            # generate_gdt.sh, coverage sweep + supporting tooling (mining, layout dumps)
 │   ├── tools/              # GenerateGdt.java — the real CLI
 │   ├── stubs/              # Minimal headers so real CommonLibSSE-NG parses without a full build
@@ -27,7 +27,7 @@ skyrim-re-toolkit/
 
 **The problem:** CommonLibSSE-NG contains thousands of reverse-engineered C++ class definitions, struct layouts, vtables, and bitfields. Getting them into Ghidra currently means either (a) hunting for a floating `types.h` file in a Discord server, or (b) manually recreating every struct by hand.
 
-**The solution:** A parser pipeline that reads CommonLibSSE-NG headers and emits Ghidra Data Type Archives (`.gdt`) and IDA Type Libraries (`.til`), built on [`playday3008/GhidraClangPoweredParse`](https://github.com/playday3008/GhidraClangPoweredParse) (a libclang-based Ghidra extension), vendored as a submodule and patched with **seven accepted fixes** (patches 0001–0006 and 0009; an eighth, template base-class inlining, is deferred pending a type-registration fix — see `type-importer/patches/`) developed and verified against real CommonLibSSE-NG headers.
+**The solution:** A parser pipeline that reads CommonLibSSE-NG headers and emits Ghidra Data Type Archives (`.gdt`) and IDA Type Libraries (`.til`), built on [`playday3008/GhidraClangPoweredParse`](https://github.com/playday3008/GhidraClangPoweredParse) (a libclang-based Ghidra extension), vendored as a submodule and patched with **eight accepted fixes** (patches 0001–0006, 0009, and 0011; template base-class inlining (0007) is deferred pending a rebase onto 0011’s qualified type registration — see `type-importer/patches/`) developed and verified against real CommonLibSSE-NG headers.
 
 - **Primary approach:** libclang preprocessing → flattened C-compatible structs → Ghidra's Java type-manager API
 - **Handles:** `BSTArray<T>`, `REL::Relocation`, `stl::enumeration`, multiple inheritance (including template-specialization base classes), MSVC bitfield packing, `std::`-qualified builtin types
