@@ -157,10 +157,52 @@ non-AE SE, `TESObjectREFR`'s effective size is `0x98` before the 1.6.629 hotfix 
 independently confirms **`0xA0`** as the AE `TESObjectREFR` size, agreeing with
 the relocation-offset math above from a completely different part of the codebase.
 
-**This number (`0xA0`) is a strong derived hypothesis, not a header
-`static_assert`.** It should still go through the Address Library / RTTI
-cross-check in the validation plan before being treated as ground truth in a
-shipped `.gdt`.
+**Superseded by real-compiler evidence, and revised further (2026-08-24).**
+Got a real header-based, `clang-cl -fdump-record-layouts-complete` compile of
+the actual `TESObjectREFR` (via the stub PCH described in the toolchain note
+below) working. It reproduces every hand-derived offset above exactly —
+`TESForm@0x00`, `BSHandleRefObject@0x20`, `BSTEventSink@0x30`,
+`IAnimationGraphManagerHolder@0x38`, own members starting `@0x40`,
+`OBJ_REFR data@0x40`, `parentCell@0x60`, `loadedData@0x68`,
+`extraList@0x70` — but reports **`sizeof(TESObjectREFR) == 0x78`** (120),
+not `0xA0`.
+
+The reason isn't a bug in the reasoning above — it's a **second instance of
+the exact same "invisible relocated member" pattern**, this time inside
+`extraList`'s own type. `RE::BaseExtraList` (`RE/E/ExtraDataList.h:18-46`)
+declares its `data`/`presence` pointer members **only**
+`#ifndef ENABLE_SKYRIM_AE` (`ExtraDataList.h:39-42`, with the header's own
+comment confirming it: `"~BaseExtraList(); // 00, virtual on AE 1.6.629 and
+later"`). Under `ENABLE_SKYRIM_AE=1`, `BaseExtraList` compiles to a
+genuinely **empty class** (verified: clang's dump shows it as `(empty)`,
+`sizeof=1`) — its two pointers are accessed via the same
+`REL::RelocateMember`-style runtime-offset trick as `TESObjectREFR`'s own
+tail, not as compiled struct members. `ExtraDataList` (which wraps a single
+`BaseExtraList _extraData` member) inherits that emptiness.
+
+**Consequence:** the `0x78` clang reports for `TESObjectREFR` is
+CommonLibSSE-NG's own AE-compiled size with **two separate blocks of
+invisible relocated data** excluded — `BaseExtraList`'s own two pointers
+*and* `TESObjectREFR`'s own `RUNTIME_DATA_CONTENT` tail. The true game
+object size is larger than either `0x78` (what clang reports) or the
+earlier `0xA0` hypothesis (which only accounted for one of the two
+invisible blocks). **Neither number should be trusted as the real object
+size without binary-level ground truth** (Address Library cross-check or
+direct disassembly) — this is now a confirmed instance of a recurring
+CommonLibSSE-NG pattern, not a one-off, so expect it in other classes with
+"AE moved this field" history too, and don't assume clang's `sizeof` under
+`ENABLE_SKYRIM_AE` is the true object size for any class that has ever had
+a runtime-relocated member.
+
+**What this changes for the `.gdt` output:** a generated Ghidra struct
+based on naively parsing these headers under `ENABLE_SKYRIM_AE` will be
+undersized wherever this pattern occurs. The type-importer needs to detect
+uses of the relocation-accessor pattern (`REL::RelocateMember[IfNewer]`
+called from an inline accessor with no backing declared member) and either
+(a) append the accessed-but-undeclared trailing bytes to the emitted
+struct's size, or (b) flag the class as "layout incomplete, needs manual
+tail sizing" rather than silently emitting a too-small struct. Not yet
+designed — tracked in open questions.
 
 ## Multiple inheritance / virtual bases — codebase-wide check
 
