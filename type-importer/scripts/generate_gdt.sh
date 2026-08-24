@@ -54,6 +54,25 @@ HEADERS=("$@")
 
 export PATH="$JAVA_HOME/bin:$PATH"
 
+# Panama FFI (java.lang.foreign) is preview in JDK 21, final in JDK 22+.
+# On 21 the preview implementation requires -Xint (upcalls crash under JIT)
+# and STILL gives order-dependent wrong values from struct-by-value downcalls
+# at full-sweep scale -- confirmed by a pure-C libclang probe that shows the
+# identical queries are stable and correct at the same scale (see
+# patches/0007-inline-template-base-classes.md and patches/0010-*.md).
+# JDK 22+ (final FFM) is therefore strongly preferred; patch 0010 ports the
+# vendored bindings to the final API and only applies on 22+.
+JAVA_MAJOR="$("$JAVA_HOME/bin/java" -version 2>&1 | head -1 | sed 's/[^"]*"\([0-9]*\).*/\1/')"
+if [ "$JAVA_MAJOR" -ge 22 ]; then
+    JAVAC_FLAGS=(--release 22)
+    JAVA_FLAGS=()
+else
+    echo "warning: JDK $JAVA_MAJOR uses the preview FFM API, which is known to" >&2
+    echo "warning: return wrong values at full-sweep scale -- use JDK 22+ instead" >&2
+    JAVAC_FLAGS=(--release 21 --enable-preview)
+    JAVA_FLAGS=(-Xint --enable-preview)
+fi
+
 BUILD_DIR="$(mktemp -d)"
 cleanup() {
     echo "Reverting $GCPP_DIR to pristine..." >&2
@@ -68,9 +87,13 @@ git status --short | grep -q . && {
     echo "error: $GCPP_DIR has uncommitted changes -- refusing to patch over them" >&2
     exit 1
 }
-for patch in "$TYPE_IMPORTER_DIR"/patches/000{1,2,3,4,5,6}-*.patch; do
+for patch in "$TYPE_IMPORTER_DIR"/patches/000{1,2,3,4,5,6,9}-*.patch; do
     patch -p1 < "$patch"
 done
+if [ "$JAVA_MAJOR" -ge 22 ]; then
+    # FFM final-API port -- the renamed methods don't exist on JDK 21.
+    patch -p1 < "$TYPE_IMPORTER_DIR"/patches/0010-jdk22-ffm-final-api.patch
+fi
 
 echo "Building GhidraClangPoweredParse..." >&2
 ./gradlew compileJava --offline 2>&1 | tail -5
@@ -81,8 +104,8 @@ CP="$CP:$(find "$GHIDRA_INSTALL_DIR/Ghidra" -iname '*.jar' | tr '\n' ':')"
 GRADLE_CACHE_JARS="$(find "$HOME/.gradle/caches" -iname '*.jar' 2>/dev/null | tr '\n' ':')"
 CP="$CP:$GRADLE_CACHE_JARS"
 
-echo "Compiling GenerateGdt.java..." >&2
-javac -cp "$CP" -d "$BUILD_DIR" --release 21 --enable-preview \
+echo "Compiling GenerateGdt.java (JDK $JAVA_MAJOR)..." >&2
+javac -cp "$CP" -d "$BUILD_DIR" "${JAVAC_FLAGS[@]}" \
     "$TYPE_IMPORTER_DIR/tools/GenerateGdt.java" 2>&1 | grep -v "^Note:\|^warning:" || true
 
 REPORT_ARGS=()
@@ -90,9 +113,17 @@ if [ -n "${REPORT_CSV:-}" ]; then
     REPORT_ARGS=(--report-csv "$REPORT_CSV")
 fi
 
-echo "Running GenerateGdt (interpreter mode -- Panama FFI upcalls crash under JIT, a documented GhidraClangPoweredParse limitation)..." >&2
+# LLVM installs its own SIGSEGV handler ("crash recovery") when an index is
+# created. HotSpot's JIT-compiled code deliberately triggers benign SIGSEGVs
+# (implicit null checks), which LLVM's handler misreads as crashes and kills
+# the JVM -- this was the real cause of the "Panama upcalls crash under JIT"
+# symptom that previously forced -Xint. Confirmed via hs_err: SIGSEGV "(sent
+# by kill)" inside JIT-compiled Ghidra code, nowhere near FFM or libclang.
+export LIBCLANG_DISABLE_CRASH_RECOVERY=1
+
+echo "Running GenerateGdt (JDK $JAVA_MAJOR: flags '${JAVA_FLAGS[*]:-none}')..." >&2
 cd "$GHIDRA_INSTALL_DIR"
-java -Xint --enable-preview --enable-native-access=ALL-UNNAMED \
+java "${JAVA_FLAGS[@]}" --enable-native-access=ALL-UNNAMED \
     -cp "$BUILD_DIR:$CP" GenerateGdt \
     --commonlib "$COMMONLIB_DIR" \
     --stubs "$STUBS_DIR" \

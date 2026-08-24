@@ -1,0 +1,47 @@
+diff -ruN a/src/main/java/playday3008/gcpp/clang/LibClang.java b/src/main/java/playday3008/gcpp/clang/LibClang.java
+--- a/src/main/java/playday3008/gcpp/clang/LibClang.java	2026-08-24 18:22:23.246424627 -0400
++++ b/src/main/java/playday3008/gcpp/clang/LibClang.java	2026-08-24 18:22:23.247973105 -0400
+@@ -476,7 +476,7 @@
+             if (cStr.equals(MemorySegment.NULL)) {
+                 return "";
+             }
+-            return cStr.reinterpret(Long.MAX_VALUE).getUtf8String(0);
++            return cStr.reinterpret(Long.MAX_VALUE).getString(0);
+         } finally {
+             disposeString(cxString);
+         }
+diff -ruN a/src/main/java/playday3008/gcpp/clang/TranslationUnit.java b/src/main/java/playday3008/gcpp/clang/TranslationUnit.java
+--- a/src/main/java/playday3008/gcpp/clang/TranslationUnit.java	2026-08-24 18:22:23.246240748 -0400
++++ b/src/main/java/playday3008/gcpp/clang/TranslationUnit.java	2026-08-24 18:22:23.248057956 -0400
+@@ -177,7 +177,7 @@
+             try {
+                 // Allocate source filename as native string
+                 MemorySegment filenameSeg = sourceFilename != null
+-                    ? arena.allocateUtf8String(sourceFilename)
++                    ? arena.allocateFrom(sourceFilename)
+                     : MemorySegment.NULL;
+ 
+                 // Allocate command line args as array of pointers to strings
+@@ -185,9 +185,9 @@
+                 int numArgs = 0;
+                 if (commandLineArgs != null && commandLineArgs.length > 0) {
+                     numArgs = commandLineArgs.length;
+-                    argsSeg = arena.allocateArray(ValueLayout.ADDRESS, numArgs);
++                    argsSeg = arena.allocate(ValueLayout.ADDRESS, numArgs);
+                     for (int i = 0; i < numArgs; i++) {
+-                        MemorySegment argStr = arena.allocateUtf8String(commandLineArgs[i]);
++                        MemorySegment argStr = arena.allocateFrom(commandLineArgs[i]);
+                         argsSeg.setAtIndex(ValueLayout.ADDRESS, i, argStr);
+                     }
+                 }
+@@ -198,8 +198,8 @@
+                 if (unsavedFileName != null && unsavedFileContents != null) {
+                     numUnsaved = 1;
+                     unsavedSeg = arena.allocate(LibClang.CX_UNSAVED_FILE);
+-                    MemorySegment nameStr = arena.allocateUtf8String(unsavedFileName);
+-                    MemorySegment contentsStr = arena.allocateUtf8String(unsavedFileContents);
++                    MemorySegment nameStr = arena.allocateFrom(unsavedFileName);
++                    MemorySegment contentsStr = arena.allocateFrom(unsavedFileContents);
+                     unsavedSeg.set(ValueLayout.ADDRESS, 0, nameStr);
+                     unsavedSeg.set(ValueLayout.ADDRESS, 8, contentsStr);
+                     unsavedSeg.set(ValueLayout.JAVA_LONG, 16, (long) unsavedFileContents.length());
