@@ -127,17 +127,32 @@ def main():
     print(f"## NO_GROUND_TRUTH ({len(no_ground_truth)}) -- resolved, non-empty, no static_assert to confirm against")
 
     if args.json_out:
+        # Anonymous types are keyed by clang's "(anonymous union at
+        # /abs/path/file.h:LINE)" spelling, which embeds a machine-specific
+        # absolute path -- a baseline recorded on one machine reports every
+        # such entry as a spurious UNRESOLVED "regression" on any other
+        # machine (this broke the first hosted CI run). They can never have
+        # static_assert ground truth (nothing can name them), so they add no
+        # regression-gate value: exclude them from the snapshot entirely.
+        def track(name):
+            return "(anonymous" not in name
+
         snapshot = {}
         for name, exp in ok:
-            snapshot[name] = {"status": "OK", "expected": exp, "actual": exp}
+            if track(name):
+                snapshot[name] = {"status": "OK", "expected": exp, "actual": exp}
         for name, exp, act in mismatch:
-            snapshot[name] = {"status": "MISMATCH", "expected": exp, "actual": act}
+            if track(name):
+                snapshot[name] = {"status": "MISMATCH", "expected": exp, "actual": act}
         for name, exp, act in empty:
-            snapshot[name] = {"status": "EMPTY", "expected": exp, "actual": act}
+            if track(name):
+                snapshot[name] = {"status": "EMPTY", "expected": exp, "actual": act}
         for name, exp in unresolved:
-            snapshot[name] = {"status": "UNRESOLVED", "expected": exp, "actual": None}
+            if track(name):
+                snapshot[name] = {"status": "UNRESOLVED", "expected": exp, "actual": None}
         for name, act in no_ground_truth:
-            snapshot[name] = {"status": "NO_GROUND_TRUTH", "expected": None, "actual": act}
+            if track(name):
+                snapshot[name] = {"status": "NO_GROUND_TRUTH", "expected": None, "actual": act}
         args.json_out.write_text(json.dumps(snapshot, indent=2, sort_keys=True))
         print(f"\n# Wrote {len(snapshot)}-entry JSON snapshot to {args.json_out}")
 
