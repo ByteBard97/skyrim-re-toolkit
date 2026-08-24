@@ -1,0 +1,73 @@
+name: runner clang probe (debug)
+
+# Manual diagnostic for the runner-only Directional::MaxMin<Color> EMPTY
+# divergence (patches/0012-*.md): runs the pure-C nested_probe against the
+# full RE/ umbrella with the exact sweep flags, so runner-side libclang
+# behavior can be compared byte-for-byte against a local run. No Ghidra/JDK
+# needed; reuses the coverage workflow's LLVM and xwin caches.
+
+on:
+  workflow_dispatch:
+
+env:
+  LLVM_VERSION: "19.1.0"
+  XWIN_VERSION: "0.10.0"
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Cache LLVM
+        id: cache-llvm
+        uses: actions/cache@v4
+        with:
+          path: ~/tools/llvm
+          key: llvm-${{ env.LLVM_VERSION }}-v1
+
+      - name: Download LLVM
+        if: steps.cache-llvm.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/tools
+          curl -sL -o /tmp/llvm.tar.xz \
+            "https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/LLVM-${LLVM_VERSION}-Linux-X64.tar.xz"
+          tar -xf /tmp/llvm.tar.xz -C ~/tools
+          mv ~/tools/LLVM-${LLVM_VERSION}-Linux-X64 ~/tools/llvm
+
+      - name: Cache xwin Windows SDK/CRT splat
+        id: cache-winsdk
+        uses: actions/cache@v4
+        with:
+          path: ~/tools/winsdk
+          key: winsdk-xwin-${{ env.XWIN_VERSION }}-v1
+
+      - name: Acquire Windows SDK/CRT headers via xwin
+        if: steps.cache-winsdk.outputs.cache-hit != 'true'
+        run: |
+          curl -sL -o /tmp/xwin.tar.gz \
+            "https://github.com/Jake-Shadle/xwin/releases/download/${XWIN_VERSION}/xwin-${XWIN_VERSION}-x86_64-unknown-linux-musl.tar.gz"
+          tar -xzf /tmp/xwin.tar.gz -C /tmp
+          /tmp/xwin-${XWIN_VERSION}-x86_64-unknown-linux-musl/xwin \
+            --accept-license splat --include-debug-libs --output ~/tools/winsdk
+
+      - name: Build and run probe
+        run: |
+          set -euo pipefail
+          TI="$GITHUB_WORKSPACE/type-importer"
+          gcc -O1 -o /tmp/nested_probe "$TI/scripts/nested_probe.c" \
+            -I ~/tools/llvm/include -L ~/tools/llvm/lib -lclang -Wl,-rpath,$HOME/tools/llvm/lib
+          cd "$TI/scripts"
+          ./list_re_headers.sh ../vendor/CommonLibSSE-NG/include | sed 's|^|#include "|;s|$|"|' > /tmp/umbrella.hpp
+          /tmp/nested_probe /tmp/umbrella.hpp \
+            --target=x86_64-pc-windows-msvc \
+            -fms-extensions -fms-compatibility -fdeclspec -fms-compatibility-version=19.40 -fdelayed-template-parsing \
+            -ferror-limit=0 -Wno-macro-redefined -Wno-nonportable-include-path -Wno-pragma-pack \
+            -Wno-ignored-attributes -Wno-ignored-pragma-intrinsic -Wno-typedef-redefinition \
+            -I"$TI/vendor/CommonLibSSE-NG/include" -I"$TI/stubs" \
+            -I"$HOME/tools/winsdk/crt/include" -I"$HOME/tools/winsdk/sdk/include/ucrt" \
+            -std=c++20 -include "$TI/stubs/layout_pch.h" -D_WIN64 -DWIN32 -DENABLE_SKYRIM_AE=1 \
+            -D_USE_ATTRIBUTES_FOR_SAL=0 -DCINTERFACE -DCOBJMACROS -D_NTLSA_
