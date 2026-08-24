@@ -328,20 +328,20 @@ STL surface actually used in class layouts (`<cstdint>`, `<utility>` for
     by 8 bytes and produces a wrong total size. This isn't an edge case: it
     fires on essentially every override in an inheritance chain, including our
     exact target (`TESObjectREFR` overrides base virtuals from `TESForm`).
-  - **Fix (not yet implemented/tested — no JDK 21+/Ghidra 12 available in this
-    environment yet):** before adding the synthetic vptr field at `:354`, check
-    whether the primary base (`baseClasses.get(0)`, if present) is itself
-    polymorphic — i.e., whether its already-parsed `ParsedStructure` starts
-    with a `vptr` field, or (simpler, cursor-level check) whether
-    `structCursor`'s primary base `Cursor` has any virtual methods anywhere in
-    its own ancestry via libclang. If the primary base is polymorphic, skip
-    adding a new vptr — the overridden methods extend the inherited vtable at
-    its existing slot, they don't create a new one. Only emit a new vptr when
-    either there are no bases, or the (primary) base is non-polymorphic. This
-    is a real code change to `SourceParser.java`, to be written and tested
-    once the build environment exists — tracked as the first concrete patch
-    for `type-importer/patches/` rather than editing the vendored submodule
-    directly (per repo convention: don't dirty submodule state).
+  - **Fixed and functionally verified (2026-08-24).** Installed JDK 21
+    (Temurin) and Ghidra 12.1.3 locally (both user-local, no sudo on this
+    box), built the extension for real, wrote a standalone Java harness
+    that calls `SourceParser.parseFiles` directly against a synthetic
+    reproduction of `TESObjectREFR`'s exact shape (primary polymorphic
+    base with an overridden virtual, plus a secondary polymorphic base),
+    and did a clean A/B: unpatched code produces the spurious extra
+    `vptr` field exactly as predicted; patched code produces zero. See
+    `patches/0001-fix-redundant-vptr.md` for the full fix, diff, and
+    verification writeup. Patch lives at
+    `patches/0001-fix-redundant-vptr.patch` — applied and tested against
+    the vendored submodule's working tree, then reverted to keep the
+    submodule pristine, per this repo's own convention of not committing
+    into `vendor/`.
 - CommonLibSSE-NG's CMake build macros for selecting the AE 1.6.1170 target
   specifically (vs. some other AE point release) — not yet identified. Needed
   before compiling anything for real, since headers are multi-runtime by

@@ -1,0 +1,109 @@
+--- a/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-23 23:35:27.747399847 -0400
++++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-23 23:41:26.361127795 -0400
+@@ -265,6 +265,7 @@
+         List<ParsedStructure.FieldInfo> fields = new ArrayList<>();
+         boolean[] packed = {false};
+         List<String[]> baseClasses = new ArrayList<>(); // [fieldName, typeName]
++        List<Cursor> baseDeclCursors = new ArrayList<>(); // parallel to baseClasses, for polymorphism checks
+         List<ParsedVtable.VtableEntry> virtualMethods = new ArrayList<>();
+ 
+         structCursor.visitChildren((cursor, parent) -> {
+@@ -313,6 +314,7 @@
+                         String fieldName = (baseDeclName != null && !baseDeclName.isEmpty())
+                             ? "super_" + baseDeclName : "super_" + baseTypeName;
+                         baseClasses.add(new String[]{fieldName, baseTypeName});
++                        baseDeclCursors.add(baseType.declaration());
+                     }
+                 }
+ 
+@@ -348,15 +350,38 @@
+             return Cursor.ChildVisitResult.CONTINUE;
+         });
+ 
+-        // Build final field list: vptr first, then base classes, then regular fields
++        // Build final field list: vptr first (ONLY if this class introduces a new
++        // vtable slot), then base classes, then regular fields.
++        //
++        // Bug fix: a class that OVERRIDES a virtual method from an already-
++        // polymorphic base does NOT get a new vptr in the MSVC/Itanium ABI --
++        // the override just changes an entry in the vtable it inherits from its
++        // primary base. Emitting a synthetic "vptr" field here unconditionally
++        // (the original behavior) duplicates the vptr that's already the first
++        // member of the embedded primary-base field below, shifting every
++        // subsequent field by 8 bytes. This is not an edge case: it fires on
++        // essentially every override in an inheritance chain (confirmed via
++        // ByteBard97/skyrim-re-toolkit's DESIGN.md source recon against
++        // CommonLibSSE-NG's TESObjectREFR, which overrides base TESForm
++        // virtuals and would otherwise get a spurious extra vptr).
++        //
++        // A new vptr is only correct when NO base class already has one --
++        // i.e. this class is the root of a new vtable (no bases at all, or
++        // every base is non-polymorphic).
++        boolean primaryBaseIsPolymorphic = !baseDeclCursors.isEmpty()
++            && isPolymorphic(baseDeclCursors.get(0));
++
+         List<ParsedStructure.FieldInfo> allFields = new ArrayList<>();
+ 
+-        if (!virtualMethods.isEmpty()) {
++        if (!virtualMethods.isEmpty() && !primaryBaseIsPolymorphic) {
+             String vtableName = name + "_vtable";
+             pool.addParsedType(new ParsedVtable(vtableName, virtualMethods, name, category));
+             allFields.add(new ParsedStructure.FieldInfo(
+                 "vptr", vtableName + " *", false, 0, false, null));
+             LOGGER.debug("Class '{}': created vtable with {} virtual method(s)", name, virtualMethods.size());
++        } else if (!virtualMethods.isEmpty()) {
++            LOGGER.debug("Class '{}': {} virtual method(s) extend the primary base's existing vtable "
++                + "(no new vptr field emitted)", name, virtualMethods.size());
+         }
+ 
+         for (String[] base : baseClasses) {
+@@ -447,6 +472,49 @@
+     // ========================================================================
+ 
+     /**
++     * Determines whether a class/struct declaration is polymorphic -- i.e. has (or
++     * inherits) a vtable -- by checking for any virtual method or destructor
++     * declared directly on it, or recursing into its own base classes.
++     * <p>
++     * Used to decide whether a derived class needs a brand-new synthetic vptr
++     * field or whether its virtual methods extend an already-inherited vtable.
++     * See the fix note at the {@code allFields} construction site in
++     * {@link #parseStruct} for why this check exists.
++     */
++    private boolean isPolymorphic(Cursor classDecl) {
++        if (classDecl == null)
++            return false;
++
++        boolean[] found = {false};
++        List<Cursor> bases = new ArrayList<>();
++
++        classDecl.visitChildren((cursor, parent) -> {
++            if (found[0])
++                return Cursor.ChildVisitResult.BREAK;
++            switch (cursor.kind()) {
++                case C_X_X_METHOD, DESTRUCTOR -> {
++                    if (cursor.isVirtualMethod()) {
++                        found[0] = true;
++                        return Cursor.ChildVisitResult.BREAK;
++                    }
++                }
++                case C_X_X_BASE_SPECIFIER -> bases.add(cursor.type().declaration());
++                default -> {}
++            }
++            return Cursor.ChildVisitResult.CONTINUE;
++        });
++
++        if (found[0])
++            return true;
++
++        for (Cursor base : bases) {
++            if (isPolymorphic(base))
++                return true;
++        }
++        return false;
++    }
++
++    /**
+      * Extract a vtable entry from a virtual method or virtual destructor cursor.
+      * The entry includes an explicit {@code this} pointer as the first parameter.
+      */
