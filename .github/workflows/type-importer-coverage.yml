@@ -25,7 +25,12 @@ on:
     paths:
       - "type-importer/**"
       - ".github/workflows/type-importer-coverage.yml"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      debug_deps:
+        description: "Substring: print which dependency blocks matching types (GCPP_DEBUG_DEPS)"
+        required: false
+        default: ""
 
 env:
   GHIDRA_VERSION: "12.1.3"
@@ -104,6 +109,11 @@ jobs:
           /tmp/xwin-bin/xwin --accept-license splat --output ~/tools/winsdk
 
       - name: Run coverage sweep
+        env:
+          # Opt-in dependency-blocker tracing (TypePool.checkDependenciesFulfilled,
+          # patch 0011) -- set via workflow_dispatch to debug runner-only
+          # divergences without touching code.
+          GCPP_DEBUG_DEPS: ${{ inputs.debug_deps || '' }}
         run: |
           set -euo pipefail
           cd type-importer/scripts
