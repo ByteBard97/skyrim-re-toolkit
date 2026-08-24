@@ -1,0 +1,86 @@
+diff --git a/src/main/java/playday3008/gcpp/processing/ParsedTypedef.java b/src/main/java/playday3008/gcpp/processing/ParsedTypedef.java
+index 4ef88dc..e245181 100644
+--- a/src/main/java/playday3008/gcpp/processing/ParsedTypedef.java
++++ b/src/main/java/playday3008/gcpp/processing/ParsedTypedef.java
+@@ -5,15 +5,36 @@ import java.util.List;
+ 
+ public class ParsedTypedef extends ParsedType {
+     private final String typeName;
++    private final ParsedType inlineType;
+ 
+     public ParsedTypedef(String name, String typeName, CategoryPath categoryPath) {
+         super(name, categoryPath);
+         this.typeName = typeName;
++        this.inlineType = null;
++    }
++
++    /**
++     * For a typedef whose underlying type is a class-template
++     * specialization (e.g. {@code using ActorHandle =
++     * BSPointerHandle<Actor>;}) -- the specialization's spelling (e.g.
++     * "BSPointerHandle<Actor>") is never independently registered
++     * anywhere in the pool by name (unlike a plain typedef target), so a
++     * name-based {@code pool.getType(typeName)} lookup can never succeed
++     * for it. Carries the already-parsed structure directly instead,
++     * exactly like {@link ParsedStructure.FieldInfo}'s
++     * {@code anonymousType} does for inline-embedded template
++     * fields/bases (see SourceParser.parseFieldsFromType) -- same
++     * underlying problem, same fix shape.
++     */
++    public ParsedTypedef(String name, ParsedType inlineType, CategoryPath categoryPath) {
++        super(name, categoryPath);
++        this.typeName = null;
++        this.inlineType = inlineType;
+     }
+ 
+     @Override
+     public DataType createDataType(TypePool pool) {
+-        DataType dt = pool.getType(typeName);
++        DataType dt = inlineType != null ? inlineType.createDataType(pool) : pool.getType(typeName);
+         if (dt != null) {
+             return new TypedefDataType(getCategoryPath(), getName(), dt, pool.getDataTypeManager());
+         }
+@@ -22,6 +43,11 @@ public class ParsedTypedef extends ParsedType {
+ 
+     @Override
+     public List<String> getDependencies() {
+-        return List.of(typeName);
++        // Mirrors ParsedStructure.getDependencies()'s filtering of
++        // isAnonymous() fields: an inline-embedded type isn't registered
++        // in the pool under any name, so there's no name-keyed dependency
++        // to wait on here -- its OWN nested dependencies are resolved
++        // when its createDataType() runs, same as any other inline-embed.
++        return inlineType != null ? List.of() : List.of(typeName);
+     }
+ }
+diff --git a/src/main/java/playday3008/gcpp/processing/SourceParser.java b/src/main/java/playday3008/gcpp/processing/SourceParser.java
+index cd4de80..0db63f4 100644
+--- a/src/main/java/playday3008/gcpp/processing/SourceParser.java
++++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java
+@@ -254,7 +254,25 @@ public class SourceParser {
+         if (name == null || name.isEmpty())
+             return;
+ 
+-        pool.addParsedType(new ParsedTypedef(name, cursor.underlyingTypedefType().spelling(), category));
++        Type underlying = cursor.underlyingTypedefType();
++        String underlyingSpelling = underlying.spelling();
++
++        // A typedef-of-a-template-specialization (e.g. `using ActorHandle =
++        // BSPointerHandle<Actor>;`, RE/B/BSPointerHandle.h) can never resolve
++        // through the normal string-keyed pool lookup: the specialization's
++        // own spelling is never independently registered anywhere by name
++        // (unlike field/base usage of the same specialization, which routes
++        // through parseFieldsFromType's inline-embedding -- see patches/0003,
++        // 0005). Route it through the same mechanism here instead of a plain
++        // ParsedTypedef -- see ParsedTypedef's inlineType constructor and
++        // patches/0008-fix-typedef-of-template-specialization.md.
++        if (underlyingSpelling != null && underlyingSpelling.contains("<")) {
++            ParsedStructure inlineType = parseFieldsFromType(underlying, category);
++            pool.addParsedType(new ParsedTypedef(name, inlineType, category));
++            return;
++        }
++
++        pool.addParsedType(new ParsedTypedef(name, underlyingSpelling, category));
+     }
+ 
+     private void parseStruct(TypePool pool, Cursor structCursor, CategoryPath category) {
