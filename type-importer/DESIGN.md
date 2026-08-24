@@ -232,20 +232,74 @@ system and isn't ABI-compatible with the `libtinfo.so.6` that is installed), now
 retrying with `LLVM-19.1.0-Linux-X64.tar.xz` (a more recent, more portable
 build). Both installed under `~/.local/tools/`, not the system.
 
-**Not yet confirmed:** whether `-fms-extensions -fms-compatibility` (or
-`clang-cl --target=x86_64-pc-windows-msvc`) on Linux actually reproduces MSVC's
-real record layout for these headers, vs. just parsing without error. This is the
-single most load-bearing unverified assumption in the whole Linux-native pipeline
-— see progress log / open questions.
+**CONFIRMED (2026-08-24):** `clang-cl` from `LLVM-19.1.0-Linux-X64` (user-local
+install under `~/.local/tools/`, defaults its target to
+`x86_64-pc-windows-msvc` — no extra flags needed) correctly reproduces MSVC
+record layout rules on Linux. Verified with a synthetic reproduction of the real
+`TESObjectREFR` multiple-inheritance shape (`TESForm` + `BSHandleRefObject` +
+two vtable-only interfaces + trailing own-data members) via
+`clang-cl -Xclang -fdump-record-layouts -fsyntax-only`. Output placed every base
+subobject and every own-member at exactly the offsets hand-derived from the
+header in the field map above: `0x00`, `0x20`, `0x30`, `0x38`, `0x40`. This is
+strong evidence the whole Linux-native libclang pipeline is viable — record
+layout, not just parsing, matches MSVC.
+
+Two notes for reproducing this: (1) `LLVM-19.1.0-Linux-X64.tar.xz` was needed,
+not `clang+llvm-18.1.8-...-ubuntu-18.04.tar.xz` — the 18.04-targeted build links
+against `libtinfo.so.5`, which isn't present or ABI-compatible with this
+system's `libtinfo.so.6`, and there's no passwordless `sudo` to install it
+system-wide. (2) `clang-cl` cannot find `<cstdint>` etc. without a real Windows
+SDK/MSVC STL on disk — the synthetic test avoided the STL entirely (used
+`unsigned int` etc. instead of `std::uint32_t`). Compiling *real*
+CommonLibSSE-NG headers will hit this for real and need either a vendored
+Windows SDK header set, or `-nostdinc++`/stub headers for the small slice of
+STL surface actually used in class layouts (`<cstdint>`, `<utility>` for
+`std::pair`, etc.) — not yet solved, see open questions.
 
 ## Open questions / not yet resolved
 
-- Does Linux clang (`-fms-extensions -fms-compatibility` or `clang-cl` with an
-  MSVC target triple) actually produce MSVC-ABI-correct record layouts for these
-  headers? Unverified — in progress.
-- `GhidraClangPoweredParse`'s redundant-vptr bug: no workaround found yet (not in
-  its issue tracker as of this pass — needs another look once we can actually
-  build and run it).
+- ~~Does Linux clang produce MSVC-ABI-correct record layouts?~~ **Resolved: yes**,
+  confirmed via `clang-cl` synthetic test, see toolchain note above.
+- Real CommonLibSSE-NG headers pull in real STL (`<cstdint>`, `std::pair`,
+  `std::atomic_ref`, etc.) and Windows SDK types. `clang-cl` has no libc++/MSVC
+  STL to find on this Linux box. Need either a vendored minimal Windows SDK +
+  MSVC STL header set (e.g. via `xwin` or a partial `mingw-w64` substitute), or
+  hand-written stub headers for just the STL surface that appears in class
+  layouts. Not yet solved — next concrete step.
+- ~~`GhidraClangPoweredParse`'s redundant-vptr bug: no workaround found~~
+  **Root-caused (2026-08-24)**, read directly from source
+  (`src/main/java/playday3008/gcpp/processing/SourceParser.java:308-369`):
+  - `parseStruct` collects `baseClasses` (from `C_X_X_BASE_SPECIFIER` cursors,
+    `:308-317`) and `virtualMethods` (any virtual method or destructor
+    declared/overridden *directly on this class*, `:320-336`) as two separate
+    lists, with **no relationship tracked between them**.
+  - At `:351-369`, the final field list is built as: `if virtualMethods is
+    non-empty, add a brand-new synthetic "vptr" field` (`:354-359`) — **always**,
+    regardless of whether any of `baseClasses` is itself polymorphic — followed
+    by the embedded base-class fields (`:362-365`, which for an already-
+    polymorphic base already contains that base's own vptr as its first
+    member).
+  - **Consequence:** any derived class that overrides even one virtual method
+    from a polymorphic base gets *two* vptr fields where MSVC has one — the
+    spurious new one from `:354-359`, plus the correct inherited one already
+    embedded inside the base-class field. This shifts every subsequent field
+    by 8 bytes and produces a wrong total size. This isn't an edge case: it
+    fires on essentially every override in an inheritance chain, including our
+    exact target (`TESObjectREFR` overrides base virtuals from `TESForm`).
+  - **Fix (not yet implemented/tested — no JDK 21+/Ghidra 12 available in this
+    environment yet):** before adding the synthetic vptr field at `:354`, check
+    whether the primary base (`baseClasses.get(0)`, if present) is itself
+    polymorphic — i.e., whether its already-parsed `ParsedStructure` starts
+    with a `vptr` field, or (simpler, cursor-level check) whether
+    `structCursor`'s primary base `Cursor` has any virtual methods anywhere in
+    its own ancestry via libclang. If the primary base is polymorphic, skip
+    adding a new vptr — the overridden methods extend the inherited vtable at
+    its existing slot, they don't create a new one. Only emit a new vptr when
+    either there are no bases, or the (primary) base is non-polymorphic. This
+    is a real code change to `SourceParser.java`, to be written and tested
+    once the build environment exists — tracked as the first concrete patch
+    for `type-importer/patches/` rather than editing the vendored submodule
+    directly (per repo convention: don't dirty submodule state).
 - CommonLibSSE-NG's CMake build macros for selecting the AE 1.6.1170 target
   specifically (vs. some other AE point release) — not yet identified. Needed
   before compiling anything for real, since headers are multi-runtime by
