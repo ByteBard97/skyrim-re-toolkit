@@ -17820,9 +17820,9 @@
     "status": "OK"
   },
   "hkpConstraintInstance": {
-    "actual": 96,
+    "actual": 112,
     "expected": 112,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpConstraintListener": {
     "actual": 1,

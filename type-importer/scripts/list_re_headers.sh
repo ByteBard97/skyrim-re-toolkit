@@ -22,7 +22,11 @@ EXCLUDE=(
 )
 
 cd "$INCLUDE_DIR"
-find RE -name '*.h' | sort | while read -r h; do
+# LC_ALL=C: bytewise sort order, identical on every machine/locale -- the
+# en_US.UTF-8 vs C difference between a desktop and a CI runner reordered
+# the umbrella TU and flipped order-sensitive results (5-class lighting
+# cluster, first two hosted CI runs).
+find RE -name '*.h' | LC_ALL=C sort | while read -r h; do
     skip=0
     for ex in "${EXCLUDE[@]}"; do
         [ "$h" = "$ex" ] && skip=1 && break

@@ -1,0 +1,46 @@
+diff -ruN -x '*.orig' -x '*.rej' a/src/main/java/playday3008/gcpp/processing/SourceParser.java b/src/main/java/playday3008/gcpp/processing/SourceParser.java
+--- a/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 19:38:33.675436558 -0400
++++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 19:38:33.679419928 -0400
+@@ -443,6 +443,27 @@
+                             if (declKind == CursorKind.STRUCT_DECL || declKind == CursorKind.CLASS_DECL) {
+                                 anonType = parseFieldsFromType(fieldType, category);
+                                 inlineEmbed = true;
++                            } else {
++                                // clang_getTypeDeclaration does not return a
++                                // record cursor for this specialization. Seen
++                                // ONLY on GitHub's hosted runner (never
++                                // reproducible locally -- not header order,
++                                // not locale; suspected glibc/allocator-
++                                // sensitive iteration inside clang) for
++                                // member templates of nested classes, e.g.
++                                // BGSDirectionalAmbientLightingColors::
++                                // Directional::MaxMin<Color>. Falling through
++                                // to a named dependency can never resolve and
++                                // zeroes out the whole enclosing struct;
++                                // parseFieldsFromType needs only the TYPE
++                                // (clang_Type_visitFields + sizeOf opaque
++                                // fallback), so attempt it anyway and embed
++                                // if it recovered anything real.
++                                ParsedStructure attempt = parseFieldsFromType(fieldType, category);
++                                if (!attempt.getFields().isEmpty()) {
++                                    anonType = attempt;
++                                    inlineEmbed = true;
++                                }
+                             }
+                         }
+                     }
+@@ -618,6 +639,14 @@
+                         if (declKind == CursorKind.STRUCT_DECL || declKind == CursorKind.CLASS_DECL) {
+                             anonType = parseFieldsFromType(fieldType, category);
+                             inlineEmbed = true;
++                        } else {
++                            // Same runner-only divergence as parseStruct's
++                            // branch above -- see that comment.
++                            ParsedStructure attempt = parseFieldsFromType(fieldType, category);
++                            if (!attempt.getFields().isEmpty()) {
++                                anonType = attempt;
++                                inlineEmbed = true;
++                            }
+                         }
+                     }
+                 }
