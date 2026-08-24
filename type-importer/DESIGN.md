@@ -342,10 +342,38 @@ STL surface actually used in class layouts (`<cstdint>`, `<utility>` for
     the vendored submodule's working tree, then reverted to keep the
     submodule pristine, per this repo's own convention of not committing
     into `vendor/`.
-- CommonLibSSE-NG's CMake build macros for selecting the AE 1.6.1170 target
-  specifically (vs. some other AE point release) — not yet identified. Needed
-  before compiling anything for real, since headers are multi-runtime by
-  default and dispatch on macros like `ENABLE_SKYRIM_AE`.
+- ~~CommonLibSSE-NG's CMake build macros for selecting the AE 1.6.1170 target~~
+  **Resolved (2026-08-24).** `CMakeLists.txt:4-6` defines three independent
+  options, **all `ON` by default**: `ENABLE_SKYRIM_SE`, `ENABLE_SKYRIM_AE`,
+  `ENABLE_SKYRIM_VR`. The project's own default CMake configure is therefore
+  a **multi-runtime build** — exactly what the wiki warns against for a
+  reversing target. A true single-runtime AE-only configure needs all three
+  passed explicitly:
+  `cmake -DENABLE_SKYRIM_SE=OFF -DENABLE_SKYRIM_AE=ON -DENABLE_SKYRIM_VR=OFF ...`
+  (our clang-cl layout tests already did the raw-preprocessor equivalent
+  correctly, by defining only `ENABLE_SKYRIM_AE=1` and nothing else — worth
+  calling out explicitly since it wasn't a deliberate choice at the time,
+  just happened to be right).
+
+  **Bigger finding: "AE" is a family, not one point release.** There is no
+  separate compile-time macro for 1.6.1170 vs. 1.6.640 vs. other AE point
+  releases. Within `ENABLE_SKYRIM_AE`, CommonLibSSE-NG targets the *whole*
+  AE family with one compiled binary, and handles the handful of fields
+  that moved between AE point releases (like `TESObjectREFR`'s runtime-data
+  tail) via runtime dispatch — `REL::RelocateMemberIfNewer<T>(SKSE::
+  RUNTIME_SSE_1_6_629, this, seOffset, aeOffset)` picks an offset by
+  comparing the *actually running game's detected version* against a
+  threshold (here, 1.6.629) at runtime, not by a compile-time macro per
+  point release. So "target AE 1.6.1170" isn't really a CommonLibSSE-NG
+  compile-time decision — it's a decision about **which Address Library
+  version and which real game binary you validate the generated `.gdt`
+  against**, not which macros you pass. This changes how to think about
+  "one `.gdt` per runtime": the `.gdt` for "AE" is genuinely valid across
+  the AE point-release range CommonLibSSE-NG supports, *provided* the
+  version-gated fields (few, but real — flagged wherever
+  `RelocateMember[IfNewer]` appears) are handled correctly, which requires
+  knowing which real address to bake in for the specific binary being
+  analyzed.
 - No CI trigger mechanism defined yet — out of scope until `symbol-archive`
   exists.
 - Exact force-instantiation script implementation (recursive template-argument
