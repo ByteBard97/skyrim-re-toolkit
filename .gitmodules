@@ -1,0 +1,6 @@
+[submodule "type-importer/vendor/CommonLibSSE-NG"]
+	path = type-importer/vendor/CommonLibSSE-NG
+	url = https://github.com/CharmedBaryon/CommonLibSSE-NG.git
+[submodule "type-importer/vendor/GhidraClangPoweredParse"]
+	path = type-importer/vendor/GhidraClangPoweredParse
+	url = https://github.com/playday3008/GhidraClangPoweredParse.git
