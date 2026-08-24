@@ -5,8 +5,10 @@ import ghidra.framework.ApplicationConfiguration;
 import ghidra.GhidraApplicationLayout;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -48,12 +50,20 @@ import java.util.List;
  *     --output &lt;path&gt;/CommonLibSSE_AE.gdt \
  *     --runtime ENABLE_SKYRIM_AE=1 \
  *     RE/T/TESForm.h RE/T/TESObject.h RE/T/TESBoundObject.h RE/T/TESObjectREFR.h
+ *
+ * Coverage-sweep mode (see ../COVERAGE_SWEEP_PLAN.md): pass --report-csv
+ * &lt;path&gt; to additionally write a two-column {@code ClassName,SizeInBytes}
+ * CSV of every resolved data type, plus a companion
+ * {@code &lt;path&gt;.unresolved.txt} listing every dependency name the
+ * pipeline could not resolve at all. This is separate from (and does not
+ * replace) the .gdt file, which is still always written -- --report-csv
+ * only adds the plain-text summary scripts/coverage_report.py consumes.
  */
 public class GenerateGdt {
 
     public static void main(String[] args) throws Exception {
         String commonlib = null, stubs = null, winsdkCrt = null, winsdkUcrt = null;
-        String output = null, runtimeDefine = "ENABLE_SKYRIM_AE=1";
+        String output = null, runtimeDefine = "ENABLE_SKYRIM_AE=1", reportCsv = null;
         List<String> headers = new ArrayList<>();
 
         for (int i = 0; i < args.length; i++) {
@@ -64,6 +74,7 @@ public class GenerateGdt {
                 case "--winsdk-ucrt" -> winsdkUcrt = args[++i];
                 case "--output" -> output = args[++i];
                 case "--runtime" -> runtimeDefine = args[++i];
+                case "--report-csv" -> reportCsv = args[++i];
                 default -> headers.add(args[i]);
             }
         }
@@ -73,7 +84,7 @@ public class GenerateGdt {
             System.err.println(
                 "Usage: GenerateGdt --commonlib <dir> --stubs <dir> --winsdk-crt <dir> "
                 + "--winsdk-ucrt <dir> --output <file.gdt> [--runtime ENABLE_SKYRIM_AE=1] "
-                + "<header1.h> [header2.h ...]");
+                + "[--report-csv <path>] <header1.h> [header2.h ...]");
             System.exit(1);
         }
 
@@ -151,5 +162,43 @@ public class GenerateGdt {
 
         System.out.println("Committed " + added + " types (" + failed + " failed) to "
             + gdtFile.getAbsolutePath() + " (" + gdtFile.length() + " bytes)");
+
+        if (reportCsv != null) {
+            writeCoverageReport(reportCsv, dataTypes, result.getUnresolvedDependencies());
+        }
+    }
+
+    /**
+     * Writes {@code path} as a two-column {@code ClassName,SizeInBytes} CSV
+     * of every resolved data type (sorted by name), and a companion
+     * {@code path + ".unresolved.txt"} listing every dependency name the
+     * pipeline never resolved at all. Consumed by
+     * scripts/coverage_report.py -- see COVERAGE_SWEEP_PLAN.md Step 4.
+     */
+    private static void writeCoverageReport(String path, List<DataType> dataTypes,
+            java.util.Set<String> unresolved) throws Exception {
+        // Only structs/unions have a meaningful "size" to check against a
+        // static_assert(sizeof(...)) -- the resolved set also contains
+        // function-signature DataTypes (FunctionDefinition), which report
+        // getLength() == -1 and would otherwise flood the EMPTY bucket in
+        // coverage_report.py with irrelevant "actual=0x-1" noise.
+        List<DataType> sorted = new ArrayList<>();
+        for (DataType t : dataTypes) {
+            if (t instanceof Composite) {
+                sorted.add(t);
+            }
+        }
+        sorted.sort(Comparator.comparing(DataType::getName));
+        try (PrintStream out = new PrintStream(new File(path))) {
+            for (DataType t : sorted) {
+                out.println(t.getName() + "," + t.getLength());
+            }
+        }
+        File unresolvedFile = new File(path + ".unresolved.txt");
+        try (PrintStream out = new PrintStream(unresolvedFile)) {
+            unresolved.stream().sorted().forEach(out::println);
+        }
+        System.out.println("Wrote coverage report (" + sorted.size() + " types) to " + path
+            + " and " + unresolved.size() + " unresolved name(s) to " + unresolvedFile);
     }
 }

@@ -18,8 +18,13 @@
 #   - Windows SDK + MSVC CRT/STL headers via `xwin` (see DESIGN.md)
 #
 # Usage:
-#   JAVA_HOME=... GHIDRA_INSTALL_DIR=... LD_LIBRARY_PATH=... \
+#   JAVA_HOME=... GHIDRA_INSTALL_DIR=... LD_LIBRARY_PATH=... [REPORT_CSV=...] \
 #     ./generate_gdt.sh <winsdk-splat-dir> <output.gdt> [header1.h header2.h ...]
+#
+# Set REPORT_CSV to also emit a coverage-sweep report (see
+# ../COVERAGE_SWEEP_PLAN.md and scripts/coverage_report.py) -- writes
+# $REPORT_CSV (ClassName,SizeInBytes for every resolved type) and
+# $REPORT_CSV.unresolved.txt (names that never resolved at all).
 #
 # Example:
 #   JAVA_HOME=~/.local/tools/jdk-21.0.12.1+1 \
@@ -80,6 +85,11 @@ echo "Compiling GenerateGdt.java..." >&2
 javac -cp "$CP" -d "$BUILD_DIR" --release 21 --enable-preview \
     "$TYPE_IMPORTER_DIR/tools/GenerateGdt.java" 2>&1 | grep -v "^Note:\|^warning:" || true
 
+REPORT_ARGS=()
+if [ -n "${REPORT_CSV:-}" ]; then
+    REPORT_ARGS=(--report-csv "$REPORT_CSV")
+fi
+
 echo "Running GenerateGdt (interpreter mode -- Panama FFI upcalls crash under JIT, a documented GhidraClangPoweredParse limitation)..." >&2
 cd "$GHIDRA_INSTALL_DIR"
 java -Xint --enable-preview --enable-native-access=ALL-UNNAMED \
@@ -90,4 +100,5 @@ java -Xint --enable-preview --enable-native-access=ALL-UNNAMED \
     --winsdk-ucrt "$WINSDK_DIR/sdk/include/ucrt" \
     --output "$OUTPUT_GDT" \
     --runtime ENABLE_SKYRIM_AE=1 \
+    "${REPORT_ARGS[@]}" \
     "${HEADERS[@]}"

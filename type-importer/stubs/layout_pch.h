@@ -180,6 +180,12 @@ namespace stl
             return (_impl & (static_cast<underlying_type>(a_args) | ...)) == (static_cast<underlying_type>(a_args) | ...);
         }
 
+        template <class... Args>
+        [[nodiscard]] constexpr bool none(Args... a_args) const noexcept
+        {
+            return !any(a_args...);
+        }
+
     private:
         underlying_type _impl{ 0 };
     };
@@ -212,6 +218,21 @@ namespace stl
 // SKYRIM_REL_VR_VIRTUAL and friends based on ENABLE_SKYRIM_AE/SE/VR.
 // Real header, not a stub: safe to use as-is.
 #include "REL/Common.h"
+
+// Real header, self-contained (only std::size_t/std::ptrdiff_t) — defines
+// UPInt/SPInt. Several RE/G/*.h Scaleform headers use these without
+// including this header themselves (relying on a real build's fixed
+// umbrella include order to have already pulled it in); the coverage
+// sweep surfaced this as "unknown type name 'UPInt'" across RE/G/*.
+#include "RE/S/SFTypes.h"
+
+// Real header, self-contained (only std::uint32_t/std::uint64_t) — defines
+// FormID/RefHandle/VMHandle/VMStackID/VMTypeID. Same missing-include
+// pattern as SFTypes.h above: RE/P/PackUnpack.h and RE/V/VirtualMachine.h
+// use VMTypeID without including this header themselves. Given how
+// fundamental these aliases are (FormID especially), force-included here
+// rather than waiting to hit it again per-header during the full sweep.
+#include "RE/B/BSCoreTypes.h"
 
 // --- REL::Relocation<T> / RELOCATION_ID stand-in -------------------------
 // NOT the real header: REL/Relocation.h transitively pulls in REL/Module.h
