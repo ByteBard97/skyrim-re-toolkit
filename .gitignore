@@ -1,0 +1,60 @@
+# --- Python (type-importer, CI scripts) ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- C++ / CMake (runtime-harness, SKSE plugin) ---
+build/
+out/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+*.obj
+*.o
+*.exe
+*.dll
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.pch
+
+# --- Visual Studio / MSVC ---
+.vs/
+*.sln.docstates
+*.user
+*.suo
+
+# --- Ghidra ---
+*.rep/
+*.gpr
+ghidra_scripts/__pycache__/
+
+# --- Generated symbol/type artifacts (published via Releases, not committed) ---
+symbol-archive/gdt/*.gdt
+symbol-archive/til/*.til
+*.gdt
+*.til
+
+# --- LLVM / libclang scratch ---
+*.ast
+compile_commands.json
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# --- Env / secrets ---
+.env
+.env.*
+
+# --- Logs ---
+*.log
