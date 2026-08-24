@@ -1,0 +1,52 @@
+--- a/src/main/java/playday3008/gcpp/clang/LibClang.java	2026-08-24 04:00:19.875473122 -0400
++++ b/src/main/java/playday3008/gcpp/clang/LibClang.java	2026-08-24 04:03:55.166814083 -0400
+@@ -381,6 +381,16 @@
+     private static final MethodHandle CLANG_GET_TYPE_DECLARATION = downcall("clang_getTypeDeclaration",
+         FunctionDescriptor.of(CX_CURSOR, CX_TYPE));
+ 
++    // Given a declaration cursor, returns the cursor that actually defines it (or a
++    // null cursor if there's no definition in this translation unit). Added while
++    // investigating why Type.declaration() finds zero fields for class template
++    // specializations -- ruled out empirically (see
++    // patches/0004-add-cursor-definition-binding.md): for this case it returns the
++    // identical cursor clang_getTypeDeclaration already gave, so it isn't the fix,
++    // but it's a real, previously-missing libclang binding worth keeping.
++    private static final MethodHandle CLANG_GET_CURSOR_DEFINITION = downcall("clang_getCursorDefinition",
++        FunctionDescriptor.of(CX_CURSOR, CX_CURSOR));
++
+     private static final MethodHandle CLANG_TYPE_GET_SIZE_OF = downcall("clang_Type_getSizeOf",
+         FunctionDescriptor.of(ValueLayout.JAVA_LONG, CX_TYPE));
+ 
+@@ -755,6 +765,14 @@
+         }
+     }
+ 
++    public static MemorySegment getCursorDefinition(SegmentAllocator allocator, MemorySegment cursor) {
++        try {
++            return (MemorySegment) CLANG_GET_CURSOR_DEFINITION.invokeExact(allocator, cursor);
++        } catch (Throwable t) {
++            throw new RuntimeException("clang_getCursorDefinition failed", t);
++        }
++    }
++
+     public static long typeGetSizeOf(MemorySegment type) {
+         try {
+             return (long) CLANG_TYPE_GET_SIZE_OF.invokeExact(type);
+--- a/src/main/java/playday3008/gcpp/clang/Cursor.java	2026-08-24 04:00:19.876415375 -0400
++++ b/src/main/java/playday3008/gcpp/clang/Cursor.java	2026-08-24 04:04:01.870034135 -0400
+@@ -207,6 +207,15 @@
+         return LibClang.isVirtualBase(segment) != 0;
+     }
+ 
++    /**
++     * Returns the cursor that actually defines this declaration, or a null cursor
++     * if this translation unit has no definition for it.
++     */
++    public Cursor definition() {
++        MemorySegment defSegment = LibClang.getCursorDefinition(arena, segment);
++        return new Cursor(defSegment, arena);
++    }
++
+     // ========================================================================
+     // Visitor pattern
+     // ========================================================================

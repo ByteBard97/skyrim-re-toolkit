@@ -115,14 +115,49 @@ specific specialization to materialize, or the forced instantiation and
 the field's own usage don't end up sharing the same canonical AST node in
 a way that helps.
 
-**Next step for whoever picks this up:** investigate whether
-`-fdelayed-template-parsing` is actually load-bearing for something else
-this tool needs (if not, just drop it for a quick test), and/or whether
-there's a libclang call that explicitly forces instantiation of a
-specific `Type` (something in the spirit of `clang_Type_getSizeOf`, which
-might have the side effect of triggering instantiation as part of
-computing the size — worth trying before assuming a bigger architectural
-change is needed).
+**Update, same session: all three parse-mode flags ruled out empirically,
+real cause narrowed further.** Tested each of the three candidates named
+above individually against the real `TESObjectREFR` header chain:
+
+- `-fno-delayed-template-parsing` appended to the clang args (a real,
+  recognized flag — verified it doesn't error) — **no change**, `TESForm`
+  still `size=0x1`.
+- Removed `.skipFunctionBodies()` from the `TranslationUnit.Builder` call
+  — **no change**.
+- Removed `.parseIncomplete()` too (both flags gone at once) — **no
+  change**. (Resolved-type count crept up slightly across these tests —
+  3744 → 3746 → 3751 — consistent with a few unrelated types elsewhere
+  benefiting, not with this specific problem being touched at all.)
+
+All three hypotheses from the original writeup are now ruled out, not just
+suspected. Reasoning about *why* points at a different, more specific gap:
+clang's normal semantic checking would treat a struct member whose type is
+genuinely incomplete as a hard compile error (you cannot have a plain
+by-value member of an incomplete class type — this isn't something
+`.parseIncomplete()`/`-fdelayed-template-parsing` can legally paper over,
+those are about tolerating *unrelated* incomplete types, not malformed
+member declarations). Since parsing `TESForm` produced **zero diagnostics**
+end to end, clang must have instantiated `stl::enumeration<InGameFormFlag,
+std::uint16_t>` for real, correctly, as an ordinary part of checking that
+field declaration. The specialization's body demonstrably exists,
+complete, somewhere in clang's AST for this translation unit.
+
+**So the most likely remaining gap is in the extension's `Cursor` wrapper
+itself, not in any compiler flag:** `Type.declaration()`
+(`clang_getTypeDeclaration`) may be returning a *declaration* cursor for
+the specialization rather than its *definition* cursor — libclang
+distinguishes these for exactly this kind of case, and only the
+definition cursor has real, visitable children. The fix would be calling
+`clang_getCursorDefinition()` on the result (given a declaration, returns
+the cursor that actually defines it, or a null cursor if none exists in
+this TU) before running `parseAnonymousStruct` on it. **This binding does
+not exist yet** in `playday3008.gcpp.clang.Cursor` — adding it means a new
+native Panama FFI declaration alongside the existing ones (see how
+`isVirtualMethod()`/`isPureVirtualMethod()` etc. are bound in `Cursor.java`
+for the pattern to follow), which is a native-binding-level change, not a
+plain Java logic edit. That's genuinely the next concrete step, and it's
+now scoped precisely enough that it should be a small, mechanical addition
+rather than more exploratory debugging.
 
 ## How this was verified
 

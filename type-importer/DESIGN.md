@@ -347,14 +347,22 @@ STL surface actually used in class layouts (`<cstdint>`, `<utility>` for
   This correctly reaches a real `CLASS_DECL` cursor for the specialization
   — but visiting ITS children still finds zero fields, for essentially
   every templated type checked (`stl::enumeration`, `vector`, `optional`,
-  `BSTArray`, etc.) — the template class body itself is apparently never
-  instantiated/parsed under this codebase's `-fdelayed-template-parsing` +
-  `parseIncomplete()`/`skipFunctionBodies()` combination unless something
-  else forces it. **Not solved — see patch 0003's writeup for the precise
-  next investigation step** (check whether `-fdelayed-template-parsing` is
-  actually needed for something else, and/or look for a libclang call that
-  forces `Type` instantiation as a side effect, e.g. around
-  `clang_Type_getSizeOf`).
+  `BSTArray`, etc.). **Four specific hypotheses for why, all individually
+  tested and ruled out** (see `patches/0003-inline-template-specialization-fields.md`
+  and `patches/0004-add-cursor-definition-binding.md` for the full
+  evidence): `-fdelayed-template-parsing` (negated it, no change),
+  `.skipFunctionBodies()` (removed it, no change), `.parseIncomplete()`
+  (removed it, no change), and the declaration-vs-definition cursor
+  distinction (added a `clang_getCursorDefinition` binding — patch 0004 —
+  and confirmed it returns the *identical* cursor `Type.declaration()`
+  already gave). **Still not solved** — the remaining gap is now known to
+  be something more specific to libclang's/Panama's handling of
+  `clang_visitChildren` on a template specialization's cursor, not a
+  parse-mode flag or a declaration/definition mixup. Patch 0004's writeup
+  has the concrete next investigation directions (a minimal C program
+  directly against libclang's C API, bypassing this project's Java/Panama
+  binding layer entirely, to isolate whether the gap is in libclang itself
+  or in how this binding layer calls it).
 - Third-party tool bugs found and fixed in `GhidraClangPoweredParse`
   tonight, beyond the redundant-vptr one below: **forward-declaration
   overwrite** — `TypePool.addParsedType` let a later, empty forward
