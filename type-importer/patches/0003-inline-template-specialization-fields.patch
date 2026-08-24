@@ -1,6 +1,6 @@
---- a/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 03:52:31.016733893 -0400
-+++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 03:52:54.460119464 -0400
-@@ -279,6 +279,7 @@
+--- a/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 04:20:41.310096506 -0400
++++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 04:22:46.783958234 -0400
+@@ -280,6 +280,7 @@
  
                      // For anonymous struct/union fields, recursively parse the inner type
                      ParsedType anonType = null;
@@ -8,70 +8,54 @@
                      if (isAnon) {
                          Type fieldType = cursor.type().unwrap();
                          TypeKind typeKind = fieldType.kind();
-@@ -291,6 +292,62 @@
+@@ -292,6 +293,46 @@
                                  anonType = parseAnonymousUnion(pool, anonDecl, category);
                              }
                          }
 +                    } else {
 +                        // Class template specializations (e.g. stl::enumeration<Flag, U>)
-+                        // are NEVER exposed by libclang as a visitable declaration cursor
-+                        // via clang_visitChildren -- confirmed with c-index-test on a
-+                        // minimal repro: the AST traversal only ever reaches the
-+                        // uninstantiated ClassTemplate plus a TemplateRef at the use
-+                        // site, never a STRUCT_DECL/CLASS_DECL for the specialization
-+                        // itself (that node exists internally, visible via -ast-dump,
-+                        // but is not a libclang cursor-tree child of anything). Any
-+                        // field of such a type can therefore never be resolved through
-+                        // top-down declaration traversal or force-instantiation tricks
-+                        // (tried and confirmed not to work -- see
-+                        // patches/0002-fix-forward-decl-overwrite.md's final section).
++                        // can never be resolved as a normal dependency: TypePool's
++                        // dependency check does a literal string lookup against the pool,
++                        // and no ParsedType is ever registered for a raw template
++                        // instantiation spelling. Inline the specialization's fields
++                        // directly instead, via the same embedding mechanism already used
++                        // for anonymous struct/union members (which conveniently bypasses
++                        // the string-keyed dependency system entirely --
++                        // ParsedStructure.getDependencies() filters out isAnonymous()
++                        // fields).
 +                        //
-+                        // Fix: resolve the field's own Type instead of relying on
-+                        // traversal -- Type.declaration() (clang_getTypeDeclaration)
-+                        // CAN reach the specialization even though clang_visitChildren
-+                        // never surfaces it as a namespace/class child -- and inline its
-+                        // fields directly via the same embedding mechanism already used
-+                        // for anonymous struct/union members, which conveniently already
-+                        // bypasses the string-keyed dependency-resolution system
-+                        // entirely (ParsedStructure.getDependencies() filters out
-+                        // isAnonymous() fields). This sidesteps the whole "would need a
-+                        // mangled synthetic name registered in the pool, matching
-+                        // whatever raw spelling every other reference to the same
-+                        // instantiation uses" problem -- each field just gets its own
-+                        // private inline copy of the specialization's layout, which is
-+                        // all a layout-only pass (this project's actual goal) needs.
-+                        //
-+                        // Note: template specializations report as TypeKind.UNEXPOSED,
-+                        // not RECORD, in libclang's C API (a known quirk -- confirmed
++                        // Note: template specialization field types report
++                        // TypeKind.UNEXPOSED, not RECORD, in libclang's C API (confirmed
 +                        // via debug tracing against real CommonLibSSE-NG headers).
 +                        //
-+                        // STILL INCOMPLETE as of 2026-08-24 -- see
-+                        // patches/0003-inline-template-specialization-fields.md: this
-+                        // correctly reaches a CLASS_DECL cursor for the specialization,
-+                        // but visiting its children finds zero fields in practice,
-+                        // because the template's class body is apparently never
-+                        // instantiated/parsed at all under this codebase's
-+                        // -fdelayed-template-parsing + parseIncomplete()/
-+                        // skipFunctionBodies() combination unless something else in the
-+                        // same translation unit forces that specific specialization's
-+                        // body to materialize (e.g. a real sizeof/member-access use).
-+                        // This patch is real, tested infrastructure and a necessary
-+                        // step, but by itself does not yet produce non-empty inlined
-+                        // fields for CommonLibSSE-NG's stl::enumeration<...> usage.
++                        // Getting the fields themselves requires Type.visitFields(), NOT
++                        // declaration().visitChildren() -- confirmed with a minimal
++                        // libclang C program bypassing this Java layer entirely that
++                        // clang_visitChildren finds ZERO children for an implicitly-
++                        // instantiated class template specialization's declaration
++                        // cursor, even though libclang confirms the type is fully
++                        // instantiated and complete (clang_isCursorDefinition true,
++                        // clang_Type_getSizeOf gives the correct size). This is a genuine
++                        // libclang-level quirk. clang_Type_visitFields (which walks
++                        // CXXRecordDecl::field_begin()/field_end() directly, rather than
++                        // the general decl-child iterator) finds them correctly. See
++                        // patches/0003-inline-template-specialization-fields.md for the
++                        // full investigation, including three other approaches that were
++                        // tried and ruled out first.
 +                        Type fieldType = cursor.type().unwrap();
 +                        if ((fieldType.kind() == TypeKind.RECORD || fieldType.kind() == TypeKind.UNEXPOSED)
 +                            && fieldType.spelling().contains("<")) {
 +                            Cursor declCursor = fieldType.declaration();
 +                            CursorKind declKind = declCursor.kind();
 +                            if (declKind == CursorKind.STRUCT_DECL || declKind == CursorKind.CLASS_DECL) {
-+                                anonType = parseAnonymousStruct(pool, declCursor, category);
++                                anonType = parseFieldsFromType(fieldType, category);
 +                                inlineEmbed = true;
 +                            }
 +                        }
                      }
  
                      fields.add(new ParsedStructure.FieldInfo(
-@@ -298,7 +355,7 @@
+@@ -299,7 +340,7 @@
                          cursor.type().spelling(),
                          isBitField,
                          bitWidth,
@@ -80,8 +64,48 @@
                          anonType
                      ));
                  }
+@@ -585,6 +626,39 @@
+      * Parse an anonymous struct declaration into a ParsedStructure without
+      * registering it in the TypePool (it will be embedded inline).
+      */
++    /**
++     * Parse the direct fields of a class template specialization Type into a
++     * ParsedStructure, for inline embedding as a field (see the FIELD_DECL case in
++     * {@link #parseStruct}).
++     * <p>
++     * Uses {@code type.visitFields()} (clang_Type_visitFields) rather than
++     * {@code type.declaration().visitChildren()} (clang_visitChildren) --
++     * confirmed with a minimal libclang C program (bypassing this Java layer
++     * entirely) that clang_visitChildren finds ZERO children for an
++     * implicitly-instantiated class template specialization's declaration
++     * cursor, even though libclang itself confirms the type is fully
++     * instantiated and complete (clang_isCursorDefinition returns true,
++     * clang_Type_getSizeOf returns the correct size). clang_Type_visitFields
++     * (which walks CXXRecordDecl::field_begin()/field_end() directly, rather
++     * than the general decl-child iterator clang_visitChildren uses) finds
++     * the fields correctly in the exact same case.
++     */
++    private ParsedStructure parseFieldsFromType(Type type, CategoryPath category) {
++        List<ParsedStructure.FieldInfo> fields = new ArrayList<>();
++
++        type.visitFields(fieldCursor -> {
++            boolean isBitField = fieldCursor.isBitField();
++            int bitWidth = isBitField ? fieldCursor.getBitFieldWidth() : 0;
++            fields.add(new ParsedStructure.FieldInfo(
++                fieldCursor.spelling(), fieldCursor.type().spelling(),
++                isBitField, bitWidth, false, null));
++            return Type.FieldVisitResult.CONTINUE;
++        });
++
++        String anonName = "anon_tmpl_" + Integer.toHexString(type.spelling().hashCode());
++        return new ParsedStructure(anonName, fields, false, 0, category);
++    }
++
+     private ParsedStructure parseAnonymousStruct(TypePool pool, Cursor structCursor, CategoryPath category) {
+         List<ParsedStructure.FieldInfo> fields = new ArrayList<>();
+         boolean[] packed = {false};
 --- a/src/main/java/playday3008/gcpp/processing/ParsedStructure.java	2026-08-24 03:46:23.433311178 -0400
-+++ b/src/main/java/playday3008/gcpp/processing/ParsedStructure.java	2026-08-24 03:53:01.997366993 -0400
++++ b/src/main/java/playday3008/gcpp/processing/ParsedStructure.java	2026-08-24 04:22:54.261203603 -0400
 @@ -56,7 +56,15 @@
              } else if (field.isAnonymous() && field.anonymousType() != null) {
                  DataType anonDt = field.anonymousType().createDataType(pool);

@@ -1,0 +1,210 @@
+--- a/src/main/java/playday3008/gcpp/clang/LibClang.java	2026-08-24 04:00:19.875473122 -0400
++++ b/src/main/java/playday3008/gcpp/clang/LibClang.java	2026-08-24 04:21:26.313317537 -0400
+@@ -71,6 +71,31 @@
+         ValueLayout.ADDRESS    // client_data
+     );
+ 
++    /**
++     * Upcall descriptor for CXFieldVisitor callback (used by
++     * clang_Type_visitFields). Distinct from CXCursorVisitor: takes a single
++     * cursor, not a cursor+parent pair, and returns CXVisitorResult rather
++     * than CXChildVisitResult.
++     * <p>
++     * Added specifically because clang_visitChildren does NOT enumerate the
++     * member fields of an implicitly-instantiated class template
++     * specialization (confirmed with a minimal libclang C program, bypassing
++     * this Java layer entirely -- clang_isCursorDefinition and
++     * clang_Type_getSizeOf both confirm the type IS fully instantiated and
++     * complete, yet clang_visitChildren finds zero children). This is a real
++     * libclang-level quirk, not a bug in this binding layer.
++     * clang_Type_visitFields (which walks CXXRecordDecl::field_begin()/
++     * field_end() directly rather than the general decl-child iterator) DOES
++     * find the fields in the same case -- confirmed with the same minimal
++     * repro, and this is the fix actually wired into SourceParser (see
++     * patches/0003-inline-template-specialization-fields.md).
++     */
++    static final FunctionDescriptor FIELD_VISITOR_DESC = FunctionDescriptor.of(
++        ValueLayout.JAVA_INT,  // return: CXVisitorResult (enum int)
++        CX_CURSOR,             // cursor (by value)
++        ValueLayout.ADDRESS    // client_data
++    );
++
+     // ========================================================================
+     // Library Loading
+     // ========================================================================
+@@ -381,6 +406,21 @@
+     private static final MethodHandle CLANG_GET_TYPE_DECLARATION = downcall("clang_getTypeDeclaration",
+         FunctionDescriptor.of(CX_CURSOR, CX_TYPE));
+ 
++    // Given a declaration cursor, returns the cursor that actually defines it (or a
++    // null cursor if there's no definition in this translation unit). Added while
++    // investigating why Type.declaration() finds zero fields for class template
++    // specializations -- ruled out empirically (see
++    // patches/0004-add-cursor-definition-binding.md): for this case it returns the
++    // identical cursor clang_getTypeDeclaration already gave, so it isn't the fix,
++    // but it's a real, previously-missing libclang binding worth keeping.
++    private static final MethodHandle CLANG_GET_CURSOR_DEFINITION = downcall("clang_getCursorDefinition",
++        FunctionDescriptor.of(CX_CURSOR, CX_CURSOR));
++
++    // The actual fix for the same investigation -- see FIELD_VISITOR_DESC's comment
++    // above and patches/0003-inline-template-specialization-fields.md.
++    private static final MethodHandle CLANG_TYPE_VISIT_FIELDS = downcall("clang_Type_visitFields",
++        FunctionDescriptor.of(ValueLayout.JAVA_INT, CX_TYPE, ValueLayout.ADDRESS, ValueLayout.ADDRESS));
++
+     private static final MethodHandle CLANG_TYPE_GET_SIZE_OF = downcall("clang_Type_getSizeOf",
+         FunctionDescriptor.of(ValueLayout.JAVA_LONG, CX_TYPE));
+ 
+@@ -755,6 +795,22 @@
+         }
+     }
+ 
++    public static MemorySegment getCursorDefinition(SegmentAllocator allocator, MemorySegment cursor) {
++        try {
++            return (MemorySegment) CLANG_GET_CURSOR_DEFINITION.invokeExact(allocator, cursor);
++        } catch (Throwable t) {
++            throw new RuntimeException("clang_getCursorDefinition failed", t);
++        }
++    }
++
++    public static int typeVisitFields(MemorySegment type, MemorySegment visitor, MemorySegment clientData) {
++        try {
++            return (int) CLANG_TYPE_VISIT_FIELDS.invokeExact(type, visitor, clientData);
++        } catch (Throwable t) {
++            throw new RuntimeException("clang_Type_visitFields failed", t);
++        }
++    }
++
+     public static long typeGetSizeOf(MemorySegment type) {
+         try {
+             return (long) CLANG_TYPE_GET_SIZE_OF.invokeExact(type);
+--- a/src/main/java/playday3008/gcpp/clang/Cursor.java	2026-08-24 04:00:19.876415375 -0400
++++ b/src/main/java/playday3008/gcpp/clang/Cursor.java	2026-08-24 04:21:33.967568717 -0400
+@@ -207,6 +207,15 @@
+         return LibClang.isVirtualBase(segment) != 0;
+     }
+ 
++    /**
++     * Returns the cursor that actually defines this declaration, or a null cursor
++     * if this translation unit has no definition for it.
++     */
++    public Cursor definition() {
++        MemorySegment defSegment = LibClang.getCursorDefinition(arena, segment);
++        return new Cursor(defSegment, arena);
++    }
++
+     // ========================================================================
+     // Visitor pattern
+     // ========================================================================
+--- a/src/main/java/playday3008/gcpp/clang/Type.java	2026-08-24 04:08:57.526844687 -0400
++++ b/src/main/java/playday3008/gcpp/clang/Type.java	2026-08-24 04:21:57.221331804 -0400
+@@ -3,6 +3,9 @@
+ import java.lang.foreign.Arena;
+ import java.lang.foreign.MemorySegment;
+ import java.lang.foreign.ValueLayout;
++import java.lang.invoke.MethodHandle;
++import java.lang.invoke.MethodHandles;
++import java.lang.invoke.MethodType;
+ 
+ /**
+  * Represents a type in the Clang AST.
+@@ -192,6 +195,100 @@
+         return LibClang.extractString(arena, cxStr);
+     }
+ 
++    /**
++     * Functional interface for visiting a type's direct fields.
++     */
++    @FunctionalInterface
++    public interface FieldVisitor {
++        FieldVisitResult visit(Cursor fieldCursor);
++    }
++
++    /** Result codes for field visitor callbacks (libclang's CXVisitorResult). */
++    public enum FieldVisitResult {
++        BREAK(0),
++        CONTINUE(1);
++
++        final int value;
++
++        FieldVisitResult(int v) {
++            this.value = v;
++        }
++    }
++
++    private static final ThreadLocal<FieldVisitor> CURRENT_FIELD_VISITOR = new ThreadLocal<>();
++    private static final ThreadLocal<Arena> CURRENT_FIELD_ARENA = new ThreadLocal<>();
++
++    /**
++     * Visit the direct fields of this type, invoking the visitor for each one.
++     * <p>
++     * Uses clang_Type_visitFields rather than {@code declaration().visitChildren(...)}
++     * because clang_visitChildren does NOT enumerate the member fields of an
++     * implicitly-instantiated class template specialization -- confirmed with a
++     * minimal libclang C program bypassing this Java layer entirely.
++     * clang_isCursorDefinition and clang_Type_getSizeOf both confirm such a type IS
++     * fully instantiated and complete; clang_visitChildren on its declaration cursor
++     * still finds zero children. clang_Type_visitFields (which walks
++     * CXXRecordDecl::field_begin()/field_end() directly) finds them correctly in the
++     * exact same case.
++     */
++    public void visitFields(FieldVisitor visitor) {
++        try (Arena upcallArena = Arena.ofConfined()) {
++            MethodHandle callback;
++            try {
++                callback = MethodHandles.lookup().findStatic(
++                    Type.class,
++                    "visitFieldsCallback",
++                    MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class)
++                );
++            } catch (NoSuchMethodException | IllegalAccessException e) {
++                throw new RuntimeException("Failed to find visitFieldsCallback", e);
++            }
++
++            MemorySegment stub = LibClang.linker().upcallStub(
++                callback,
++                LibClang.FIELD_VISITOR_DESC,
++                upcallArena
++            );
++
++            FieldVisitor previousVisitor = CURRENT_FIELD_VISITOR.get();
++            Arena previousArena = CURRENT_FIELD_ARENA.get();
++            CURRENT_FIELD_VISITOR.set(visitor);
++            CURRENT_FIELD_ARENA.set(this.arena);
++            try {
++                LibClang.typeVisitFields(this.segment, stub, MemorySegment.NULL);
++            } finally {
++                if (previousVisitor != null) {
++                    CURRENT_FIELD_VISITOR.set(previousVisitor);
++                } else {
++                    CURRENT_FIELD_VISITOR.remove();
++                }
++                if (previousArena != null) {
++                    CURRENT_FIELD_ARENA.set(previousArena);
++                } else {
++                    CURRENT_FIELD_ARENA.remove();
++                }
++            }
++        }
++    }
++
++    @SuppressWarnings("unused") // Invoked via MethodHandles.lookup().findStatic() in visitFields()
++    private static int visitFieldsCallback(MemorySegment cursorSeg, MemorySegment clientData) {
++        try {
++            Arena arena = CURRENT_FIELD_ARENA.get();
++            FieldVisitor visitor = CURRENT_FIELD_VISITOR.get();
++
++            MemorySegment cursorCopy = arena.allocate(LibClang.CX_CURSOR);
++            cursorCopy.copyFrom(cursorSeg.reinterpret(LibClang.CX_CURSOR.byteSize()));
++
++            Cursor cursor = new Cursor(cursorCopy, arena);
++            return visitor.visit(cursor).value;
++        } catch (Throwable t) {
++            // MUST catch everything -- uncaught exceptions in upcalls terminate the JVM
++            t.printStackTrace();
++            return FieldVisitResult.BREAK.value;
++        }
++    }
++
+     @Override
+     public String toString() {
+         return "Type{kind=" + kind() + ", spelling='" + spelling() + "'}";

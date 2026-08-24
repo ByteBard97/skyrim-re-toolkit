@@ -311,58 +311,58 @@ STL surface actually used in class layouts (`<cstdint>`, `<utility>` for
 - **MAJOR MILESTONE (2026-08-24): produced a real `.gdt` file from actual
   CommonLibSSE-NG headers using the actual (patched) `GhidraClangPoweredParse`
   extension** — not just a clang-cl layout dump. Installed JDK 21 + Ghidra
-  12.1.3 (both user-local), applied both patches in `patches/`, and ran
+  12.1.3 (both user-local), applied the patches in `patches/`, and ran
   `SourceParser.parseFiles` directly (via a standalone harness, same
   technique as the patch verification tests) against `TESForm.h`,
   `TESObject.h`, `TESBoundObject.h`, `TESObjectREFR.h`, force-including
-  `stubs/layout_pch.h`. Result: **zero clang diagnostics**, 3731 real data
+  `stubs/layout_pch.h`. Result: **zero clang diagnostics**, ~3746 real data
   types resolved and committed to an actual `.gdt` file via
   `FileDataTypeManager.createFileArchive` (the same API path the real
-  Ghidra UI plugin uses). One important caveat found in the process — see
-  `patches/0002-fix-forward-decl-overwrite.md`'s "What this patch does NOT
-  fix" section: `TESForm` itself still comes out as an empty placeholder in
-  this particular run, because its `stl::enumeration<...>` fields are
-  uninstantiated template spellings this tool can't create a `DataType`
-  for without the force-instantiation preprocessing step
-  (`scripts/generate_forced_instantiations.py`) actually being wired into
-  the real parse call — confirmed via debug tracing, not guessed.
-  **Root cause now precisely confirmed** via `c-index-test` (libclang's own
-  cursor-inspection tool): a class template specialization is *never*
-  exposed as a visitable declaration cursor by `clang_visitChildren` —
-  traversal only ever reaches the uninstantiated primary template plus a
-  `TemplateRef` at the use site. This is an architectural fact about
-  libclang, not a flag or timing issue — confirmed by inspecting both
-  Clang's internal AST (`-ast-dump`, which DOES show a
-  `ClassTemplateSpecializationDecl`) and libclang's actual cursor tree
-  (`c-index-test`, which does NOT expose it anywhere). No amount of
-  source-level force-instantiation trickery can fix this by itself — the
-  `using` alias + `sizeof` attempt above was a source-level trick and was
-  correctly ruled out.
-  **Partial fix applied and verified**
-  (`patches/0003-inline-template-specialization-fields.{patch,md}`):
-  resolve the field's `Type.declaration()` directly (`clang_getTypeDeclaration`,
-  a different API that CAN reach the specialization) instead of relying on
-  traversal, and inline it via the same anonymous-struct-embedding
-  mechanism (which already bypasses the string-keyed dependency system).
-  This correctly reaches a real `CLASS_DECL` cursor for the specialization
-  — but visiting ITS children still finds zero fields, for essentially
-  every templated type checked (`stl::enumeration`, `vector`, `optional`,
-  `BSTArray`, etc.). **Four specific hypotheses for why, all individually
-  tested and ruled out** (see `patches/0003-inline-template-specialization-fields.md`
-  and `patches/0004-add-cursor-definition-binding.md` for the full
-  evidence): `-fdelayed-template-parsing` (negated it, no change),
-  `.skipFunctionBodies()` (removed it, no change), `.parseIncomplete()`
-  (removed it, no change), and the declaration-vs-definition cursor
-  distinction (added a `clang_getCursorDefinition` binding — patch 0004 —
-  and confirmed it returns the *identical* cursor `Type.declaration()`
-  already gave). **Still not solved** — the remaining gap is now known to
-  be something more specific to libclang's/Panama's handling of
-  `clang_visitChildren` on a template specialization's cursor, not a
-  parse-mode flag or a declaration/definition mixup. Patch 0004's writeup
-  has the concrete next investigation directions (a minimal C program
-  directly against libclang's C API, bypassing this project's Java/Panama
-  binding layer entirely, to isolate whether the gap is in libclang itself
-  or in how this binding layer calls it).
+  Ghidra UI plugin uses).
+- ~~Class template specialization fields (e.g. `stl::enumeration<...>`)
+  can never resolve~~ **SOLVED (2026-08-24).** Root-caused precisely with
+  two independent tools outside this Java layer: `c-index-test` (libclang's
+  own cursor-inspection CLI) showed a template specialization is never
+  exposed as a visitable declaration cursor via `clang_visitChildren`
+  — only the uninstantiated primary template plus a `TemplateRef` at the
+  use site — even though Clang's internal AST (`-ast-dump`) shows the real
+  `ClassTemplateSpecializationDecl` node exists. A minimal, from-scratch
+  libclang C program confirmed this further against the real
+  `TESForm::inGameFormFlags` field: `clang_getTypeDeclaration` resolves a
+  `CLASS_DECL` cursor, `clang_isCursorDefinition` on it returns true,
+  `clang_Type_getSizeOf` gives the correct size (2 bytes) — the type is
+  genuinely, fully instantiated — yet `clang_visitChildren` on that same
+  cursor still finds zero children. **The fix:** `clang_Type_visitFields`
+  (a different libclang API that walks `CXXRecordDecl::field_begin()`/
+  `field_end()` directly) finds the field correctly in the exact same
+  case. Added as a new `Type.visitFields()` binding
+  (`patches/0004-add-libclang-introspection-bindings.patch`) and wired
+  into `SourceParser`'s field-handling logic
+  (`patches/0003-inline-template-specialization-fields.patch`, superseding
+  an earlier version of that patch which used the broken
+  `declaration().visitChildren()` approach and didn't work). Verified: a
+  debug trace across the real header chain shows `parseFieldsFromType`
+  correctly resolving real fields for all 9 distinct `stl::enumeration<...>`
+  instantiations encountered.
+
+  Getting to this took five ruled-out hypotheses first, each tested
+  individually against the real headers (not guessed) — source-level
+  force-instantiation, `-fdelayed-template-parsing`, `.skipFunctionBodies()`,
+  `.parseIncomplete()`, and the declaration-vs-definition cursor
+  distinction. See `patches/0003-inline-template-specialization-fields.md`'s
+  "Investigation history" for the full list and the lesson learned: when a
+  Java/Panama binding produces a surprising result, drop to a minimal C
+  program against the same C API before assuming the binding layer is at
+  fault.
+
+  **What this does NOT fix:** `TESForm` as a whole still doesn't fully
+  resolve in the real header test, but for a completely separate reason —
+  `FormID` (`using FormID = std::uint32_t;`) appears stuck as an
+  unresolved dependency, suggesting a distinct bug in how namespace-
+  qualified builtin type spellings resolve. Not investigated this session
+  — flagged in `patches/0003-inline-template-specialization-fields.md`'s
+  "What this does NOT fix" section as a separate, freshly-discovered
+  thread for a future session.
 - Third-party tool bugs found and fixed in `GhidraClangPoweredParse`
   tonight, beyond the redundant-vptr one below: **forward-declaration
   overwrite** — `TypePool.addParsedType` let a later, empty forward
