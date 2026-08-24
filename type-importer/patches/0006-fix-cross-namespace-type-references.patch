@@ -1,0 +1,72 @@
+--- a/src/main/java/playday3008/gcpp/processing/TypePool.java
++++ b/src/main/java/playday3008/gcpp/processing/TypePool.java
+@@ -248,7 +248,30 @@
+         return null;
+     }
+ 
++    // C++ keyword primitive types that are never independently declared as a
++    // typedef anywhere in an AST (unlike std::uint32_t/std::size_t, which
++    // bootstrap themselves the first time <cstdint>'s own `using uint32_t =
++    // ...` gets parsed and registered in the pool -- these are raw language
++    // keywords with nothing to parse a definition FROM). Confirmed via a
++    // standalone test that DataTypeParser.parse("bool") returns null even on
++    // a completely fresh StandAloneDataTypeManager: this is not an ordering
++    // issue that more resolution passes would fix, it is a permanent,
++    // deterministic gap. "bool" alone appears ~3500 times across RE/ headers
++    // (vs. a combined ~12 files for wchar_t/char16_t/char32_t/char8_t) --
++    // by far the dominant cause of the EMPTY-class bucket investigated in
++    // patches/0006-fix-cross-namespace-type-references.md (e.g.
++    // RE::AbstractHeap has two bare `bool` fields; every class anywhere with
++    // an unqualified bool member was permanently blocked before this fix).
++    private static final Map<String, DataType> KEYWORD_PRIMITIVES = Map.of(
++        "bool", BooleanDataType.dataType,
++        "wchar_t", WideCharDataType.dataType
++    );
++
+     private DataType resolveType(String name) {
++        DataType keyword = KEYWORD_PRIMITIVES.get(name);
++        if (keyword != null)
++            return keyword;
++
+         // Check our internal StandAloneDataTypeManager (built-in + already resolved types)
+         try {
+             DataType dt = typeParser.parse(name);
+@@ -321,6 +344,38 @@
+             changed = true;
+         }
+ 
++        // Strip a leading namespace-qualifier path down to the bare identifier,
++        // as a final fallback (e.g. "REX::W32::CRITICAL_SECTION" ->
++        // "CRITICAL_SECTION", "RE::ActorValue" -> "ActorValue"). TypePool
++        // registers every struct/union/enum/typedef under its BARE
++        // (non-namespace-qualified) name -- see SourceParser.parseStruct's use
++        // of structCursor.spelling(), which never includes namespace
++        // qualification (namespaces only ever affect CategoryPath, not the
++        // registered name). But clang's own Type.spelling() DOES include full
++        // namespace qualification whenever a field/base type is referenced
++        // from a DIFFERENT namespace than where it's declared -- extremely
++        // common in this codebase, e.g. any RE:: class using a REX::W32::*
++        // Win32 stand-in type. Confirmed via a debug trace: RE::
++        // BSCriticalSection's own member is declared with type spelling
++        // "REX::W32::CRITICAL_SECTION", which never matched the pool's
++        // registered "CRITICAL_SECTION" key, permanently blocking
++        // BSCriticalSection's dependency check -- and cascading into every
++        // class that (transitively) depends on it, e.g. RE::AbstractHeap,
++        // RE::AIProcess. Deliberately does NOT apply to template
++        // instantiations (names containing "<"): those go through the
++        // separate inline-embedding mechanism in SourceParser (patches
++        // 0003/0005), and a naive last-"::"-segment split would incorrectly
++        // cut through a namespace-qualified template argument (e.g.
++        // "RE::NiPointer<Actor>" must not become "Actor>"). See
++        // patches/0006-fix-cross-namespace-type-references.md.
++        if (!s.contains("<")) {
++            int lastSep = s.lastIndexOf("::");
++            if (lastSep >= 0) {
++                s = s.substring(lastSep + 2);
++                changed = true;
++            }
++        }
++
+         return changed ? s : null;
+     }
+ 
