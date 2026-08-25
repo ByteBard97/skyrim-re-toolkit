@@ -109,3 +109,30 @@ solving this independently.
 Affected classes remain as documented in `COVERAGE_SWEEP_PLAN.md`:
 `HUDMenu`, `KinectMenu`, `ModManagerMenu`, `SleepWaitMenu`,
 `TutorialMenu` (each 8 bytes oversized from the redundant vptr).
+
+## Update (v0.2 SE/VR runtime validation): real blast radius is much wider
+
+The SE/VR runtime coverage sweeps (`RUNTIME_SE_1_5_97.md`,
+`RUNTIME_VR_1_4_15.md`) re-confirmed this same bug hits every
+`IMenu`-derived class, not just the 5 above — `IMenu` itself and ~34 of
+its subclasses (`BarterMenu`, `BookMenu`, `ContainerMenu`, `DialogueMenu`,
+`InventoryMenu`, `JournalMenu`, `MagicMenu`, `RaceSexMenu`, `StatsMenu`,
+etc. — every `IMenu` subclass tracked by the sweep) are each exactly 8
+bytes oversized (a couple with one additional independent +8 or +24 on
+top, from their own separate issues), traced via a throwaway
+`InspectGdt`-style component dump to the same root cause: `FxDelegateHandler`
+resolves to 24 bytes instead of its real, `static_assert`-confirmed 16
+(`vptr` field duplicated on top of the fully-embedded
+`GRefCountBase<...>` base, which already contains its own inherited
+vptr from `GRefCountImplCore`).
+
+Also confirmed: **this is not VR- or SE-specific** — `FxDelegateHandler`
+and `IMenu` are already `MISMATCH` in the committed AE
+`coverage_baseline.json` (`actual=24/expected=16` and
+`actual=56/expected=48` respectively) with the exact same off-by-8
+signature. This bug is fully runtime-independent; it was just never
+part of the original 39-class hotspot list, so the earlier investigation
+undercounted its reach. No new root cause found here, no fix attempted
+(per the recommendation above — still blocked on patch 0007's deferred
+substitution-machinery reliability question); this is a scope update
+only.
