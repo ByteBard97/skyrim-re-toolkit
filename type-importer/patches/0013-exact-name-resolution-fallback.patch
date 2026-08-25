@@ -1,0 +1,84 @@
+diff -ruN -x '*.orig' -x '*.rej' a/src/main/java/playday3008/gcpp/processing/TypePool.java b/src/main/java/playday3008/gcpp/processing/TypePool.java
+--- a/src/main/java/playday3008/gcpp/processing/TypePool.java	2026-08-24 20:01:06.093392659 -0400
++++ b/src/main/java/playday3008/gcpp/processing/TypePool.java	2026-08-24 20:01:06.097385078 -0400
+@@ -296,17 +296,19 @@
+                 return dt;
+         } catch (Exception ignored) {}
+ 
+-        // DataTypeParser tokenizes its input as a C-ish type expression and
+-        // cannot find types whose NAME contains "::" -- which is exactly how
+-        // patch 0011 registers nested records ("BGSSoundOutput::Data") and
+-        // how methods were always registered ("X::~X"). Fall back to an
+-        // exact-name lookup against the same DTM, which matches any name
+-        // verbatim.
+-        if (name.indexOf("::") >= 0) {
+-            DataType byName = findTypeByName(this.dtm, name);
+-            if (byName != null)
+-                return byName;
+-        }
++        // DataTypeParser tokenizes its input as a C-ish type expression: it
++        // cannot find types whose NAME contains "::" (how patch 0011
++        // registers nested records and methods were always registered), and
++        // it can fail or go ambiguous for plain names when multiple
++        // same-named types exist across categories -- observed ONLY on
++        // GitHub's hosted runner, where 'Color' stopped resolving and took
++        // the whole BGSDirectionalAmbientLightingColors cascade with it
++        // (see patches/0013-*.md). Fall back to an exact-name lookup against
++        // the same DTM, preferring the candidate whose category matches the
++        // pool's own parsed entry for that name.
++        DataType byName = findTypeByNamePreferringParsedCategory(name);
++        if (byName != null)
++            return byName;
+ 
+         // Then check the open archives the user chose to use
+         if (openArchives != null) {
+@@ -408,6 +410,31 @@
+         return changed ? s : null;
+     }
+ 
++    /**
++     * Exact-name DTM lookup that disambiguates same-named types across
++     * categories by preferring the category this pool's own parsed entry
++     * for the name was registered under (e.g. RE::Color's category over a
++     * Windows-SDK COLOR living elsewhere in the DTM).
++     */
++    private DataType findTypeByNamePreferringParsedCategory(String name) {
++        List<DataType> results = new ArrayList<>();
++        this.dtm.findDataTypes(name, results);
++        if (results.isEmpty())
++            return null;
++        if (results.size() > 1) {
++            ParsedType parsed = this.parsedTypes.get(name);
++            if (parsed != null) {
++                for (DataType dt : results) {
++                    if (dt.getCategoryPath() != null
++                        && dt.getCategoryPath().equals(parsed.getCategoryPath())) {
++                        return dt;
++                    }
++                }
++            }
++        }
++        return results.get(0);
++    }
++
+     private DataType findTypeByName(DataTypeManager mgr, String name) {
+         // Try direct lookup first (handles fully qualified names)
+         List<DataType> results = new ArrayList<>();
+@@ -426,7 +453,16 @@
+             if (!this.hasType(dependency)) {
+                 if (System.getenv("GCPP_DEBUG_DEPS") != null
+                     && type.getName().contains(System.getenv("GCPP_DEBUG_DEPS"))) {
+-                    System.err.println("[DEPS] '" + type.getName() + "' blocked by '" + dependency + "'");
++                    List<DataType> cands = new ArrayList<>();
++                    this.dtm.findDataTypes(dependency, cands);
++                    StringBuilder sb = new StringBuilder();
++                    for (DataType c : cands)
++                        sb.append(" [").append(c.getCategoryPath()).append("]");
++                    ParsedType parsedEntry = this.parsedTypes.get(dependency);
++                    System.err.println("[DEPS] '" + type.getName() + "' blocked by '" + dependency
++                        + "' exactNameCandidates=" + cands.size() + sb
++                        + " parsedEntry=" + (parsedEntry == null ? "none"
++                            : parsedEntry.getClass().getSimpleName() + "@" + parsedEntry.getCategoryPath()));
+                 }
+                 return false;
+             }
