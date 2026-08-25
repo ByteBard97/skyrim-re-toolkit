@@ -1,0 +1,95 @@
+diff -ruN -x '*.orig' -x '*.rej' a/src/main/java/playday3008/gcpp/processing/SourceParser.java b/src/main/java/playday3008/gcpp/processing/SourceParser.java
+--- a/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 20:26:06.829212833 -0400
++++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 20:26:06.833119839 -0400
+@@ -230,7 +230,14 @@
+     // ========================================================================
+ 
+     private void parseEnum(TypePool pool, Cursor enumCursor, CategoryPath category) {
+-        String name = enumCursor.spelling();
++        // Record-qualified like structs/unions (patch 0011) -- extended to
++        // enums by patch 0014 after the runner-only Directional cascade was
++        // traced to MistMenu's nested `enum Color` contesting the bare
++        // "Color" key with the top-level RE::Color struct (struct-vs-enum
++        // registration has no tiebreaker, so different machines kept
++        // different winners; GCPP_DEBUG_DEPS on the runner:
++        // exactNameCandidates=0 parsedEntry=ParsedEnum@/MistMenu.h).
++        String name = recordQualifiedName(enumCursor);
+         if (name == null || name.isEmpty())
+             return; // Skip anonymous enums
+ 
+diff -ruN -x '*.orig' -x '*.rej' a/src/main/java/playday3008/gcpp/processing/TypePool.java b/src/main/java/playday3008/gcpp/processing/TypePool.java
+--- a/src/main/java/playday3008/gcpp/processing/TypePool.java	2026-08-24 20:26:06.830281997 -0400
++++ b/src/main/java/playday3008/gcpp/processing/TypePool.java	2026-08-24 20:26:06.833086876 -0400
+@@ -16,6 +16,9 @@
+     private final DataTypeManager[] openArchives;
+ 
+     private final Map<String, ParsedType> parsedTypes = new HashMap<>();
++    // Names currently being materialized on demand by getType (patch 0014's
++    // cycle guard) -- see the exactParsed block in getType.
++    private final Set<String> materializing = new HashSet<>();
+     private final StandAloneDataTypeManager dtm;
+     private final DataTypeParser typeParser;
+ 
+@@ -181,6 +184,18 @@
+         if (dt != null)
+             return dt;
+ 
++        // On-demand materialization (patch 0014): if the pool KNOWS this
++        // exact name, NEVER fall through to qualifier peeling -- peeling
++        // past an exact-but-not-yet-materialized entry binds a WRONG type
++        // (observed: DisguiseEffect::State, a nested enum not yet in the
++        // DTM, peeled to a bare 152-byte 'State' struct and inflated its
++        // owner from 152 to 296). Materialize the parsed entry right now
++        // instead; a guard set breaks recursion cycles (A embeds B embeds
++        // A* -- the pointer path's void* fallback covers the cycle edge).
++        DataType demandMade = materializeParsed(name);
++        if (demandMade != null)
++            return demandMade;
++
+         // Progressive qualifier peeling (patch 0011): a record-parent-
+         // qualified registration ("BGSSoundOutput::Data") must win over the
+         // bare-name fallback, and a namespace-qualified reference
+@@ -195,6 +210,15 @@
+                 DataType hit = resolveType(peeled);
+                 if (hit != null)
+                     return hit;
++                // On-demand materialization applies at EVERY peel step, not
++                // just the original name: a canonical reference like
++                // "RE::DisguiseEffect::State" only matches its parsedTypes
++                // key ("DisguiseEffect::State") after one peel, and letting
++                // the loop continue past that known-but-unmaterialized entry
++                // bound the bare 'State' struct instead (152 -> 296).
++                DataType made = materializeParsed(peeled);
++                if (made != null)
++                    return made;
+             }
+         }
+ 
+@@ -416,6 +440,27 @@
+      * for the name was registered under (e.g. RE::Color's category over a
+      * Windows-SDK COLOR living elsewhere in the DTM).
+      */
++    /**
++     * If the pool has a parsed entry under EXACTLY this name, materialize it
++     * into the DTM right now and return it (patch 0014). The guard set
++     * breaks recursion cycles (A embeds B embeds A* -- the pointer path's
++     * void* fallback covers the cycle edge).
++     */
++    private DataType materializeParsed(String name) {
++        ParsedType exactParsed = this.parsedTypes.get(name);
++        if (exactParsed == null || this.materializing.contains(name))
++            return null;
++        this.materializing.add(name);
++        try {
++            DataType made = exactParsed.createDataType(this);
++            if (made != null)
++                return this.dtm.addDataType(made, DataTypeConflictHandler.REPLACE_HANDLER);
++        } finally {
++            this.materializing.remove(name);
++        }
++        return null;
++    }
++
+     private DataType findTypeByNamePreferringParsedCategory(String name) {
+         List<DataType> results = new ArrayList<>();
+         this.dtm.findDataTypes(name, results);
