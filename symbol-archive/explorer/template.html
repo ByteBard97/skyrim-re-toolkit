@@ -1,0 +1,436 @@
+<title>Skyrim Type Layouts</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #eef1f4;
+  --border: #dde2e8;
+  --border-strong: #c6cdd6;
+  --ink: #1b2028;
+  --ink-2: #55606e;
+  --ink-3: #8b95a2;
+  --accent: #2f6f9e;
+  --accent-soft: #e4eef5;
+  --ok: #2e8b63;
+  --ok-soft: #e0f0e8;
+  --warn: #b26a1f;
+  --warn-soft: #f6eadb;
+  --neutral: #6b7480;
+  --neutral-soft: #e9ecf0;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+}
+:root:not([data-theme="light"]) {
+  @media (prefers-color-scheme: dark) {
+    --bg: #0f1216;
+    --surface: #171b21;
+    --surface-2: #1e242c;
+    --border: #262c35;
+    --border-strong: #333b46;
+    --ink: #e6ebf1;
+    --ink-2: #a3adba;
+    --ink-3: #6b7684;
+    --accent: #5a9fd0;
+    --accent-soft: #17303f;
+    --ok: #4fb488;
+    --ok-soft: #12281e;
+    --warn: #d9973f;
+    --warn-soft: #2e2213;
+    --neutral: #7f8a97;
+    --neutral-soft: #212832;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1216;
+  --surface: #171b21;
+  --surface-2: #1e242c;
+  --border: #262c35;
+  --border-strong: #333b46;
+  --ink: #e6ebf1;
+  --ink-2: #a3adba;
+  --ink-3: #6b7684;
+  --accent: #5a9fd0;
+  --accent-soft: #17303f;
+  --ok: #4fb488;
+  --ok-soft: #12281e;
+  --warn: #d9973f;
+  --warn-soft: #2e2213;
+  --neutral: #7f8a97;
+  --neutral-soft: #212832;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app { display: grid; grid-template-rows: auto 1fr; height: 100vh; }
+
+/* ---- header ---- */
+header {
+  display: flex; align-items: center; gap: 20px;
+  padding: 14px 22px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.brand { display: flex; flex-direction: column; gap: 1px; margin-right: auto; }
+.brand h1 {
+  margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.01em;
+}
+.brand .sub {
+  font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+  letter-spacing: 0.02em;
+}
+.stats { display: flex; gap: 8px; }
+.stat {
+  display: flex; align-items: baseline; gap: 6px;
+  padding: 5px 11px; border-radius: 999px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  font-size: 12px; color: var(--ink-2);
+}
+.stat b { font-family: var(--mono); font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.stat .dot { width: 7px; height: 7px; border-radius: 50%; align-self: center; }
+.stat.ok .dot { background: var(--ok); }
+.stat.warn .dot { background: var(--warn); }
+.stat.neutral .dot { background: var(--neutral); }
+.theme-btn {
+  display: grid; place-items: center;
+  width: 34px; height: 34px; border-radius: 8px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--ink-2); cursor: pointer; font-size: 15px;
+}
+.theme-btn:hover { color: var(--ink); border-color: var(--border-strong); }
+
+/* ---- body split ---- */
+.split { display: grid; grid-template-columns: 340px 1fr; min-height: 0; }
+@media (max-width: 780px) { .split { grid-template-columns: 1fr; } .main { display: none; } .split.detail .list-pane { display: none; } .split.detail .main { display: flex; } }
+
+.list-pane { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--border); background: var(--surface); }
+.search-wrap { padding: 12px; border-bottom: 1px solid var(--border); }
+.search {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 12px; border-radius: 9px;
+  background: var(--bg); border: 1px solid var(--border-strong);
+}
+.search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.search svg { flex: none; color: var(--ink-3); }
+.search input {
+  border: 0; outline: 0; background: transparent; width: 100%;
+  color: var(--ink); font-family: var(--mono); font-size: 13px;
+}
+.search input::placeholder { color: var(--ink-3); }
+.filters { display: flex; gap: 6px; margin-top: 10px; }
+.filters button {
+  flex: 1; padding: 5px 4px; border-radius: 7px; cursor: pointer;
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--ink-2); font-family: var(--mono); font-size: 11px; letter-spacing: 0.02em;
+}
+.filters button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+.results { flex: 1; overflow-y: auto; overflow-x: hidden; }
+.result {
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px;
+  width: 100%; text-align: left; cursor: pointer;
+  padding: 8px 14px; border: 0; background: transparent;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink); font-family: var(--mono); font-size: 12.5px;
+}
+.result:hover { background: var(--surface-2); }
+.result[aria-selected="true"] { background: var(--accent-soft); }
+.result[aria-selected="true"] .rname { color: var(--accent); font-weight: 600; }
+.rname { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rname .q { color: var(--ink-3); }
+.badge {
+  flex: none; width: 8px; height: 8px; border-radius: 50%;
+}
+.badge.verified { background: var(--ok); }
+.badge.mismatch { background: var(--warn); }
+.badge.unverified { background: var(--neutral); opacity: 0.5; }
+.more-note { padding: 12px 14px; color: var(--ink-3); font-size: 12px; font-family: var(--mono); }
+
+/* ---- detail ---- */
+.main { display: flex; flex-direction: column; min-height: 0; overflow-y: auto; }
+.empty { margin: auto; text-align: center; color: var(--ink-3); padding: 40px; max-width: 380px; }
+.empty .glyph { font-family: var(--mono); font-size: 34px; color: var(--border-strong); }
+.empty h2 { font-size: 15px; font-weight: 600; color: var(--ink-2); margin: 16px 0 6px; }
+.empty p { margin: 0; font-size: 13px; line-height: 1.6; }
+
+.detail { padding: 26px 30px; max-width: 900px; width: 100%; }
+.back { display: none; }
+@media (max-width: 780px) { .back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 14px; background: none; border: 0; color: var(--accent); font-family: var(--mono); font-size: 12px; cursor: pointer; } }
+.dhead { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 4px; }
+.dhead .kind {
+  font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+.dname {
+  font-family: var(--mono); font-size: 23px; font-weight: 600; letter-spacing: -0.01em;
+  margin: 2px 0 0; word-break: break-word;
+}
+.dname .q { color: var(--ink-3); font-weight: 400; }
+.dmeta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; margin: 16px 0 24px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border-radius: 8px; font-size: 12.5px;
+  background: var(--surface); border: 1px solid var(--border);
+}
+.chip .k { color: var(--ink-3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+.chip .v { font-family: var(--mono); font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 13px; border-radius: 999px; font-size: 12px; font-weight: 600;
+}
+.pill.verified { background: var(--ok-soft); color: var(--ok); }
+.pill.mismatch { background: var(--warn-soft); color: var(--warn); }
+.pill.unverified { background: var(--neutral-soft); color: var(--neutral); }
+.pill .d { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+/* field table as a memory map */
+.layout { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.layout-head, .row {
+  display: grid; grid-template-columns: 92px 1fr 1fr 64px; align-items: center;
+}
+.layout-head {
+  padding: 10px 16px; background: var(--surface-2); border-bottom: 1px solid var(--border);
+  font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--ink-3);
+}
+.rows { max-height: none; }
+.row {
+  padding: 9px 16px; border-bottom: 1px solid var(--border);
+  font-family: var(--mono); font-size: 13px;
+}
+.row:last-child { border-bottom: 0; }
+.row:hover { background: var(--surface-2); }
+.row .off { color: var(--accent); font-variant-numeric: tabular-nums; }
+.row .fname { color: var(--ink); word-break: break-word; padding-right: 10px; }
+.row .ftype { color: var(--ink-2); word-break: break-word; padding-right: 10px; }
+.row .ftype.synth { color: var(--ink-3); font-style: italic; }
+.row .fsize { color: var(--ink-3); text-align: right; font-variant-numeric: tabular-nums; }
+.row.base { background: color-mix(in srgb, var(--accent-soft) 45%, transparent); }
+.row.base .fname::before {
+  content: "inherited"; display: inline-block; margin-right: 8px;
+  font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--accent); vertical-align: middle;
+}
+.row.base .fname { color: var(--ink-2); }
+.enumval { display: grid; grid-template-columns: 1fr 120px; }
+.enumval .ev { color: var(--accent); text-align: right; font-variant-numeric: tabular-nums; }
+
+.note { margin-top: 18px; font-size: 12px; color: var(--ink-3); line-height: 1.6; }
+.note code { font-family: var(--mono); color: var(--ink-2); }
+footer {
+  margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--border);
+  font-size: 11.5px; color: var(--ink-3); line-height: 1.7;
+}
+footer a { color: var(--accent); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+</style>
+
+<div class="app">
+  <header>
+    <div class="brand">
+      <h1>Skyrim Type Layouts</h1>
+      <span class="sub" id="srcline">CommonLibSSE-NG &middot; AE 1.6.1170</span>
+    </div>
+    <div class="stats" id="stats"></div>
+    <button class="theme-btn" id="theme" title="Toggle theme" aria-label="Toggle theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" fill="currentColor" stroke="none" d="M12 3a9 9 0 0 0 0 18z"/></svg></button>
+  </header>
+  <div class="split" id="split">
+    <aside class="list-pane">
+      <div class="search-wrap">
+        <label class="search">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="q" type="search" placeholder="search a class…  (e.g. TESObjectREFR)" autocomplete="off" spellcheck="false">
+        </label>
+        <div class="filters" id="filters">
+          <button data-f="all" aria-pressed="true">all</button>
+          <button data-f="verified">verified</button>
+          <button data-f="mismatch">mismatch</button>
+          <button data-f="unverified">unverified</button>
+        </div>
+      </div>
+      <div class="results" id="results" role="listbox" aria-label="Types"></div>
+    </aside>
+    <main class="main" id="main">
+      <div class="empty" id="empty">
+        <div class="glyph">{ ; }</div>
+        <h2>Pick a type to inspect its byte layout</h2>
+        <p>Every field, offset, and size below is parsed from CommonLibSSE-NG's headers. A green badge means the total size is confirmed byte-for-byte against the header's own <code>static_assert</code>.</p>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+const DATA = __DATA__;
+</script>
+<script>
+(function () {
+  const $ = (s, r=document) => r.querySelector(s);
+  const types = DATA.types;
+  const byName = new Map(types.map(t => [t.name, t]));
+
+  // ---- theme ----
+  const root = document.documentElement;
+  const themeBtn = $("#theme");
+  function stored() { try { return localStorage.getItem("stl-theme"); } catch (e) { return null; } }
+  if (stored()) root.setAttribute("data-theme", stored());
+  themeBtn.addEventListener("click", () => {
+    const dark = getComputedStyle(root).getPropertyValue("--bg").trim().startsWith("#0f");
+    const next = dark ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("stl-theme", next); } catch (e) {}
+  });
+
+  // ---- stats ----
+  const c = DATA.counts;
+  $("#stats").innerHTML =
+    `<span class="stat ok"><span class="dot"></span>verified <b>${c.verified.toLocaleString()}</b></span>`
+  + `<span class="stat warn"><span class="dot"></span>mismatch <b>${c.mismatch.toLocaleString()}</b></span>`
+  + `<span class="stat neutral"><span class="dot"></span>no assert <b>${c.unverified.toLocaleString()}</b></span>`;
+  $("#srcline").textContent = "CommonLibSSE-NG · AE 1.6.1170 · patches " + (DATA.patchset || "");
+
+  // ---- qualified name rendering ----
+  function qname(n) {
+    const i = n.lastIndexOf("::");
+    return i < 0 ? n : `<span class="q">${n.slice(0, i+2)}</span>${n.slice(i+2)}`;
+  }
+  const hex = n => "0x" + n.toString(16).toUpperCase();
+
+  // ---- list ----
+  const results = $("#results");
+  const qInput = $("#q");
+  let filter = "all";
+  let matches = [];
+  let sel = -1;
+  const CAP = 400;
+
+  function passFilter(t) {
+    if (filter === "all") return true;
+    if (filter === "verified") return t.status === "verified";
+    if (filter === "mismatch") return t.status === "mismatch";
+    if (filter === "unverified") return t.status === "unverified";
+    return true;
+  }
+
+  function render() {
+    const q = qInput.value.trim().toLowerCase();
+    matches = [];
+    for (const t of types) {
+      if (!passFilter(t)) continue;
+      if (q && !t.name.toLowerCase().includes(q)) continue;
+      matches.push(t);
+      if (matches.length > CAP + 1) break;
+    }
+    // rank: startswith the query first, then shorter names
+    if (q) {
+      matches.sort((a, b) => {
+        const as = a.name.toLowerCase().startsWith(q) ? 0 : 1;
+        const bs = b.name.toLowerCase().startsWith(q) ? 0 : 1;
+        return as - bs || a.name.length - b.name.length;
+      });
+    }
+    const shown = matches.slice(0, CAP);
+    let html = shown.map((t, i) =>
+      `<button class="result" role="option" data-i="${i}" data-name="${t.name}">`
+      + `<span class="rname">${qname(t.name)}</span>`
+      + `<span class="badge ${t.status}" title="${t.status}"></span></button>`
+    ).join("");
+    if (matches.length > CAP) html += `<div class="more-note">${matches.length}+ matches — keep typing to narrow.</div>`;
+    if (shown.length === 0) html = `<div class="more-note">No type matches “${q}”.</div>`;
+    results.innerHTML = html;
+    sel = -1;
+  }
+
+  results.addEventListener("click", e => {
+    const btn = e.target.closest(".result");
+    if (btn) open(btn.dataset.name);
+  });
+
+  qInput.addEventListener("input", render);
+  qInput.addEventListener("keydown", e => {
+    const rows = [...results.querySelectorAll(".result")];
+    if (e.key === "ArrowDown") { e.preventDefault(); sel = Math.min(sel + 1, rows.length - 1); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); sel = Math.max(sel - 1, 0); }
+    else if (e.key === "Enter") { if (rows[sel]) open(rows[sel].dataset.name); return; }
+    else return;
+    rows.forEach((r, i) => r.setAttribute("aria-selected", i === sel));
+    if (rows[sel]) rows[sel].scrollIntoView({ block: "nearest" });
+  });
+
+  $("#filters").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    filter = b.dataset.f;
+    [...e.currentTarget.children].forEach(x => x.setAttribute("aria-pressed", x === b));
+    render();
+  });
+
+  // ---- detail ----
+  const main = $("#main");
+  const split = $("#split");
+  function open(name) {
+    const t = byName.get(name); if (!t) return;
+    location.hash = encodeURIComponent(name);
+    [...results.querySelectorAll(".result")].forEach(r => r.setAttribute("aria-selected", r.dataset.name === name));
+    split.classList.add("detail");
+
+    let body = "";
+    if (t.kind === "enum") {
+      body = `<div class="layout"><div class="layout-head" style="grid-template-columns:1fr 120px"><span>Constant</span><span style="text-align:right">Value</span></div><div class="rows">`
+        + (t.values || []).map(v => `<div class="row enumval"><span class="fname">${v.name}</span><span class="ev">${v.value}</span></div>`).join("")
+        + `</div></div>`;
+    } else {
+      const rows = (t.fields || []).map(f => {
+        const base = /^super_/.test(f.name);
+        return `<div class="row ${base ? "base" : ""}">`
+          + `<span class="off">+${hex(f.offset)}</span>`
+          + `<span class="fname">${base ? f.name.replace(/^super_/, "") : f.name}</span>`
+          + `<span class="ftype${/^anon_tmpl_/.test(f.type) ? " synth" : ""}">${/^anon_tmpl_/.test(f.type) ? "‹inline template›" : f.type}</span>`
+          + `<span class="fsize">${f.size}</span></div>`;
+      }).join("");
+      body = `<div class="layout"><div class="layout-head"><span>Offset</span><span>Field</span><span>Type</span><span style="text-align:right">Size</span></div><div class="rows">${rows || '<div class="row"><span class="fname" style="grid-column:1/-1;color:var(--ink-3)">No modeled fields (opaque or pure-interface).</span></div>'}</div></div>`;
+    }
+
+    let statusPill;
+    if (t.status === "verified") statusPill = `<span class="pill verified"><span class="d"></span>static_assert confirmed</span>`;
+    else if (t.status === "mismatch") statusPill = `<span class="pill mismatch"><span class="d"></span>size ${hex(t.size)} ≠ assert ${hex(t.expected)}</span>`;
+    else statusPill = `<span class="pill unverified"><span class="d"></span>no ground-truth assert</span>`;
+
+    main.innerHTML = `<div class="detail">
+      <button class="back" onclick="history.back()">← list</button>
+      <div class="dhead"><span class="kind">${t.kind}</span></div>
+      <h2 class="dname">${qname(t.name)}</h2>
+      <div class="dmeta">
+        <span class="chip"><span class="k">size</span><span class="v">${hex(t.size)}</span><span class="v" style="color:var(--ink-3)">${t.size} B</span></span>
+        ${statusPill}
+      </div>
+      ${body}
+      <p class="note">Offsets and field types are parsed directly from CommonLibSSE-NG headers by <code>type-importer</code>. <span class="base-legend"></span></p>
+      <footer>
+        Generated from <code>${DATA.generated_from || "the AE archive"}</code>. Layouts derive from community reverse-engineering (CommonLibSSE-NG, GPL-3.0); this page redistributes no game code or assets. Part of <a href="https://github.com/ByteBard97/skyrim-re-toolkit">skyrim-re-toolkit</a>.
+      </footer>
+    </div>`;
+    main.scrollTop = 0;
+  }
+
+  $(".back") && $(".back").addEventListener("click", () => split.classList.remove("detail"));
+
+  render();
+  const initial = decodeURIComponent(location.hash.slice(1));
+  if (initial && byName.has(initial)) open(initial);
+})();
+</script>
