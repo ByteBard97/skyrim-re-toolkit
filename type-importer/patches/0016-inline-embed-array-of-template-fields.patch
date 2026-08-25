@@ -1,0 +1,83 @@
+--- a/src/main/java/playday3008/gcpp/processing/ParsedStructure.java	2026-08-24 22:42:25.986097656 -0400
++++ b/src/main/java/playday3008/gcpp/processing/ParsedStructure.java	2026-08-24 22:42:21.854105642 -0400
+@@ -16,8 +16,18 @@
+         boolean isBitField,
+         int bitFieldWidth,
+         boolean isAnonymous,
+-        ParsedType anonymousType
+-    ) {}
++        ParsedType anonymousType,
++        int arrayCount
++    ) {
++        // arrayCount == 0 means "not an array of an inline-embedded type" --
++        // used only when a C-style array field's element type is itself a
++        // class template specialization that must be inline-embedded (see
++        // patch 0016). All pre-existing call sites use this 6-arg form.
++        public FieldInfo(String name, String typeName, boolean isBitField, int bitFieldWidth,
++                          boolean isAnonymous, ParsedType anonymousType) {
++            this(name, typeName, isBitField, bitFieldWidth, isAnonymous, anonymousType, 0);
++        }
++    }
+ 
+     private final List<FieldInfo> fields;
+     private final boolean isPacked;
+@@ -64,7 +74,13 @@
+                     // needs to be preserved rather than flattened.
+                     String fieldName = (field.name() != null && !field.name().isEmpty())
+                         ? field.name() : "";
+-                    struct.add(anonDt, fieldName, null);
++                    // A C-style array whose element type is itself a template
++                    // specialization (e.g. NiPointer<bhkShape> shapes[2]) is
++                    // inline-embedded per-element and wrapped in an ArrayDataType here.
++                    DataType finalDt = (field.arrayCount() > 0)
++                        ? new ArrayDataType(anonDt, field.arrayCount(), anonDt.getLength(), pool.getDataTypeManager())
++                        : anonDt;
++                    struct.add(finalDt, fieldName, null);
+                 }
+             } else {
+                 DataType fieldType = pool.getType(field.typeName());
+--- a/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 22:42:25.995917825 -0400
++++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 22:42:21.854105642 -0400
+@@ -400,6 +400,7 @@
+                     // For anonymous struct/union fields, recursively parse the inner type
+                     ParsedType anonType = null;
+                     boolean inlineEmbed = isAnon;
++                    int arrayCount = 0;
+                     if (isAnon) {
+                         Type fieldType = cursor.type().unwrap();
+                         TypeKind typeKind = fieldType.kind();
+@@ -443,6 +444,24 @@
+                         // full investigation, including three other approaches that were
+                         // tried and ruled out first.
+                         Type fieldType = cursor.type().unwrap();
++                        // A C-style array whose ELEMENT type is a template specialization
++                        // (e.g. bhkCharacterController's "NiPointer<bhkShape> shapes[2]",
++                        // TESQuest's "BSTArray<TESTopic*> topics[6]") reports its own kind
++                        // as CONSTANT_ARRAY, not RECORD/UNEXPOSED, so the check below never
++                        // fired and the field silently fell through to an unresolvable
++                        // string-keyed dependency ("NiPointer<bhkShape>[2]"), leaving the
++                        // whole enclosing struct forever unresolved (confirmed via debug
++                        // tracing: both classes parsed with a full, correct field list and
++                        // were successfully registered in TypePool, but never resolved --
++                        // TypePool.checkDependenciesFulfilled kept reporting exactly this
++                        // array-of-template dependency as permanently unfulfilled). Peel
++                        // the array off first so the same template-inline-embed logic
++                        // applies to its element type, then re-wrap as an array in
++                        // ParsedStructure.createDataType (patch 0016).
++                        if (fieldType.kind() == TypeKind.CONSTANT_ARRAY) {
++                            arrayCount = (int) fieldType.arraySize();
++                            fieldType = fieldType.arrayElementType().unwrap();
++                        }
+                         if ((fieldType.kind() == TypeKind.RECORD || fieldType.kind() == TypeKind.UNEXPOSED)
+                             && fieldType.spelling().contains("<")) {
+                             Cursor declCursor = fieldType.declaration();
+@@ -481,7 +500,8 @@
+                         isBitField,
+                         bitWidth,
+                         inlineEmbed,
+-                        anonType
++                        anonType,
++                        arrayCount
+                     ));
+                 }
+                 case PACKED_ATTR -> packed[0] = true;

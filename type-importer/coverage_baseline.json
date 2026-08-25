@@ -35,9 +35,9 @@
     "status": "OK"
   },
   "AIPerkData": {
-    "actual": 1,
+    "actual": 2208,
     "expected": 2208,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "AIProcess": {
     "actual": 320,
@@ -785,9 +785,9 @@
     "status": "EMPTY"
   },
   "BGSConstructFormsInAllFilesMap": {
-    "actual": 1,
+    "actual": 128,
     "expected": 128,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "BGSConstructFormsInFileMap": {
     "actual": 1,
@@ -1045,9 +1045,9 @@
     "status": "OK"
   },
   "BGSFootstepSet": {
-    "actual": 1,
+    "actual": 152,
     "expected": 152,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "BGSFootstepSet::RecordFlags": {
     "actual": 1,
@@ -1355,9 +1355,9 @@
     "status": "OK"
   },
   "BGSMusicPaletteTrack": {
-    "actual": 1,
+    "actual": 144,
     "expected": 144,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "BGSMusicSilenceTrack": {
     "actual": 56,
@@ -1775,9 +1775,9 @@
     "status": "OK"
   },
   "BGSSaveLoadGame": {
-    "actual": 568,
+    "actual": 840,
     "expected": 840,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSSaveLoadManager": {
     "actual": 952,
@@ -1800,9 +1800,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "BGSSaveLoadQueuedSubBufferMap": {
-    "actual": 1,
+    "actual": 144,
     "expected": 144,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "BGSSaveLoadReferencesMap": {
     "actual": 144,
@@ -2250,9 +2250,9 @@
     "status": "OK"
   },
   "BSBloodSplatterShaderProperty": {
-    "actual": 1,
+    "actual": 176,
     "expected": 176,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "BSBound": {
     "actual": 48,
@@ -2315,9 +2315,9 @@
     "status": "OK"
   },
   "BSDynamicTriShape": {
-    "actual": 40,
+    "actual": 384,
     "expected": 384,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSDynamicTriShape::DYNAMIC_TRISHAPE_RUNTIME_DATA": {
     "actual": 32,
@@ -2485,14 +2485,14 @@
     "status": "EMPTY"
   },
   "BSGeometry": {
-    "actual": 1,
+    "actual": 344,
     "expected": 344,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "BSGeometry::GEOMETRY_RUNTIME_DATA": {
-    "actual": 1,
+    "actual": 48,
     "expected": 48,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "BSGeometry::MODEL_DATA": {
     "actual": 16,
@@ -2650,9 +2650,9 @@
     "status": "OK"
   },
   "BSInstanceTriShape": {
-    "actual": 8,
+    "actual": 352,
     "expected": 352,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSIntrusiveRefCounted": {
     "actual": 4,
@@ -2745,9 +2745,9 @@
     "status": "OK"
   },
   "BSLightingShaderMaterialLandscape": {
-    "actual": 1,
+    "actual": 344,
     "expected": 344,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "BSLightingShaderMaterialMultiLayerParallax": {
     "actual": 208,
@@ -2865,9 +2865,9 @@
     "status": "OK"
   },
   "BSMultiIndexTriShape": {
-    "actual": 128,
+    "actual": 472,
     "expected": 472,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSMultiIndexTriShape::MULTI_INDEX_TRISHAPE_RUNTIME_DATA": {
     "actual": 120,
@@ -2875,9 +2875,9 @@
     "status": "OK"
   },
   "BSMultiStreamInstanceTriShape": {
-    "actual": 72,
+    "actual": 416,
     "expected": 416,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSMultiStreamInstanceTriShape::MULTISTREAM_TRISHAPE_RUNTIME_DATA": {
     "actual": 64,
@@ -3665,9 +3665,9 @@
     "status": "EMPTY"
   },
   "BSTriShape": {
-    "actual": 8,
+    "actual": 352,
     "expected": 352,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSTriShape::TRISHAPE_RUNTIME_DATA": {
     "actual": 8,
@@ -4150,9 +4150,9 @@
     "status": "OK"
   },
   "Clouds": {
-    "actual": 1,
+    "actual": 1304,
     "expected": 1312,
-    "status": "EMPTY"
+    "status": "MISMATCH"
   },
   "CodeTasklet": {
     "actual": 80,
@@ -4215,9 +4215,9 @@
     "status": "OK"
   },
   "CombatInventory": {
-    "actual": 1,
+    "actual": 448,
     "expected": 456,
-    "status": "EMPTY"
+    "status": "MISMATCH"
   },
   "CombatInventoryItem": {
     "actual": 48,
@@ -4560,9 +4560,9 @@
     "status": "OK"
   },
   "ControlMap::InputContext": {
-    "actual": 1,
+    "actual": 96,
     "expected": 96,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "ControlMap::LinkedMapping": {
     "actual": 32,
@@ -7295,9 +7295,9 @@
     "status": "OK"
   },
   "GFxLoadProcess": {
-    "actual": 1,
+    "actual": 1024,
     "expected": 1008,
-    "status": "EMPTY"
+    "status": "MISMATCH"
   },
   "GFxLoadProcess::TimelineType": {
     "actual": 1,
@@ -9785,14 +9785,14 @@
     "status": "OK"
   },
   "ImageSpaceModifierData": {
-    "actual": 108,
+    "actual": 244,
     "expected": 244,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ImageSpaceModifierData::Bloom": {
-    "actual": 1,
+    "actual": 24,
     "expected": 24,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "ImageSpaceModifierData::Cinematic": {
     "actual": 32,
@@ -9805,9 +9805,9 @@
     "status": "OK"
   },
   "ImageSpaceModifierData::HDR": {
-    "actual": 1,
+    "actual": 112,
     "expected": 112,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "ImageSpaceModifierInstance": {
     "actual": 40,
@@ -10415,9 +10415,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "MapCamera": {
-    "actual": 1,
+    "actual": 144,
     "expected": 144,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "MapInputHandler": {
     "actual": 24,
@@ -10435,7 +10435,7 @@
     "status": "OK"
   },
   "MapMenu": {
-    "actual": 197904,
+    "actual": 198048,
     "expected": 198040,
     "status": "MISMATCH"
   },
@@ -10445,9 +10445,9 @@
     "status": "OK"
   },
   "MapMenu::RUNTIME_DATA2": {
-    "actual": 168,
+    "actual": 312,
     "expected": 312,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "MapMenu::Unk30470Entry": {
     "actual": 56,
@@ -11060,7 +11060,7 @@
     "status": "OK"
   },
   "NiMeshParticleSystem": {
-    "actual": 72,
+    "actual": 416,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -11120,12 +11120,12 @@
     "status": "OK"
   },
   "NiParticleSystem": {
-    "actual": 64,
+    "actual": 408,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
   "NiParticles": {
-    "actual": 16,
+    "actual": 360,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -11665,9 +11665,9 @@
     "status": "OK"
   },
   "PlayerCamera": {
-    "actual": 1,
+    "actual": 360,
     "expected": 360,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "PlayerCamera::Unk120": {
     "actual": 16,
@@ -12030,14 +12030,14 @@
     "status": "OK"
   },
   "RaceSexMenu": {
-    "actual": 1,
+    "actual": 432,
     "expected": 424,
-    "status": "EMPTY"
+    "status": "MISMATCH"
   },
   "RaceSexMenu::RUNTIME_DATA": {
-    "actual": 1,
+    "actual": 360,
     "expected": 360,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "RaceSexMenuEvent": {
     "actual": 1,
@@ -12390,9 +12390,9 @@
     "status": "OK"
   },
   "ScreenSplatter": {
-    "actual": 1,
+    "actual": 64,
     "expected": 64,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "ScreenshotHandler": {
     "actual": 24,
@@ -13130,9 +13130,9 @@
     "status": "OK"
   },
   "TESDataHandler": {
-    "actual": 1,
+    "actual": 3520,
     "expected": null,
-    "status": "EMPTY"
+    "status": "NO_GROUND_TRUTH"
   },
   "TESDataHandler::RUNTIME_DATA": {
     "actual": 10,
@@ -13370,14 +13370,14 @@
     "status": "OK"
   },
   "TESImageSpaceModifier": {
-    "actual": 328,
+    "actual": 736,
     "expected": 736,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TESImageSpaceModifier::Bloom": {
-    "actual": 1,
+    "actual": 48,
     "expected": 48,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "TESImageSpaceModifier::Cinematic": {
     "actual": 64,
@@ -13390,9 +13390,9 @@
     "status": "OK"
   },
   "TESImageSpaceModifier::HDR": {
-    "actual": 1,
+    "actual": 224,
     "expected": 224,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "TESImageSpaceModifier::RadialBlur": {
     "actual": 40,
@@ -13730,9 +13730,9 @@
     "status": "OK"
   },
   "TESObjectLAND::LoadedLandData": {
-    "actual": 1,
+    "actual": 18880,
     "expected": 18896,
-    "status": "EMPTY"
+    "status": "MISMATCH"
   },
   "TESObjectLAND::RecordFlags": {
     "actual": 1,
@@ -13910,9 +13910,9 @@
     "status": "OK"
   },
   "TESQuest": {
-    "actual": 1,
+    "actual": 616,
     "expected": 616,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "TESQuest::ChangeFlags": {
     "actual": 1,
@@ -14310,9 +14310,9 @@
     "status": "OK"
   },
   "TESWaterForm": {
-    "actual": 1,
+    "actual": 608,
     "expected": 608,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "TESWaterForm::RecordFlags": {
     "actual": 1,
@@ -14575,9 +14575,9 @@
     "status": "OK"
   },
   "UI3DSceneManager": {
-    "actual": 1,
+    "actual": 280,
     "expected": 280,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "UI::UIMenuEntry": {
     "actual": 16,
@@ -14605,9 +14605,9 @@
     "status": "MISMATCH"
   },
   "UIRenderManager": {
-    "actual": 1,
+    "actual": 280,
     "expected": 280,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "UIRenderManager::UILightData": {
     "actual": 56,
@@ -16495,14 +16495,14 @@
     "status": "OK"
   },
   "bhkCharProxyController": {
-    "actual": 360,
+    "actual": 976,
     "expected": 1456,
     "status": "MISMATCH"
   },
   "bhkCharacterController": {
-    "actual": 1,
+    "actual": 616,
     "expected": 816,
-    "status": "EMPTY"
+    "status": "MISMATCH"
   },
   "bhkCharacterMoveFinishEvent": {
     "actual": 1,
