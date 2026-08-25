@@ -13730,9 +13730,9 @@
     "status": "OK"
   },
   "TESObjectLAND::LoadedLandData": {
-    "actual": 18880,
+    "actual": 18896,
     "expected": 18896,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TESObjectLAND::RecordFlags": {
     "actual": 1,
@@ -16405,14 +16405,14 @@
     "status": "EMPTY"
   },
   "ahkpCharacterProxy": {
-    "actual": 200,
+    "actual": 248,
     "expected": 256,
     "status": "MISMATCH"
   },
   "ahkpWorld": {
-    "actual": 984,
+    "actual": 1088,
     "expected": 1088,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "allocator_arg_t": {
     "actual": 1,
@@ -16495,12 +16495,12 @@
     "status": "OK"
   },
   "bhkCharProxyController": {
-    "actual": 976,
+    "actual": 1424,
     "expected": 1456,
     "status": "MISMATCH"
   },
   "bhkCharacterController": {
-    "actual": 616,
+    "actual": 808,
     "expected": 816,
     "status": "MISMATCH"
   },
@@ -16510,12 +16510,12 @@
     "status": "EMPTY"
   },
   "bhkCharacterPointCollector": {
-    "actual": 304,
+    "actual": 560,
     "expected": 576,
     "status": "MISMATCH"
   },
   "bhkCharacterProxy": {
-    "actual": 336,
+    "actual": 592,
     "expected": 608,
     "status": "MISMATCH"
   },
@@ -16570,9 +16570,9 @@
     "status": "OK"
   },
   "bhkCompressedMeshShapeData": {
-    "actual": 224,
+    "actual": 256,
     "expected": 256,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "bhkContactListener": {
     "actual": 8,
@@ -16625,7 +16625,7 @@
     "status": "OK"
   },
   "bhkPickData": {
-    "actual": 136,
+    "actual": 200,
     "expected": 208,
     "status": "MISMATCH"
   },
@@ -16700,9 +16700,9 @@
     "status": "OK"
   },
   "bhkWorld": {
-    "actual": 50672,
+    "actual": 50688,
     "expected": 50688,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "bhkWorld::bhkConstraintProjector": {
     "actual": 1,
@@ -16945,9 +16945,9 @@
     "status": "EMPTY"
   },
   "hkAabb": {
-    "actual": 1,
+    "actual": 32,
     "expected": 32,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "hkAabbUint32": {
     "actual": 1,
@@ -16980,9 +16980,9 @@
     "status": "OK"
   },
   "hkContactPoint": {
-    "actual": 1,
+    "actual": 32,
     "expected": 32,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "hkContainerHeapAllocator": {
     "actual": 1,
@@ -17015,9 +17015,9 @@
     "status": "EMPTY"
   },
   "hkMatrix3": {
-    "actual": 1,
+    "actual": 48,
     "expected": 48,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "hkMemoryAllocator": {
     "actual": 8,
@@ -17045,14 +17045,14 @@
     "status": "NO_GROUND_TRUTH"
   },
   "hkMoppBvTreeShapeBase": {
-    "actual": 64,
+    "actual": 80,
     "expected": 80,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkMotionState": {
-    "actual": 16,
+    "actual": 176,
     "expected": 176,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkMultiThreadCheck": {
     "actual": 12,
@@ -17060,9 +17060,9 @@
     "status": "OK"
   },
   "hkQsTransform": {
-    "actual": 1,
+    "actual": 48,
     "expected": 48,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "hkQuadReal": {
     "actual": null,
@@ -17070,9 +17070,9 @@
     "status": "UNRESOLVED"
   },
   "hkQuaternion": {
-    "actual": 1,
+    "actual": 16,
     "expected": 16,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "hkRefVariant": {
     "actual": 8,
@@ -17085,9 +17085,9 @@
     "status": "OK"
   },
   "hkRotation": {
-    "actual": 1,
+    "actual": 48,
     "expected": 48,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "hkSphere": {
     "actual": 1,
@@ -17115,14 +17115,14 @@
     "status": "OK"
   },
   "hkSweptTransform": {
-    "actual": 1,
+    "actual": 80,
     "expected": 80,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "hkTransform": {
-    "actual": 1,
+    "actual": 64,
     "expected": 64,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "hkUFloat8": {
     "actual": 1,
@@ -17130,14 +17130,14 @@
     "status": "OK"
   },
   "hkVector4": {
-    "actual": 1,
+    "actual": 16,
     "expected": 16,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "hkVector4Comparison": {
-    "actual": 1,
+    "actual": 16,
     "expected": 16,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "hkWorldMemoryAvailableWatchDog": {
     "actual": 1,
@@ -17195,7 +17195,7 @@
     "status": "EMPTY"
   },
   "hkaDefaultAnimationControl": {
-    "actual": 160,
+    "actual": 192,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -17305,9 +17305,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "hkbClipGenerator": {
-    "actual": 224,
+    "actual": 272,
     "expected": 272,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkbClipTriggerArray": {
     "actual": 32,
@@ -17380,9 +17380,9 @@
     "status": "OK"
   },
   "hkbProjectData": {
-    "actual": 32,
+    "actual": 48,
     "expected": 48,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkbProjectStringData": {
     "actual": 128,
@@ -17470,9 +17470,9 @@
     "status": "OK"
   },
   "hkp3AxisSweep": {
-    "actual": 144,
+    "actual": 272,
     "expected": 272,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkp3AxisSweep::hkpBpAxis": {
     "actual": 16,
@@ -17520,7 +17520,7 @@
     "status": "MISMATCH"
   },
   "hkpAllCdPointCollector": {
-    "actual": 272,
+    "actual": 528,
     "expected": 544,
     "status": "MISMATCH"
   },
@@ -17550,9 +17550,9 @@
     "status": "OK"
   },
   "hkpBoxShape": {
-    "actual": 48,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpBreakableBody": {
     "actual": 1,
@@ -17565,14 +17565,14 @@
     "status": "OK"
   },
   "hkpBroadPhase::hkpCastAabbInput": {
-    "actual": 16,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpBroadPhase::hkpCastRayInput": {
-    "actual": 32,
+    "actual": 48,
     "expected": 48,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpBroadPhaseBorder": {
     "actual": 1,
@@ -17610,9 +17610,9 @@
     "status": "OK"
   },
   "hkpCachingShapePhantom": {
-    "actual": 288,
+    "actual": 448,
     "expected": 448,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpCachingShapePhantom::CollisionDetail": {
     "actual": 16,
@@ -17630,9 +17630,9 @@
     "status": "OK"
   },
   "hkpCapsuleShape": {
-    "actual": 48,
+    "actual": 80,
     "expected": 80,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpCdBody": {
     "actual": 32,
@@ -17645,9 +17645,9 @@
     "status": "EMPTY"
   },
   "hkpCdPoint": {
-    "actual": 16,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpCdPointCollector": {
     "actual": 16,
@@ -17670,27 +17670,27 @@
     "status": "OK"
   },
   "hkpCharacterInput": {
-    "actual": 88,
+    "actual": 200,
     "expected": 208,
     "status": "MISMATCH"
   },
   "hkpCharacterObjectInteractionEvent": {
-    "actual": 32,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpCharacterObjectInteractionResult": {
-    "actual": 1,
+    "actual": 32,
     "expected": 32,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "hkpCharacterOutput": {
-    "actual": 1,
+    "actual": 16,
     "expected": 16,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "hkpCharacterProxy": {
-    "actual": 184,
+    "actual": 232,
     "expected": 240,
     "status": "MISMATCH"
   },
@@ -17720,9 +17720,9 @@
     "status": "EMPTY"
   },
   "hkpClosestRayHitCollector": {
-    "actual": 96,
+    "actual": 112,
     "expected": 112,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpCollidable": {
     "actual": 112,
@@ -17770,19 +17770,19 @@
     "status": "OK"
   },
   "hkpCollisionInput": {
-    "actual": 48,
+    "actual": 96,
     "expected": 96,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpCollisionInput::Aabb32Info": {
-    "actual": 1,
+    "actual": 48,
     "expected": 48,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "hkpCompressedMeshShape": {
-    "actual": 256,
+    "actual": 288,
     "expected": 288,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpCompressedMeshShape::BigTriangle": {
     "actual": 16,
@@ -17790,14 +17790,14 @@
     "status": "OK"
   },
   "hkpCompressedMeshShape::Chunk": {
-    "actual": 80,
+    "actual": 96,
     "expected": 96,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpCompressedMeshShape::ConvexPiece": {
-    "actual": 64,
+    "actual": 80,
     "expected": 80,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpConeLimitConstraintAtom": {
     "actual": 20,
@@ -17910,9 +17910,9 @@
     "status": "OK"
   },
   "hkpEntity": {
-    "actual": 488,
+    "actual": 720,
     "expected": 720,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpEntity::ExtendedListeners": {
     "actual": 32,
@@ -17950,9 +17950,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "hkpFixedRigidMotion": {
-    "actual": 88,
+    "actual": 320,
     "expected": 320,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpIslandActivationListener": {
     "actual": 1,
@@ -17970,9 +17970,9 @@
     "status": "EMPTY"
   },
   "hkpKeyframedRigidMotion": {
-    "actual": 88,
+    "actual": 320,
     "expected": 320,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpLimitedForceConstraintMotor": {
     "actual": 32,
@@ -17980,12 +17980,12 @@
     "status": "OK"
   },
   "hkpLimitedHingeConstraintData": {
-    "actual": 120,
+    "actual": 248,
     "expected": 272,
     "status": "MISMATCH"
   },
   "hkpLimitedHingeConstraintData::Atoms": {
-    "actual": 96,
+    "actual": 224,
     "expected": 240,
     "status": "MISMATCH"
   },
@@ -17995,14 +17995,14 @@
     "status": "OK"
   },
   "hkpLinearCastCollisionInput": {
-    "actual": 64,
+    "actual": 128,
     "expected": 128,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpLinearCastInput": {
-    "actual": 16,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpLinkedCollidable": {
     "actual": 128,
@@ -18015,7 +18015,7 @@
     "status": "OK"
   },
   "hkpListShape": {
-    "actual": 104,
+    "actual": 136,
     "expected": 144,
     "status": "MISMATCH"
   },
@@ -18030,9 +18030,9 @@
     "status": "OK"
   },
   "hkpMaxSizeMotion": {
-    "actual": 88,
+    "actual": 320,
     "expected": 320,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpMeshMaterial": {
     "actual": 4,
@@ -18055,24 +18055,24 @@
     "status": "NO_GROUND_TRUTH"
   },
   "hkpMoppBvTreeShape": {
-    "actual": 96,
+    "actual": 112,
     "expected": 112,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpMoppCode": {
-    "actual": 48,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpMoppCode::CodeInfo": {
-    "actual": 1,
+    "actual": 16,
     "expected": 16,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "hkpMotion": {
-    "actual": 88,
+    "actual": 320,
     "expected": 320,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpMtThreadStructure": {
     "actual": 1,
@@ -18130,12 +18130,12 @@
     "status": "OK"
   },
   "hkpRagdollConstraintData": {
-    "actual": 168,
+    "actual": 344,
     "expected": 384,
     "status": "MISMATCH"
   },
   "hkpRagdollConstraintData::Atoms": {
-    "actual": 144,
+    "actual": 320,
     "expected": 352,
     "status": "MISMATCH"
   },
@@ -18145,7 +18145,7 @@
     "status": "OK"
   },
   "hkpRagdollMotorConstraintAtom": {
-    "actual": 32,
+    "actual": 80,
     "expected": 96,
     "status": "MISMATCH"
   },
@@ -18180,17 +18180,17 @@
     "status": "NO_GROUND_TRUTH"
   },
   "hkpRigidBody": {
-    "actual": 488,
+    "actual": 720,
     "expected": 720,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpRootCdPoint": {
-    "actual": 32,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpSetLocalTransformsConstraintAtom": {
-    "actual": 8,
+    "actual": 136,
     "expected": 144,
     "status": "MISMATCH"
   },
@@ -18255,9 +18255,9 @@
     "status": "EMPTY"
   },
   "hkpShapePhantom": {
-    "actual": 256,
+    "actual": 416,
     "expected": 416,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpShapeRayBundleCastInput": {
     "actual": 1,
@@ -18270,9 +18270,9 @@
     "status": "EMPTY"
   },
   "hkpShapeRayCastCollectorOutput": {
-    "actual": 16,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpShapeRayCastInput": {
     "actual": 1,
@@ -18280,9 +18280,9 @@
     "status": "EMPTY"
   },
   "hkpShapeRayCastOutput": {
-    "actual": 64,
+    "actual": 80,
     "expected": 80,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpSimpleConstraintContactMgr": {
     "actual": 1,
@@ -18290,9 +18290,9 @@
     "status": "EMPTY"
   },
   "hkpSimplexSolverInput": {
-    "actual": 32,
+    "actual": 96,
     "expected": 96,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpSimulation": {
     "actual": 1,
@@ -18310,9 +18310,9 @@
     "status": "OK"
   },
   "hkpSolverInfo": {
-    "actual": 240,
+    "actual": 304,
     "expected": 304,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpSolverInfo::DeactivationClasses": {
     "actual": 1,
@@ -18350,14 +18350,14 @@
     "status": "OK"
   },
   "hkpSurfaceConstraintInfo": {
-    "actual": 32,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpSurfaceInfo": {
-    "actual": 32,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpSuspendInactiveAgentsUtil": {
     "actual": 1,
@@ -18415,14 +18415,14 @@
     "status": "OK"
   },
   "hkpWorld": {
-    "actual": 968,
+    "actual": 1072,
     "expected": 1072,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpWorldCinfo": {
-    "actual": 208,
+    "actual": 256,
     "expected": 256,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpWorldDeletionListener": {
     "actual": 1,
@@ -18430,9 +18430,9 @@
     "status": "EMPTY"
   },
   "hkpWorldDynamicsStepInfo": {
-    "actual": 256,
+    "actual": 320,
     "expected": 320,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpWorldExtension": {
     "actual": 1,
@@ -18440,7 +18440,7 @@
     "status": "EMPTY"
   },
   "hkpWorldLinearCaster": {
-    "actual": 120,
+    "actual": 184,
     "expected": 192,
     "status": "MISMATCH"
   },
@@ -18480,14 +18480,14 @@
     "status": "NO_GROUND_TRUTH"
   },
   "hkpWorldRayCastInput": {
-    "actual": 8,
+    "actual": 40,
     "expected": 48,
     "status": "MISMATCH"
   },
   "hkpWorldRayCastOutput": {
-    "actual": 80,
+    "actual": 96,
     "expected": 96,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "identity": {
     "actual": 1,

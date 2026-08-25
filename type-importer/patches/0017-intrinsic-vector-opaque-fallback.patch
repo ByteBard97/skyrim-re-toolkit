@@ -1,0 +1,47 @@
+--- a/src/main/java/playday3008/gcpp/processing/TypePool.java	2026-08-24 22:52:11.923526972 -0400
++++ b/src/main/java/playday3008/gcpp/processing/TypePool.java	2026-08-24 22:51:31.953241784 -0400
+@@ -179,6 +179,23 @@
+     }
+ 
+     public DataType getType(String name) {
++        // SSE/AVX/AVX512 intrinsic vector types (__m128, __m128i, __m128d,
++        // __m128h, __m128bh, __m256*, __m512*) are compiler builtins that
++        // clang itself parses as a REAL typedef (registered in parsedTypes
++        // like any other typedef), whose own underlying spelling (an
++        // attribute-vector-typed builtin) never resolves either -- so the
++        // typedef materializes to an empty/1-byte placeholder. This must be
++        // checked BEFORE resolveType()/materializeParsed() below: whichever
++        // wrong-sized entry those produce for this exact name would win
++        // first and this fallback would never be reached. Same fix shape as
++        // the existing opaque-padding fallback (SourceParser pads inline-
++        // embedded bases with no fields to "char[N]" of the clang-reported
++        // size): resolve straight to a same-sized opaque byte array.
++        Integer vecSize = intrinsicVectorSize(name);
++        if (vecSize != null) {
++            return getType("char[" + vecSize + "]");
++        }
++
+         // Try direct resolution first
+         DataType dt = resolveType(name);
+         if (dt != null)
+@@ -245,6 +262,20 @@
+         return null;
+     }
+ 
++    // Matches optional "const "/"volatile "/elaborated ("struct "/"union "/
++    // "class ") prefixes and trailing whitespace around the bare name, since
++    // this check runs before normalizeTypeName (it must run first -- see
++    // getType()'s comment above).
++    private static final Pattern INTRINSIC_VECTOR =
++        Pattern.compile("^(?:const |volatile |struct |union |class )*__m(128|256|512)[a-z]*\\s*$");
++
++    private static Integer intrinsicVectorSize(String name) {
++        Matcher m = INTRINSIC_VECTOR.matcher(name.trim());
++        if (!m.matches())
++            return null;
++        return Integer.parseInt(m.group(1)) / 8;
++    }
++
+     /**
+      * Handles pointer types (trailing *), array types (trailing [N]),
+      * and function pointers (contains (*) or (^)).
