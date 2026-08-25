@@ -16224,6 +16224,21 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "__intrinsic_vec16": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__intrinsic_vec32": {
+    "actual": 32,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__intrinsic_vec64": {
+    "actual": 64,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "__non_rtti_object": {
     "actual": 24,
     "expected": null,
@@ -16405,9 +16420,9 @@
     "status": "EMPTY"
   },
   "ahkpCharacterProxy": {
-    "actual": 248,
+    "actual": 256,
     "expected": 256,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ahkpWorld": {
     "actual": 1088,
@@ -16495,14 +16510,14 @@
     "status": "OK"
   },
   "bhkCharProxyController": {
-    "actual": 1424,
+    "actual": 1440,
     "expected": 1456,
     "status": "MISMATCH"
   },
   "bhkCharacterController": {
-    "actual": 808,
+    "actual": 816,
     "expected": 816,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "bhkCharacterMoveFinishEvent": {
     "actual": 1,
@@ -16625,9 +16640,9 @@
     "status": "OK"
   },
   "bhkPickData": {
-    "actual": 200,
+    "actual": 208,
     "expected": 208,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "bhkRagdollPenetrationUtil": {
     "actual": 1,
@@ -17670,9 +17685,9 @@
     "status": "OK"
   },
   "hkpCharacterInput": {
-    "actual": 200,
+    "actual": 208,
     "expected": 208,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpCharacterObjectInteractionEvent": {
     "actual": 64,
@@ -17690,9 +17705,9 @@
     "status": "OK"
   },
   "hkpCharacterProxy": {
-    "actual": 232,
+    "actual": 240,
     "expected": 240,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpCharacterProxyListener": {
     "actual": 8,
@@ -17980,14 +17995,14 @@
     "status": "OK"
   },
   "hkpLimitedHingeConstraintData": {
-    "actual": 248,
+    "actual": 272,
     "expected": 272,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpLimitedHingeConstraintData::Atoms": {
-    "actual": 224,
+    "actual": 240,
     "expected": 240,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpLimitedHingeConstraintData::Runtime": {
     "actual": 72,
@@ -18015,9 +18030,9 @@
     "status": "OK"
   },
   "hkpListShape": {
-    "actual": 136,
+    "actual": 144,
     "expected": 144,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpListShape::ChildInfo": {
     "actual": 32,
@@ -18130,14 +18145,14 @@
     "status": "OK"
   },
   "hkpRagdollConstraintData": {
-    "actual": 344,
+    "actual": 384,
     "expected": 384,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpRagdollConstraintData::Atoms": {
-    "actual": 320,
+    "actual": 352,
     "expected": 352,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpRagdollConstraintData::Runtime": {
     "actual": 116,
@@ -18145,9 +18160,9 @@
     "status": "OK"
   },
   "hkpRagdollMotorConstraintAtom": {
-    "actual": 80,
+    "actual": 96,
     "expected": 96,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpRayCollidableFilter": {
     "actual": 8,
@@ -18190,9 +18205,9 @@
     "status": "OK"
   },
   "hkpSetLocalTransformsConstraintAtom": {
-    "actual": 136,
+    "actual": 144,
     "expected": 144,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpSetupStabilizationAtom": {
     "actual": 16,
@@ -18440,9 +18455,9 @@
     "status": "EMPTY"
   },
   "hkpWorldLinearCaster": {
-    "actual": 184,
+    "actual": 192,
     "expected": 192,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpWorldMaintenanceMgr": {
     "actual": 1,
@@ -18480,9 +18495,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "hkpWorldRayCastInput": {
-    "actual": 40,
+    "actual": 48,
     "expected": 48,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpWorldRayCastOutput": {
     "actual": 96,

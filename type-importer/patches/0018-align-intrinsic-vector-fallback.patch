@@ -1,0 +1,40 @@
+--- a/src/main/java/playday3008/gcpp/processing/TypePool.java	2026-08-24 22:56:36.955147551 -0400
++++ b/src/main/java/playday3008/gcpp/processing/TypePool.java	2026-08-24 22:56:02.203151608 -0400
+@@ -193,7 +193,7 @@
+         // size): resolve straight to a same-sized opaque byte array.
+         Integer vecSize = intrinsicVectorSize(name);
+         if (vecSize != null) {
+-            return getType("char[" + vecSize + "]");
++            return intrinsicVectorType(vecSize);
+         }
+ 
+         // Try direct resolution first
+@@ -277,6 +277,28 @@
+     }
+ 
+     /**
++     * A same-sized opaque byte array (like the existing "char[N]" padding
++     * fallback) is not enough for an SSE/AVX intrinsic: real hardware
++     * requires 16/32/64-byte ALIGNMENT for __m128/__m256/__m512, and a
++     * plain char array only carries 1-byte alignment. An enclosing struct
++     * with a trailing intrinsic-vector member (e.g. bhkCharacterController's
++     * hkVector4 fields) needs its own overall size to round up to that
++     * alignment, matching the real compiler's layout -- confirmed
++     * empirically: bhkCharacterController and hkpCharacterProxy both landed
++     * exactly 8 bytes short of their real (16-byte-aligned) sizes with the
++     * plain char[N] fallback, and both gaps vanished once this alignment
++     * was added. Wrap the opaque bytes in a packed, explicitly-aligned
++     * single-member struct instead of a bare array.
++     */
++    private DataType intrinsicVectorType(int size) {
++        StructureDataType s = new StructureDataType(CategoryPath.ROOT, "__intrinsic_vec" + size, 0, this.dtm);
++        s.setPackingEnabled(true);
++        s.setExplicitMinimumAlignment(size);
++        s.add(new ArrayDataType(CharDataType.dataType, size, 1, this.dtm), "data", null);
++        return s;
++    }
++
++    /**
+      * Handles pointer types (trailing *), array types (trailing [N]),
+      * and function pointers (contains (*) or (^)).
+      */
