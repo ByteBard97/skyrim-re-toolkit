@@ -3,10 +3,18 @@ name: type-importer coverage sweep
 # Regression gate for the type-importer parser pipeline (see
 # type-importer/COVERAGE_SWEEP_PLAN.md). Runs the full CommonLibSSE-NG
 # RE/ header sweep and fails the build if any class's resolved layout got
-# WORSE relative to type-importer/coverage_baseline.json -- e.g. a patch
+# WORSE relative to type-importer/coverage_baseline*.json -- e.g. a patch
 # to GhidraClangPoweredParse or stubs/layout_pch.h that fixes one class
 # but silently breaks another. See scripts/check_regression.py's
 # docstring for the exact comparison rules.
+#
+# Runs as a matrix over runtimes (AE, SE -- see
+# type-importer/RUNTIME_SE_1_5_97.md) so a patch can't silently regress
+# one runtime's layout while only being checked against the other's
+# baseline. Each runtime gets its own full sweep and its own committed
+# coverage_baseline_<runtime>.json (AE keeps the original unsuffixed
+# coverage_baseline.json for backward compatibility with existing local
+# workflows/scripts).
 #
 # Toolchain versions pinned here match what was verified locally when
 # this workflow was written (see DESIGN.md's toolchain note for why each
@@ -42,6 +50,16 @@ jobs:
   coverage-sweep:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runtime_macro: ENABLE_SKYRIM_AE
+            baseline_file: coverage_baseline.json
+          - runtime_macro: ENABLE_SKYRIM_SE
+            baseline_file: coverage_baseline_se.json
+          - runtime_macro: ENABLE_SKYRIM_VR
+            baseline_file: coverage_baseline_vr.json
     steps:
       - name: Checkout (with submodules)
         uses: actions/checkout@v4
@@ -108,12 +126,13 @@ jobs:
           tar -xzf /tmp/xwin.tar.gz -C /tmp/xwin-bin --strip-components=1
           /tmp/xwin-bin/xwin --accept-license splat --output ~/tools/winsdk
 
-      - name: Run coverage sweep
+      - name: Run coverage sweep (${{ matrix.runtime_macro }})
         env:
           # Opt-in dependency-blocker tracing (TypePool.checkDependenciesFulfilled,
           # patch 0011) -- set via workflow_dispatch to debug runner-only
           # divergences without touching code.
           GCPP_DEBUG_DEPS: ${{ inputs.debug_deps || '' }}
+          RUNTIME_DEFINE: ${{ matrix.runtime_macro }}=1
         run: |
           set -euo pipefail
           cd type-importer/scripts
@@ -124,15 +143,17 @@ jobs:
           JAVA_HOME="$JAVA_HOME" \
           GHIDRA_INSTALL_DIR="$HOME/tools/ghidra" \
           LD_LIBRARY_PATH="$HOME/tools/llvm/lib" \
+          RUNTIME_DEFINE="$RUNTIME_DEFINE" \
           REPORT_CSV="$SCRATCH/report.csv" \
             ./generate_gdt.sh "$HOME/tools/winsdk" "$SCRATCH/full_re.gdt" $HEADERS
 
-          python3 mine_static_asserts.py ../vendor/CommonLibSSE-NG/include --json "$SCRATCH/ae_sizes.json" > /dev/null
+          python3 mine_static_asserts.py ../vendor/CommonLibSSE-NG/include \
+            --runtime "${{ matrix.runtime_macro }}" --json "$SCRATCH/expected_sizes.json" > /dev/null
           python3 coverage_report.py \
-            --expected "$SCRATCH/ae_sizes.json" \
+            --expected "$SCRATCH/expected_sizes.json" \
             --actual "$SCRATCH/report.csv" \
             --actual-unresolved "$SCRATCH/report.csv.unresolved.txt" \
-            --scope-note "CI full RE/*.h sweep, run ${{ github.run_id }}" \
+            --scope-note "CI full RE/*.h sweep (${{ matrix.runtime_macro }}), run ${{ github.run_id }}" \
             --json-out "$SCRATCH/snapshot.json" \
             > "$SCRATCH/report.txt"
           cat "$SCRATCH/report.txt"
@@ -142,13 +163,13 @@ jobs:
       - name: Check for regressions against the committed baseline
         run: |
           cd type-importer/scripts
-          python3 check_regression.py --baseline ../coverage_baseline.json --new "$SNAPSHOT_PATH"
+          python3 check_regression.py --baseline "../${{ matrix.baseline_file }}" --new "$SNAPSHOT_PATH"
 
       - name: Upload sweep report (always, even on failure)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-sweep-report
+          name: coverage-sweep-report-${{ matrix.runtime_macro }}
           path: |
             ${{ runner.temp }}/coverage-sweep/report.txt
             ${{ runner.temp }}/coverage-sweep/snapshot.json

@@ -29,10 +29,13 @@ regardless of runtime; see the comment in `stubs/layout_pch.h`).
 
 Ground truth: `mine_static_asserts.py --runtime ENABLE_SKYRIM_SE` finds 2168
 SE-applicable `static_assert(sizeof(...))`s. Diffing against the AE-applicable
-set (2149 entries): **2149 classes have identical expected size in both
-runtimes** (the vast majority of layouts are runtime-invariant); only **19
-classes have a genuinely SE-specific expected size** (the classes whose
-layout depends on `REL::RelocateMember`/`#ifndef ENABLE_SKYRIM_AE` branches —
+set (2149 entries): **all 2149 AE-applicable asserts have an identical-value
+SE-applicable counterpart** (the vast majority of layouts are
+runtime-invariant, and no class asserts a *different* size under the two
+runtimes); the other **19 SE-applicable asserts have no AE-applicable
+counterpart at all** (AE simply has no `static_assert` for these classes —
+their layout depends on `REL::RelocateMember`/`#ifndef ENABLE_SKYRIM_AE`
+branches that are compiled out, not compared, under AE:
 `TESObjectREFR`, `Actor`, `Character`, `PlayerCharacter`, `Projectile` and its
 subclasses, `TESObjectCELL`, `Explosion`, `Hazard`, `BSAnimationGraphManager`,
 `BSAnimationGraphVariableCache`, `Inventory3DManager`). That 19 is the honest
@@ -57,7 +60,7 @@ Bucket totals (3817 tracked classes, same scale as the committed AE
 | MISMATCH | 178 | 180 |
 | UNRESOLVED | 27 | 27 |
 
-Of the 19 genuinely SE-specific-layout classes: **16 resolve byte-accurate
+Of the 19 SE-only-asserted classes: **16 resolve byte-accurate
 under SE** (all the `Actor`/`Character`/`Projectile`-family and
 `TESObjectREFR`/`TESObjectCELL`/`Explosion`/`Hazard`/
 `BSAnimationGraphVariableCache` classes), 2 `MISMATCH`
