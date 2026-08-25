@@ -21,6 +21,12 @@
 #   JAVA_HOME=... GHIDRA_INSTALL_DIR=... LD_LIBRARY_PATH=... [REPORT_CSV=...] \
 #     ./generate_gdt.sh <winsdk-splat-dir> <output.gdt> [header1.h header2.h ...]
 #
+# Set RUNTIME_DEFINE to target a runtime other than AE, e.g.
+#   RUNTIME_DEFINE=ENABLE_SKYRIM_SE=1
+# (default: ENABLE_SKYRIM_AE=1). Passed through verbatim as GenerateGdt's
+# --runtime; pair with `mine_static_asserts.py --runtime ENABLE_SKYRIM_SE`
+# for a matching ground-truth sweep.
+#
 # Set REPORT_CSV to also emit a coverage-sweep report (see
 # ../COVERAGE_SWEEP_PLAN.md and scripts/coverage_report.py) -- writes
 # $REPORT_CSV (ClassName,SizeInBytes for every resolved type) and
@@ -138,6 +144,6 @@ java "${JAVA_FLAGS[@]}" --enable-native-access=ALL-UNNAMED \
     --winsdk-crt "$WINSDK_DIR/crt/include" \
     --winsdk-ucrt "$WINSDK_DIR/sdk/include/ucrt" \
     --output "$OUTPUT_GDT" \
-    --runtime ENABLE_SKYRIM_AE=1 \
+    --runtime "${RUNTIME_DEFINE:-ENABLE_SKYRIM_AE=1}" \
     "${REPORT_ARGS[@]}" \
     "${HEADERS[@]}"

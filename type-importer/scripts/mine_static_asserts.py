@@ -22,9 +22,17 @@ as "unevaluated guard" rather than silently guessed.
 
 Usage:
     python3 mine_static_asserts.py <path-to-CommonLibSSE-NG>/include [--json out.json]
+        [--runtime ENABLE_SKYRIM_AE]
+
+--runtime selects which guard macro is treated as defined (default:
+ENABLE_SKYRIM_AE, matching the historical --runtime ENABLE_SKYRIM_AE=1
+passed to tools/GenerateGdt.java / generate_gdt.sh). Pass
+ENABLE_SKYRIM_SE or ENABLE_SKYRIM_VR to mine ground truth for those
+runtimes instead -- exactly one of the three is ever "defined" here,
+matching how generate_gdt.sh invokes GenerateGdt with a single -D.
 
 Output (stdout, unless --json is given): one line per class,
-    ClassName 0xNN                  # has an AE-applicable assert
+    ClassName 0xNN                  # has a static_assert applicable to --runtime
     ClassName NO_AE_ASSERT          # only has asserts guarded for other runtimes
     ClassName UNEVALUATED_GUARD     # guard references an unrecognized macro
 """
@@ -33,9 +41,6 @@ import json
 import re
 from pathlib import Path
 
-# Our target runtime: AE defined, SE/VR/legacy-AE-alias/IntelliSense undefined.
-# Matches --runtime ENABLE_SKYRIM_AE=1 in tools/GenerateGdt.java / generate_gdt.sh.
-TARGET_DEFINED = {"ENABLE_SKYRIM_AE"}
 KNOWN_MACROS = {
     "ENABLE_SKYRIM_AE",
     "ENABLE_SKYRIM_SE",
@@ -43,6 +48,9 @@ KNOWN_MACROS = {
     "SKYRIM_SUPPORT_AE",
     "__INTELLISENSE__",
 }
+
+# Set by main() from --runtime before any scanning happens.
+TARGET_DEFINED = {"ENABLE_SKYRIM_AE"}
 
 DIRECTIVE_RE = re.compile(r'^\s*#\s*(if|ifdef|ifndef|elif|else|endif)\b(.*)$')
 ASSERT_RE = re.compile(r'static_assert\s*\(\s*sizeof\s*\(\s*([A-Za-z_][A-Za-z0-9_:]*)\s*\)\s*==\s*(0[xX][0-9a-fA-F]+|\d+)\s*\)')
@@ -235,8 +243,14 @@ def scan_file(path: Path, results: dict, ambiguous: dict, unevaluated: dict):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("include_dir", type=Path, help="Path to CommonLibSSE-NG/include")
-    parser.add_argument("--json", type=Path, help="Write JSON {class: expected_size_for_AE} here instead of/in addition to stdout")
+    parser.add_argument("--json", type=Path, help="Write JSON {class: expected_size} here instead of/in addition to stdout")
+    parser.add_argument("--runtime", default="ENABLE_SKYRIM_AE",
+                         choices=["ENABLE_SKYRIM_AE", "ENABLE_SKYRIM_SE", "ENABLE_SKYRIM_VR"],
+                         help="Which runtime guard macro to treat as defined (default: ENABLE_SKYRIM_AE)")
     args = parser.parse_args()
+
+    global TARGET_DEFINED
+    TARGET_DEFINED = {args.runtime}
 
     re_dir = args.include_dir / "RE"
     if not re_dir.is_dir():
