@@ -1,0 +1,10 @@
+{
+    "name": "runtime-harness",
+    "version-string": "0.1.0",
+    "description": "SKSE plugins for live Creation Engine state inspection (skyrim-re-toolkit's third pillar). Dependencies here are the vendored CommonLibSSE-NG's own requirements (type-importer/vendor/CommonLibSSE-NG/vcpkg.json), since it is built via add_subdirectory and its manifest is not consumed.",
+    "license": "MIT",
+    "dependencies": [
+        "rapidcsv",
+        "spdlog"
+    ]
+}

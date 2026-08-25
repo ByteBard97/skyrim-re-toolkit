@@ -20,7 +20,7 @@ skyrim-re-toolkit/
 │   ├── stubs/              # Minimal headers so real CommonLibSSE-NG parses without a full build
 │   └── vendor/             # CommonLibSSE-NG + GhidraClangPoweredParse (git submodules)
 ├── symbol-archive/         # CI-built AE .gdt workflow artifact (early scaffold, see its README)
-└── runtime-harness/        # SKSE plugins for live engine inspection (not started)
+└── runtime-harness/        # SKSE plugins for live engine inspection (skeleton, first Windows build in progress)
 ```
 
 ### 1. type-importer
@@ -50,7 +50,7 @@ skyrim-re-toolkit/
 
 **The solution (planned):** SKSE plugins that hook into under-instrumented subsystems and log their internal state — e.g. an `AIProcessInspector` for package evaluation and scheduler decisions, a `HavokStepLogger` for collision/ragdoll state, a `SavegameTracer` for `BGSSaveLoadManager` serialization.
 
-**Status: not started.** This directory doesn't exist yet. Requires Windows + Visual Studio + SKSE64 — unlike `type-importer`, this piece cannot be built or tested on Linux (see `type-importer/DESIGN.md`'s platform-constraints note).
+**Status: skeleton in progress — Windows build machine online.** `runtime-harness/` now holds a minimal CommonLibSSE-NG plugin (logging + version report + `kDataLoaded` listener) whose only job is to prove the Windows/MSVC/vcpkg toolchain before real inspectors are built. Builds happen on a dedicated Windows machine driven over SSH; this piece still cannot be built or tested on Linux (see `type-importer/DESIGN.md`'s platform-constraints note).
 
 ---
 
@@ -117,7 +117,7 @@ In Ghidra: **File → Import File** (select `SkyrimSE.exe`) → **Window → Dat
 
 ### `symbol-archive` and `runtime-harness`
 
-Not started yet — see their sections above. `runtime-harness` in particular will require Windows + Visual Studio + SKSE64 once work begins; it can't be built on Linux the way `type-importer` can.
+See their sections above for status. `runtime-harness` requires Windows + Visual Studio + SKSE64 (now available via the project's Windows build machine); it can't be built on Linux the way `type-importer` can.
 
 ---
 
@@ -130,7 +130,7 @@ Not started yet — see their sections above. `runtime-harness` in particular wi
 | v0.1.2 — IDA `.til` output | Not started | `.gdt` path is proven; `.til` export is a separate code path |
 | v0.2 — Other runtimes (SE 1.5.97, AE 1.7.99, VR, GOG) | Not started | Tooling is runtime-agnostic; needs per-runtime validation against real binaries (Address Library cross-check) |
 | v0.3 — CI auto-build on CommonLibSSE-NG releases | In progress | `type-importer` has a CI regression gate (`.github/workflows/type-importer-coverage.yml`); `symbol-archive` has a manual-dispatch AE build (`.github/workflows/symbol-archive-build.yml`). Both Linux-native GitHub Actions runners. Automatic rebuild on submodule bump not started |
-| v0.4 — AIProcessInspector / runtime-harness plugin | Not started | Requires Windows + MSVC; blocked on hardware access |
+| v0.4 — AIProcessInspector / runtime-harness plugin | In progress | Windows build machine online; minimal CommonLibSSE-NG plugin skeleton in `runtime-harness/`, toolchain bring-up underway |
 | v0.5 — Cross-game type propagation (Skyrim → Fallout 4 → Starfield) | Not started | `libxse/commonlib-shared` header unification |
 | v1.0 — Stable release with full documentation | Not started | Community validation; maintainer feedback |
 
