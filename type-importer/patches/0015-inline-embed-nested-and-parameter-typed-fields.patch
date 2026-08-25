@@ -1,0 +1,97 @@
+--- a/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 21:14:50.130276454 -0400
++++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-24 21:11:21.948982938 -0400
+@@ -844,14 +844,87 @@
+         type.visitFields(fieldCursor -> {
+             boolean isBitField = fieldCursor.isBitField();
+             int bitWidth = isBitField ? fieldCursor.getBitFieldWidth() : 0;
+-            // Use the canonical type spelling, not the raw one: template members
+-            // are commonly typed via a nested alias (e.g. stl::enumeration's own
+-            // "using underlying_type = Underlying;"), which is never independently
+-            // registered as a resolvable type anywhere -- clang_getCanonicalType
+-            // resolves through it to the real underlying type (e.g. "unsigned
+-            // short"), which Ghidra's DataTypeParser can actually find.
++
++            // A field whose raw (unwrapped) type resolves to a real STRUCT_DECL/
++            // CLASS_DECL cursor -- e.g. BSSimpleList<T>'s own "Node _listHead"
++            // field, where Node is a struct NESTED INSIDE the template itself --
++            // must be inline-embedded, not looked up by name. Its canonical
++            // spelling (e.g. "BSSimpleList<Foo *>::Node") is never independently
++            // registered anywhere in the pool, AND TypePool.normalizeTypeName's
++            // namespace-strip fallback deliberately refuses to touch any name
++            // containing "<" (see its own comment -- that exclusion exists to
++            // avoid corrupting template argument spellings like
++            // "RE::NiPointer<Actor>"), so a plain string-keyed pool.getType()
++            // lookup for this field can NEVER succeed. Before this fix, that
++            // meant the field was silently dropped by ParsedStructure.
++            // createDataType()'s `if (fieldType != null)` guard, silently
++            // shrinking the ENCLOSING struct by this field's size -- confirmed
++            // via a standalone libclang C probe: clang_Type_visitFields reports
++            // "_listHead" with the correct sizeof (16, matching the enclosing
++            // type's own real sizeof), so this is a pool-resolution bug in this
++            // Java layer, not a libclang limitation. Recurse through the same
++            // parseFieldsFromType inline-embedding mechanism already used for
++            // top-level template-typed FIELD_DECLs (see the FIELD_DECL case in
++            // parseStruct) -- confirmed via the same probe that
++            // clang_getTypeDeclaration on the RAW (non-canonical) field type
++            // returns a valid StructDecl cursor, exactly the precondition that
++            // code path already checks for.
++            Type rawFieldType = fieldCursor.type().unwrap();
++            Cursor rawFieldDecl = rawFieldType.declaration();
++            CursorKind rawFieldDeclKind = (rawFieldDecl != null) ? rawFieldDecl.kind() : null;
++            if (rawFieldDeclKind == CursorKind.STRUCT_DECL || rawFieldDeclKind == CursorKind.CLASS_DECL) {
++                ParsedStructure inlineType = parseFieldsFromType(rawFieldType, category);
++                fields.add(new ParsedStructure.FieldInfo(
++                    fieldCursor.spelling(), null, isBitField, bitWidth, true, inlineType));
++                return Type.FieldVisitResult.CONTINUE;
++            }
++
++            // A field declared in terms of a template PARAMETER (e.g.
++            // BSPointerHandle<T, Handle = BSUntypedPointerHandle<>>'s own
++            // "Handle _handle" member) has a raw type whose declaration()
++            // cursor is a TEMPLATE_TYPE_PARAMETER, not a STRUCT_DECL -- the
++            // check above correctly falls through for it. But for a fully-
++            // instantiated specialization (which is exactly the state
++            // parseFieldsFromType is always called with -- it's invoked on a
++            // concrete Type like "BSPointerHandle<Actor>", never the
++            // uninstantiated primary template), clang_getCanonicalType
++            // resolves the parameter through to its ACTUAL substituted type
++            // for this instantiation (e.g. "RE::BSUntypedPointerHandle<>")
++            // -- itself just another template specialization, with exactly
++            // the same "never independently registered by name" problem
++            // patch 0003/0005/0009 already exist to solve. Confirmed via
++            // debug trace against the real header: BSPointerHandle<Actor>'s
++            // "_handle" field canonical-resolves to
++            // "RE::BSUntypedPointerHandle<>", which (before this fix) went
++            // through the plain string-lookup path below, could never
++            // resolve (nothing is ever registered under that literal
++            // string), and was silently dropped -- shrinking ActorHandle/
++            // ObjectRefHandle from their real 4-byte size to 0, and every
++            // enclosing struct with a field of that type (e.g.
++            // CombatController::attackerHandle, BGSLocation's
++            // ObjectRefHandle members) by the same 4 bytes each. Recurse
++            // through the same inline-embedding mechanism, this time keyed
++            // off the CANONICAL type's own declaration cursor.
++            Type canonicalFieldType = fieldCursor.type().canonicalType();
++            Cursor canonicalFieldDecl = canonicalFieldType.declaration();
++            CursorKind canonicalFieldDeclKind = (canonicalFieldDecl != null) ? canonicalFieldDecl.kind() : null;
++            if (canonicalFieldType.spelling() != null && canonicalFieldType.spelling().contains("<")
++                && (canonicalFieldDeclKind == CursorKind.STRUCT_DECL || canonicalFieldDeclKind == CursorKind.CLASS_DECL)) {
++                ParsedStructure inlineType = parseFieldsFromType(canonicalFieldType, category);
++                fields.add(new ParsedStructure.FieldInfo(
++                    fieldCursor.spelling(), null, isBitField, bitWidth, true, inlineType));
++                return Type.FieldVisitResult.CONTINUE;
++            }
++
++            // Otherwise, use the canonical type spelling, not the raw one:
++            // template members are commonly typed via a nested alias (e.g.
++            // stl::enumeration's own "using underlying_type = Underlying;"),
++            // which is never independently registered as a resolvable type
++            // anywhere -- clang_getCanonicalType resolves through it to the
++            // real underlying type (e.g. "unsigned short"), which Ghidra's
++            // DataTypeParser can actually find.
+             fields.add(new ParsedStructure.FieldInfo(
+-                fieldCursor.spelling(), fieldCursor.type().canonicalType().spelling(),
++                fieldCursor.spelling(), canonicalFieldType.spelling(),
+                 isBitField, bitWidth, false, null));
+             return Type.FieldVisitResult.CONTINUE;
+         });

@@ -40,9 +40,9 @@
     "status": "EMPTY"
   },
   "AIProcess": {
-    "actual": 288,
+    "actual": 320,
     "expected": 320,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "AIProcess::Data0B8": {
     "actual": 56,
@@ -160,7 +160,7 @@
     "status": "NO_GROUND_TRUTH"
   },
   "Actor::ACTOR_RUNTIME_DATA": {
-    "actual": 440,
+    "actual": 464,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -190,9 +190,9 @@
     "status": "EMPTY"
   },
   "ActorCause": {
-    "actual": 20,
+    "actual": 24,
     "expected": 24,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ActorEquipManager": {
     "actual": 2,
@@ -220,9 +220,9 @@
     "status": "OK"
   },
   "ActorKnowledge": {
-    "actual": 64,
+    "actual": 72,
     "expected": 72,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ActorMagicCaster": {
     "actual": 256,
@@ -315,9 +315,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "ActorValueStorage": {
-    "actual": 16,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "AddCallbackVisitor": {
     "actual": 24,
@@ -520,9 +520,9 @@
     "status": "EMPTY"
   },
   "AttackAnimationArrayMap": {
-    "actual": 48,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "AttackBlockHandler": {
     "actual": 72,
@@ -580,9 +580,9 @@
     "status": "OK"
   },
   "BGSActorCellEvent": {
-    "actual": 8,
+    "actual": 12,
     "expected": 12,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSActorDeathEvent": {
     "actual": 1,
@@ -590,14 +590,14 @@
     "status": "EMPTY"
   },
   "BGSActorEvent": {
-    "actual": 1,
+    "actual": 4,
     "expected": 4,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "BGSAddToPlayerInventoryEvent": {
-    "actual": 24,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSAddonNode": {
     "actual": 128,
@@ -610,9 +610,9 @@
     "status": "EMPTY"
   },
   "BGSAnimationSequencer": {
-    "actual": 40,
+    "actual": 56,
     "expected": 56,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSApparatus": {
     "actual": 288,
@@ -675,9 +675,9 @@
     "status": "OK"
   },
   "BGSAttackDataMap": {
-    "actual": 56,
+    "actual": 72,
     "expected": 72,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSBaseAlias": {
     "actual": 40,
@@ -720,9 +720,9 @@
     "status": "EMPTY"
   },
   "BGSCameraPath": {
-    "actual": 72,
+    "actual": 88,
     "expected": 88,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSCameraPath::RecordFlags": {
     "actual": 1,
@@ -810,9 +810,9 @@
     "status": "EMPTY"
   },
   "BGSCreatedObjectManager": {
-    "actual": 160,
+    "actual": 208,
     "expected": 208,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSCreatedObjectManager::CreatedMagicItemData": {
     "actual": 16,
@@ -820,9 +820,9 @@
     "status": "OK"
   },
   "BGSDebris": {
-    "actual": 40,
+    "actual": 56,
     "expected": 56,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSDebris::RecordFlags": {
     "actual": 1,
@@ -895,9 +895,9 @@
     "status": "OK"
   },
   "BGSDistantTreeBlock": {
-    "actual": 104,
+    "actual": 136,
     "expected": 136,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSDistantTreeBlock::InstanceData": {
     "actual": 20,
@@ -1040,9 +1040,9 @@
     "status": "OK"
   },
   "BGSFootstepManager": {
-    "actual": 56,
+    "actual": 128,
     "expected": 128,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSFootstepSet": {
     "actual": 1,
@@ -1120,9 +1120,9 @@
     "status": "EMPTY"
   },
   "BGSImpactDataSet": {
-    "actual": 72,
+    "actual": 88,
     "expected": 88,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSImpactDataSet::RecordFlags": {
     "actual": 1,
@@ -1165,9 +1165,9 @@
     "status": "OK"
   },
   "BGSLargeRefData": {
-    "actual": 96,
+    "actual": 144,
     "expected": 144,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSLensFlare": {
     "actual": 64,
@@ -1240,9 +1240,9 @@
     "status": "OK"
   },
   "BGSLocation": {
-    "actual": 232,
+    "actual": 240,
     "expected": 240,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSLocation::ChangeFlags": {
     "actual": 1,
@@ -1310,9 +1310,9 @@
     "status": "EMPTY"
   },
   "BGSMessage": {
-    "actual": 88,
+    "actual": 104,
     "expected": 104,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSMessage::MESSAGEBOX_BUTTON": {
     "actual": 16,
@@ -1350,9 +1350,9 @@
     "status": "EMPTY"
   },
   "BGSMoviePlayer": {
-    "actual": 120,
+    "actual": 192,
     "expected": 192,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSMusicPaletteTrack": {
     "actual": 1,
@@ -1405,9 +1405,9 @@
     "status": "UNRESOLVED"
   },
   "BGSNote": {
-    "actual": 168,
+    "actual": 184,
     "expected": 184,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSNote::ChangeFlags": {
     "actual": 1,
@@ -1645,9 +1645,9 @@
     "status": "OK"
   },
   "BGSRefAlias::ForcedFillData": {
-    "actual": 1,
+    "actual": 4,
     "expected": 4,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "BGSRefAlias::FromAliasFillData": {
     "actual": 16,
@@ -1770,17 +1770,17 @@
     "status": "OK"
   },
   "BGSSaveLoadFormIDMap": {
-    "actual": 72,
+    "actual": 104,
     "expected": 104,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSSaveLoadGame": {
-    "actual": 424,
+    "actual": 568,
     "expected": 840,
     "status": "MISMATCH"
   },
   "BGSSaveLoadManager": {
-    "actual": 864,
+    "actual": 952,
     "expected": 976,
     "status": "MISMATCH"
   },
@@ -1805,9 +1805,9 @@
     "status": "EMPTY"
   },
   "BGSSaveLoadReferencesMap": {
-    "actual": 96,
+    "actual": 144,
     "expected": 144,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSScene": {
     "actual": 200,
@@ -1970,7 +1970,7 @@
     "status": "OK"
   },
   "BGSStoryEventManager": {
-    "actual": 96,
+    "actual": 112,
     "expected": 104,
     "status": "MISMATCH"
   },
@@ -2010,9 +2010,9 @@
     "status": "OK"
   },
   "BGSStoryManagerQuestNode": {
-    "actual": 192,
+    "actual": 224,
     "expected": 224,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSStoryManagerQuestNode::ChangeFlags": {
     "actual": 1,
@@ -2040,7 +2040,7 @@
     "status": "NO_GROUND_TRUTH"
   },
   "BGSStoryTeller": {
-    "actual": 208,
+    "actual": 224,
     "expected": 216,
     "status": "MISMATCH"
   },
@@ -2225,9 +2225,9 @@
     "status": "OK"
   },
   "BSAudioManager": {
-    "actual": 336,
+    "actual": 400,
     "expected": 400,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSAudioManagerThread": {
     "actual": 104,
@@ -2235,9 +2235,9 @@
     "status": "OK"
   },
   "BSBatchRenderer": {
-    "actual": 248,
+    "actual": 264,
     "expected": 264,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSBatchRenderer_vtable": {
     "actual": 32,
@@ -2375,9 +2375,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "BSFaceGenManager": {
-    "actual": 88,
+    "actual": 104,
     "expected": 104,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSFaceGenModel": {
     "actual": 32,
@@ -2390,9 +2390,9 @@
     "status": "OK"
   },
   "BSFaceGenModelMap": {
-    "actual": 48,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSFaceGenModelMap::Entry": {
     "actual": 32,
@@ -2465,9 +2465,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "BSGamepadDevice": {
-    "actual": 104,
+    "actual": 208,
     "expected": 208,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSGamepadDevice::ColorParam": {
     "actual": 12,
@@ -2610,19 +2610,19 @@
     "status": "NO_GROUND_TRUTH"
   },
   "BSImagespaceShader": {
-    "actual": 392,
+    "actual": 424,
     "expected": 424,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSImagespaceShaderBlur3": {
-    "actual": 392,
+    "actual": 424,
     "expected": 424,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSInputDevice": {
-    "actual": 80,
+    "actual": 112,
     "expected": 112,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSInputDevice::InputButton": {
     "actual": 16,
@@ -2635,14 +2635,14 @@
     "status": "EMPTY"
   },
   "BSInputDeviceManager": {
-    "actual": 96,
+    "actual": 240,
     "expected": 240,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSInputDeviceManager::RUNTIME_DATA": {
-    "actual": 40,
+    "actual": 112,
     "expected": 112,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSInputEventQueue": {
     "actual": 912,
@@ -2660,9 +2660,9 @@
     "status": "OK"
   },
   "BSKeyboardDevice": {
-    "actual": 80,
+    "actual": 112,
     "expected": 112,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSKeyboardDevice::Keys": {
     "actual": 1,
@@ -2825,9 +2825,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "BSMouseDevice": {
-    "actual": 88,
+    "actual": 120,
     "expected": 120,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSMultiBound": {
     "actual": 32,
@@ -3015,12 +3015,12 @@
     "status": "EMPTY"
   },
   "BSOpenVR": {
-    "actual": 56,
+    "actual": 272,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
   "BSOpenVRControllerDevice": {
-    "actual": 80,
+    "actual": 112,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -3035,9 +3035,9 @@
     "status": "OK"
   },
   "BSPCGamepadDeviceDelegate": {
-    "actual": 112,
+    "actual": 216,
     "expected": 216,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSPCGamepadDeviceHandler": {
     "actual": 16,
@@ -3045,9 +3045,9 @@
     "status": "OK"
   },
   "BSPCOrbisGamepadDevice": {
-    "actual": 400,
+    "actual": 504,
     "expected": 504,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSPCOrbisGamepadDevice::ButtonState": {
     "actual": 4,
@@ -3180,7 +3180,7 @@
     "status": "OK"
   },
   "BSPrecomputedNavmeshInfoPathMap": {
-    "actual": 64,
+    "actual": 80,
     "expected": 72,
     "status": "MISMATCH"
   },
@@ -3240,9 +3240,9 @@
     "status": "EMPTY"
   },
   "BSSaveDataSystemUtility": {
-    "actual": 480,
+    "actual": 552,
     "expected": 552,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSSaveDataSystemUtility::Entry": {
     "actual": 408,
@@ -3270,7 +3270,7 @@
     "status": "OK"
   },
   "BSScaleformImageLoader": {
-    "actual": 64,
+    "actual": 80,
     "expected": 72,
     "status": "MISMATCH"
   },
@@ -3295,7 +3295,7 @@
     "status": "OK"
   },
   "BSScaleformTranslator": {
-    "actual": 72,
+    "actual": 88,
     "expected": 80,
     "status": "MISMATCH"
   },
@@ -3330,9 +3330,9 @@
     "status": "OK"
   },
   "BSShader": {
-    "actual": 112,
+    "actual": 144,
     "expected": 144,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSShaderAccumulator": {
     "actual": 1,
@@ -3630,9 +3630,9 @@
     "status": "OK"
   },
   "BSTrackedControllerDevice": {
-    "actual": 80,
+    "actual": 112,
     "expected": 112,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSTransformDeltaEvent": {
     "actual": 1,
@@ -3640,9 +3640,9 @@
     "status": "EMPTY"
   },
   "BSTranslator": {
-    "actual": 32,
+    "actual": 48,
     "expected": 48,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSTreeManager": {
     "actual": 136,
@@ -3695,9 +3695,9 @@
     "status": "EMPTY"
   },
   "BSVRInterface": {
-    "actual": 56,
+    "actual": 272,
     "expected": 272,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSVRInterface_vtable": {
     "actual": 192,
@@ -3715,9 +3715,9 @@
     "status": "EMPTY"
   },
   "BSVirtualKeyboardDevice": {
-    "actual": 80,
+    "actual": 112,
     "expected": 112,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSVolumetricLightingRenderData": {
     "actual": 48,
@@ -3755,9 +3755,9 @@
     "status": "OK"
   },
   "BSWin32GamepadDevice": {
-    "actual": 192,
+    "actual": 296,
     "expected": 296,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSWin32GamepadDevice::ButtonState": {
     "actual": 2,
@@ -3770,14 +3770,14 @@
     "status": "EMPTY"
   },
   "BSWin32KeyboardDevice": {
-    "actual": 848,
+    "actual": 880,
     "expected": 880,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSWin32MouseDevice": {
-    "actual": 152,
+    "actual": 184,
     "expected": 184,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSWin32MouseDevice::Keys": {
     "actual": 1,
@@ -3785,14 +3785,14 @@
     "status": "EMPTY"
   },
   "BSWin32SaveDataSystemUtility": {
-    "actual": 480,
+    "actual": 552,
     "expected": 552,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSWin32VirtualKeyboardDevice": {
-    "actual": 80,
+    "actual": 112,
     "expected": 112,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSWindModifier": {
     "actual": 56,
@@ -3820,9 +3820,9 @@
     "status": "EMPTY"
   },
   "BShkbAnimationGraph": {
-    "actual": 448,
+    "actual": 592,
     "expected": 592,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BShkbAnimationGraph::BoneNodeEntry": {
     "actual": 16,
@@ -3845,9 +3845,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "BarrierProjectile::CollisionData": {
-    "actual": 4,
+    "actual": 8,
     "expected": 8,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BarrierProjectile::RecordFlags": {
     "actual": 1,
@@ -3900,7 +3900,7 @@
     "status": "OK"
   },
   "BeamProjectile": {
-    "actual": 136,
+    "actual": 208,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -4190,9 +4190,9 @@
     "status": "EMPTY"
   },
   "CombatController": {
-    "actual": 208,
+    "actual": 216,
     "expected": 216,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "CombatEquipment": {
     "actual": 44,
@@ -4300,9 +4300,9 @@
     "status": "OK"
   },
   "CombatMagicCasterReanimate": {
-    "actual": 40,
+    "actual": 48,
     "expected": 48,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "CombatMagicCasterRestore": {
     "actual": 48,
@@ -4340,9 +4340,9 @@
     "status": "OK"
   },
   "CombatMember": {
-    "actual": 8,
+    "actual": 12,
     "expected": 12,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "CombatObject": {
     "actual": 16,
@@ -4355,9 +4355,9 @@
     "status": "EMPTY"
   },
   "CombatSearchDoor": {
-    "actual": 3,
+    "actual": 12,
     "expected": 12,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "CombatSearchLocation": {
     "actual": 32,
@@ -4410,9 +4410,9 @@
     "status": "EMPTY"
   },
   "CombatThreatMap": {
-    "actual": 48,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "CommandEffect": {
     "actual": 152,
@@ -4515,7 +4515,7 @@
     "status": "OK"
   },
   "ConstructibleObjectMenu": {
-    "actual": 344,
+    "actual": 360,
     "expected": 352,
     "status": "MISMATCH"
   },
@@ -4555,9 +4555,9 @@
     "status": "OK"
   },
   "ControlMap": {
-    "actual": 224,
+    "actual": 296,
     "expected": 296,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ControlMap::InputContext": {
     "actual": 1,
@@ -4635,9 +4635,9 @@
     "status": "OK"
   },
   "CrosshairPickData": {
-    "actual": 48,
+    "actual": 56,
     "expected": 56,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "CubeMapRenderTargetProperties": {
     "actual": 12,
@@ -5530,9 +5530,9 @@
     "status": "OK"
   },
   "DetectionEvent": {
-    "actual": 20,
+    "actual": 24,
     "expected": 24,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "DetectionListener": {
     "actual": 16,
@@ -5560,9 +5560,9 @@
     "status": "OK"
   },
   "DialogueItem": {
-    "actual": 56,
+    "actual": 72,
     "expected": 72,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "DialogueMenu": {
     "actual": 88,
@@ -5580,9 +5580,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "DialoguePackage": {
-    "actual": 248,
+    "actual": 256,
     "expected": 256,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "DialogueResponse": {
     "actual": 64,
@@ -5625,9 +5625,9 @@
     "status": "OK"
   },
   "DoorTeleportData": {
-    "actual": 28,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "DragonSoulsGained": {
     "actual": 1,
@@ -5685,9 +5685,9 @@
     "status": "EMPTY"
   },
   "EffectSetting": {
-    "actual": 392,
+    "actual": 408,
     "expected": 408,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "EffectSetting::EffectSettingData": {
     "actual": 240,
@@ -5785,9 +5785,9 @@
     "status": "OK"
   },
   "ErrorLogger": {
-    "actual": 64,
+    "actual": 152,
     "expected": 152,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ErrorLogger::PerThreadErrorCounts": {
     "actual": 12,
@@ -5810,12 +5810,12 @@
     "status": "NO_GROUND_TRUTH"
   },
   "Explosion": {
-    "actual": 272,
+    "actual": 280,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
   "Explosion::EXPLOSION_RUNTIME_DATA": {
-    "actual": 160,
+    "actual": 168,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -5830,14 +5830,14 @@
     "status": "OK"
   },
   "ExtraActivateRef": {
-    "actual": 24,
+    "actual": 40,
     "expected": 40,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ExtraActivateRefChildren": {
-    "actual": 24,
+    "actual": 40,
     "expected": 40,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ExtraActorCause": {
     "actual": 24,
@@ -5885,9 +5885,9 @@
     "status": "OK"
   },
   "ExtraAttachRefChildren": {
-    "actual": 16,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ExtraAttachedArrows3D": {
     "actual": 48,
@@ -6025,9 +6025,9 @@
     "status": "OK"
   },
   "ExtraDroppedItemList": {
-    "actual": 16,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ExtraEditorID": {
     "actual": 24,
@@ -6050,9 +6050,9 @@
     "status": "OK"
   },
   "ExtraEnableStateChildren": {
-    "actual": 16,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ExtraEnableStateParent": {
     "actual": 24,
@@ -6090,9 +6090,9 @@
     "status": "OK"
   },
   "ExtraFollower::FollowerInfo": {
-    "actual": 4,
+    "actual": 8,
     "expected": 8,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ExtraFollowerSwimBreadcrumb": {
     "actual": 36,
@@ -6100,9 +6100,9 @@
     "status": "OK"
   },
   "ExtraFollowerSwimBreadcrumbs": {
-    "actual": 40,
+    "actual": 56,
     "expected": 56,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ExtraForcedLandingMarker": {
     "actual": 24,
@@ -6285,9 +6285,9 @@
     "status": "OK"
   },
   "ExtraLitWaterRefs": {
-    "actual": 16,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ExtraLocation": {
     "actual": 24,
@@ -6665,9 +6665,9 @@
     "status": "OK"
   },
   "ExtraWaterCurrentZoneData": {
-    "actual": 88,
+    "actual": 104,
     "expected": 104,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ExtraWaterData": {
     "actual": 40,
@@ -6675,9 +6675,9 @@
     "status": "OK"
   },
   "ExtraWaterLightRefs": {
-    "actual": 16,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ExtraWeaponAttackSound": {
     "actual": 32,
@@ -6840,9 +6840,9 @@
     "status": "EMPTY"
   },
   "FragmentSystem": {
-    "actual": 200,
+    "actual": 280,
     "expected": 280,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "FreeBlock": {
     "actual": 8,
@@ -6880,9 +6880,9 @@
     "status": "OK"
   },
   "FxDelegate": {
-    "actual": 32,
+    "actual": 40,
     "expected": 32,
-    "status": "OK"
+    "status": "MISMATCH"
   },
   "FxDelegate::CallbackDefn": {
     "actual": 16,
@@ -8050,9 +8050,9 @@
     "status": "EMPTY"
   },
   "GMemoryHeap": {
-    "actual": 184,
+    "actual": 200,
     "expected": 200,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GMemoryHeap::HeapDesc": {
     "actual": 64,
@@ -8110,9 +8110,9 @@
     "status": "OK"
   },
   "GMemoryHeapPT": {
-    "actual": 200,
+    "actual": 216,
     "expected": 216,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GMemoryHeap_vtable": {
     "actual": 280,
@@ -8190,7 +8190,7 @@
     "status": "EMPTY"
   },
   "GRenderer": {
-    "actual": 48,
+    "actual": 64,
     "expected": 56,
     "status": "MISMATCH"
   },
@@ -8430,7 +8430,7 @@
     "status": "EMPTY"
   },
   "GameSettingCollection": {
-    "actual": 8,
+    "actual": 48,
     "expected": 320,
     "status": "MISMATCH"
   },
@@ -8635,9 +8635,9 @@
     "status": "EMPTY"
   },
   "HandlePolicy": {
-    "actual": 80,
+    "actual": 112,
     "expected": 112,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "HandlerCreationMissPolicy": {
     "actual": null,
@@ -8645,7 +8645,7 @@
     "status": "UNRESOLVED"
   },
   "HandlerDictionary": {
-    "actual": 16,
+    "actual": 64,
     "expected": 80,
     "status": "MISMATCH"
   },
@@ -8700,9 +8700,9 @@
     "status": "OK"
   },
   "HighProcessData": {
-    "actual": 1096,
+    "actual": 1144,
     "expected": 1144,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "HighProcessData::Data190": {
     "actual": 48,
@@ -8735,9 +8735,9 @@
     "status": "OK"
   },
   "HitData": {
-    "actual": 136,
+    "actual": 144,
     "expected": 144,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "HorseCameraState": {
     "actual": 248,
@@ -8800,7 +8800,7 @@
     "status": "EMPTY"
   },
   "ICellAttachDetachEventSource": {
-    "actual": 32,
+    "actual": 104,
     "expected": 96,
     "status": "MISMATCH"
   },
@@ -9150,9 +9150,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "IDDatabase::Offset2ID": {
-    "actual": 1,
+    "actual": 24,
     "expected": null,
-    "status": "EMPTY"
+    "status": "NO_GROUND_TRUTH"
   },
   "IDDatabase::header_t": {
     "actual": 16,
@@ -9505,12 +9505,12 @@
     "status": "OK"
   },
   "INIPrefSettingCollection": {
-    "actual": 8,
+    "actual": 24,
     "expected": 296,
     "status": "MISMATCH"
   },
   "INISettingCollection": {
-    "actual": 8,
+    "actual": 24,
     "expected": 296,
     "status": "MISMATCH"
   },
@@ -10065,9 +10065,9 @@
     "status": "EMPTY"
   },
   "LOADED_CELL_DATA": {
-    "actual": 352,
+    "actual": 384,
     "expected": 384,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "LOADED_REF_DATA": {
     "actual": 120,
@@ -10250,9 +10250,9 @@
     "status": "EMPTY"
   },
   "Logger": {
-    "actual": 88,
+    "actual": 176,
     "expected": 176,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "LoggingDisabler": {
     "actual": 40,
@@ -10435,14 +10435,14 @@
     "status": "OK"
   },
   "MapMenu": {
-    "actual": 197896,
+    "actual": 197904,
     "expected": 198040,
     "status": "MISMATCH"
   },
   "MapMenu::RUNTIME_DATA": {
-    "actual": 197656,
+    "actual": 197664,
     "expected": 197664,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "MapMenu::RUNTIME_DATA2": {
     "actual": 168,
@@ -10470,9 +10470,9 @@
     "status": "OK"
   },
   "MarkerUsedData": {
-    "actual": 8,
+    "actual": 12,
     "expected": 12,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "MaxSpeeds": {
     "actual": 44,
@@ -10555,14 +10555,14 @@
     "status": "OK"
   },
   "MenuTopicManager": {
-    "actual": 216,
+    "actual": 224,
     "expected": 216,
-    "status": "OK"
+    "status": "MISMATCH"
   },
   "MenuTopicManager::Dialogue": {
-    "actual": 72,
+    "actual": 88,
     "expected": 88,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "MenuTopicManager_vtable": {
     "actual": 24,
@@ -10590,9 +10590,9 @@
     "status": "OK"
   },
   "MiddleHighProcessData": {
-    "actual": 736,
+    "actual": 824,
     "expected": 824,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "MiddleLowProcessData": {
     "actual": 4,
@@ -10640,9 +10640,9 @@
     "status": "OK"
   },
   "ModelReferenceEffect": {
-    "actual": 208,
+    "actual": 216,
     "expected": 216,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "Modifiers": {
     "actual": 12,
@@ -10670,9 +10670,9 @@
     "status": "OK"
   },
   "MoveToFunctor": {
-    "actual": 56,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "MovementControllerAI": {
     "actual": 304,
@@ -10755,7 +10755,7 @@
     "status": "EMPTY"
   },
   "NavMeshInfoMap": {
-    "actual": 200,
+    "actual": 248,
     "expected": 240,
     "status": "MISMATCH"
   },
@@ -10875,9 +10875,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "NiCloningProcess": {
-    "actual": 88,
+    "actual": 120,
     "expected": 120,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "NiCollisionObject": {
     "actual": 24,
@@ -10910,9 +10910,9 @@
     "status": "OK"
   },
   "NiControllerManager": {
-    "actual": 184,
+    "actual": 200,
     "expected": 200,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "NiControllerSequence": {
     "actual": 184,
@@ -11340,9 +11340,9 @@
     "status": "OK"
   },
   "NonActorMagicTarget": {
-    "actual": 48,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "OBJ_ARMA": {
     "actual": 12,
@@ -11380,7 +11380,7 @@
     "status": "OK"
   },
   "Object": {
-    "actual": 352,
+    "actual": 464,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -11395,7 +11395,7 @@
     "status": "EMPTY"
   },
   "ObjectBindPolicy.conflict": {
-    "actual": 104,
+    "actual": 136,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -11480,9 +11480,9 @@
     "status": "OK"
   },
   "OcclusionPlaneLinkedRefData": {
-    "actual": 4,
+    "actual": 16,
     "expected": 16,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "OldMessageBoxCallback": {
     "actual": 24,
@@ -11495,9 +11495,9 @@
     "status": "OK"
   },
   "OverrideData": {
-    "actual": 56,
+    "actual": 72,
     "expected": 72,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "PACKAGE_DATA": {
     "actual": 12,
@@ -11550,9 +11550,9 @@
     "status": "OK"
   },
   "PackageList": {
-    "actual": 1,
+    "actual": 16,
     "expected": 16,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "PackageLocation": {
     "actual": 24,
@@ -11685,22 +11685,22 @@
     "status": "NO_GROUND_TRUTH"
   },
   "PlayerCharacter::CrimeValue": {
-    "actual": 64,
+    "actual": 96,
     "expected": 96,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "PlayerCharacter::GameStateData": {
-    "actual": 8,
+    "actual": 12,
     "expected": 12,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "PlayerCharacter::INFO_RUNTIME_DATA": {
-    "actual": 328,
+    "actual": 336,
     "expected": 336,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "PlayerCharacter::PLAYER_RUNTIME_DATA": {
-    "actual": 1928,
+    "actual": 2056,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -11800,9 +11800,9 @@
     "status": "OK"
   },
   "PortalLinkedRefData": {
-    "actual": 2,
+    "actual": 8,
     "expected": 8,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "PositionPlayerEvent": {
     "actual": 4,
@@ -11825,7 +11825,7 @@
     "status": "NO_GROUND_TRUTH"
   },
   "PrecomputedNavmeshInfoPathMap": {
-    "actual": 64,
+    "actual": 80,
     "expected": 72,
     "status": "MISMATCH"
   },
@@ -11835,9 +11835,9 @@
     "status": "UNRESOLVED"
   },
   "ProcessLists": {
-    "actual": 480,
+    "actual": 496,
     "expected": 496,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ProcessLists::GetActorsFilter": {
     "actual": 8,
@@ -11850,9 +11850,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "Profiler": {
-    "actual": 176,
+    "actual": 224,
     "expected": 224,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "Projectile": {
     "actual": 112,
@@ -11860,9 +11860,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "Projectile::ImpactData": {
-    "actual": 72,
+    "actual": 80,
     "expected": 80,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "Projectile::LaunchData": {
     "actual": 168,
@@ -11880,7 +11880,7 @@
     "status": "NO_GROUND_TRUTH"
   },
   "Projectile::PROJECTILE_RUNTIME_DATA": {
-    "actual": 296,
+    "actual": 320,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -11890,9 +11890,9 @@
     "status": "OK"
   },
   "Projectile::WobbleControl": {
-    "actual": 40,
+    "actual": 44,
     "expected": 44,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "Property": {
     "actual": 56,
@@ -11995,9 +11995,9 @@
     "status": "OK"
   },
   "REF_ACTIVATE_DATA": {
-    "actual": 4,
+    "actual": 8,
     "expected": 8,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "RENDER_TARGETS": {
     "actual": 1,
@@ -12095,9 +12095,9 @@
     "status": "OK"
   },
   "ReferenceEffect": {
-    "actual": 64,
+    "actual": 72,
     "expected": 72,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ReferenceEffectController": {
     "actual": 8,
@@ -12110,12 +12110,12 @@
     "status": "NO_GROUND_TRUTH"
   },
   "RefrInteraction": {
-    "actual": 24,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "RegSettingCollection": {
-    "actual": 8,
+    "actual": 24,
     "expected": 296,
     "status": "MISMATCH"
   },
@@ -12135,9 +12135,9 @@
     "status": "OK"
   },
   "RemoveItemFunctor": {
-    "actual": 40,
+    "actual": 48,
     "expected": 48,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "RenderTargetData": {
     "actual": 48,
@@ -12190,7 +12190,7 @@
     "status": "UNRESOLVED"
   },
   "ResponseDictionary": {
-    "actual": 16,
+    "actual": 64,
     "expected": 80,
     "status": "MISMATCH"
   },
@@ -12200,9 +12200,9 @@
     "status": "OK"
   },
   "RoomRefData": {
-    "actual": 24,
+    "actual": 56,
     "expected": 56,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "Rumble": {
     "actual": 1,
@@ -12400,9 +12400,9 @@
     "status": "OK"
   },
   "Script": {
-    "actual": 96,
+    "actual": 128,
     "expected": 128,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "Script::RecordFlags": {
     "actual": 1,
@@ -12425,9 +12425,9 @@
     "status": "OK"
   },
   "ScriptEventSourceHolder": {
-    "actual": 864,
+    "actual": 4752,
     "expected": 4752,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ScriptFunction": {
     "actual": 128,
@@ -12510,9 +12510,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "ShaderReferenceEffect": {
-    "actual": 304,
+    "actual": 312,
     "expected": 312,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ShaderReferenceEffect::ParticleShader": {
     "actual": 16,
@@ -12585,9 +12585,9 @@
     "status": "OK"
   },
   "Sky": {
-    "actual": 704,
+    "actual": 712,
     "expected": 712,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "Sky::SkyStaticRefData": {
     "actual": 1,
@@ -12620,7 +12620,7 @@
     "status": "NO_GROUND_TRUTH"
   },
   "SkyrimVM": {
-    "actual": 1672,
+    "actual": 2056,
     "expected": 35192,
     "status": "MISMATCH"
   },
@@ -12635,9 +12635,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "SkyrimVM::InventoryEventFilterLists": {
-    "actual": 72,
+    "actual": 104,
     "expected": 104,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "SkyrimVM::LOSDataEvent": {
     "actual": 32,
@@ -12675,7 +12675,7 @@
     "status": "OK"
   },
   "SmithingMenu": {
-    "actual": 352,
+    "actual": 368,
     "expected": 360,
     "status": "MISMATCH"
   },
@@ -12710,9 +12710,9 @@
     "status": "OK"
   },
   "SpawnHazardEffect": {
-    "actual": 152,
+    "actual": 160,
     "expected": 160,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "SpecialRefData": {
     "actual": 24,
@@ -12865,7 +12865,7 @@
     "status": "OK"
   },
   "SubtitleManager": {
-    "actual": 40,
+    "actual": 44,
     "expected": 48,
     "status": "MISMATCH"
   },
@@ -12875,9 +12875,9 @@
     "status": "OK"
   },
   "SummonPlacementEffect": {
-    "actual": 152,
+    "actual": 160,
     "expected": 160,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "Sun": {
     "actual": 80,
@@ -12900,7 +12900,7 @@
     "status": "NO_GROUND_TRUTH"
   },
   "TES": {
-    "actual": 608,
+    "actual": 712,
     "expected": 696,
     "status": "MISMATCH"
   },
@@ -12915,9 +12915,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "TESAIForm": {
-    "actual": 24,
+    "actual": 40,
     "expected": 40,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TESActionData": {
     "actual": 96,
@@ -12935,9 +12935,9 @@
     "status": "OK"
   },
   "TESActorBase": {
-    "actual": 320,
+    "actual": 336,
     "expected": 336,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TESActorBaseData": {
     "actual": 88,
@@ -13065,9 +13065,9 @@
     "status": "EMPTY"
   },
   "TESClimate": {
-    "actual": 112,
+    "actual": 128,
     "expected": 128,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TESClimate::RecordFlags": {
     "actual": 1,
@@ -13120,9 +13120,9 @@
     "status": "OK"
   },
   "TESContainerChangedEvent": {
-    "actual": 20,
+    "actual": 24,
     "expected": 24,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TESCustomPackageData": {
     "actual": 64,
@@ -13190,9 +13190,9 @@
     "status": "EMPTY"
   },
   "TESFaction": {
-    "actual": 224,
+    "actual": 256,
     "expected": 256,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TESFaction::ChangeFlags": {
     "actual": 1,
@@ -13210,9 +13210,9 @@
     "status": "OK"
   },
   "TESFile": {
-    "actual": 1192,
+    "actual": 1224,
     "expected": 1224,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TESFileArray": {
     "actual": 16,
@@ -13370,7 +13370,7 @@
     "status": "OK"
   },
   "TESImageSpaceModifier": {
-    "actual": 264,
+    "actual": 328,
     "expected": 736,
     "status": "MISMATCH"
   },
@@ -13380,9 +13380,9 @@
     "status": "EMPTY"
   },
   "TESImageSpaceModifier::Cinematic": {
-    "actual": 1,
+    "actual": 64,
     "expected": 64,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "TESImageSpaceModifier::DOF": {
     "actual": 24,
@@ -13420,9 +13420,9 @@
     "status": "EMPTY"
   },
   "TESLandTexture": {
-    "actual": 64,
+    "actual": 80,
     "expected": 80,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TESLandTexture::RecordFlags": {
     "actual": 1,
@@ -13560,9 +13560,9 @@
     "status": "OK"
   },
   "TESNPC": {
-    "actual": 600,
+    "actual": 616,
     "expected": 616,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TESNPC::ChangeFlags": {
     "actual": 1,
@@ -13690,7 +13690,7 @@
     "status": "EMPTY"
   },
   "TESObjectCELL::RUNTIME_DATA": {
-    "actual": 208,
+    "actual": 224,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -14010,9 +14010,9 @@
     "status": "OK"
   },
   "TESReactionForm": {
-    "actual": 16,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TESRegion": {
     "actual": 80,
@@ -14045,9 +14045,9 @@
     "status": "OK"
   },
   "TESRegionDataList": {
-    "actual": 8,
+    "actual": 24,
     "expected": 24,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TESRegionDataManager": {
     "actual": 16,
@@ -14080,9 +14080,9 @@
     "status": "OK"
   },
   "TESRegionDataWeather": {
-    "actual": 16,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TESRegionData_vtable": {
     "actual": 64,
@@ -14090,9 +14090,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "TESRegionList": {
-    "actual": 16,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TESRegionList_vtable": {
     "actual": 8,
@@ -14105,9 +14105,9 @@
     "status": "OK"
   },
   "TESRegionPointList": {
-    "actual": 40,
+    "actual": 56,
     "expected": 56,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TESRegionPointList::ScaleResult": {
     "actual": 16,
@@ -14345,9 +14345,9 @@
     "status": "OK"
   },
   "TESWeather": {
-    "actual": 2248,
+    "actual": 2264,
     "expected": 2264,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TESWeather::ColorTimes": {
     "actual": 1,
@@ -14385,9 +14385,9 @@
     "status": "OK"
   },
   "TESWeather::WeatherSoundList": {
-    "actual": 1,
+    "actual": 16,
     "expected": null,
-    "status": "EMPTY"
+    "status": "NO_GROUND_TRUTH"
   },
   "TESWeightForm": {
     "actual": 16,
@@ -14405,9 +14405,9 @@
     "status": "EMPTY"
   },
   "TESWorldSpace": {
-    "actual": 712,
+    "actual": 856,
     "expected": 856,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TESWorldSpace::RecordFlags": {
     "actual": 1,
@@ -14570,9 +14570,9 @@
     "status": "OK"
   },
   "UI": {
-    "actual": 224,
+    "actual": 456,
     "expected": 456,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "UI3DSceneManager": {
     "actual": 1,
@@ -14600,7 +14600,7 @@
     "status": "OK"
   },
   "UIMessageQueue": {
-    "actual": 2912,
+    "actual": 2928,
     "expected": 2944,
     "status": "MISMATCH"
   },
@@ -14675,9 +14675,9 @@
     "status": "OK"
   },
   "VATSCommand": {
-    "actual": 176,
+    "actual": 184,
     "expected": 184,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "VDescTable": {
     "actual": 16,
@@ -14770,7 +14770,7 @@
     "status": "OK"
   },
   "VirtualMachine": {
-    "actual": 5120,
+    "actual": 5320,
     "expected": 38168,
     "status": "MISMATCH"
   },
@@ -15830,7 +15830,7 @@
     "status": "EMPTY"
   },
   "_Recursive_dir_enum_impl": {
-    "actual": 48,
+    "actual": 72,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -16025,7 +16025,7 @@
     "status": "NO_GROUND_TRUTH"
   },
   "_Stop_state": {
-    "actual": 20,
+    "actual": 28,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -16910,9 +16910,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "formatter": {
-    "actual": 1,
+    "actual": 8,
     "expected": null,
-    "status": "EMPTY"
+    "status": "NO_GROUND_TRUTH"
   },
   "forward_iterator_tag": {
     "actual": 1,
@@ -18565,7 +18565,7 @@
     "status": "NO_GROUND_TRUTH"
   },
   "leap_second": {
-    "actual": 16,
+    "actual": 24,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -18590,7 +18590,7 @@
     "status": "EMPTY"
   },
   "local_info": {
-    "actual": 40,
+    "actual": 72,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -18890,7 +18890,7 @@
     "status": "EMPTY"
   },
   "sys_info": {
-    "actual": 16,
+    "actual": 32,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -18975,12 +18975,12 @@
     "status": "NO_GROUND_TRUTH"
   },
   "tzdb": {
-    "actual": 1,
+    "actual": 80,
     "expected": null,
-    "status": "EMPTY"
+    "status": "NO_GROUND_TRUTH"
   },
   "tzdb_list": {
-    "actual": 8,
+    "actual": 16,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
