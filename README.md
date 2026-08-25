@@ -14,7 +14,7 @@ This is a collection of tools, type archives, and runtime instrumentation that l
 skyrim-re-toolkit/
 ├── type-importer/          # C++ headers → Ghidra / IDA type archives
 │   ├── DESIGN.md           # Full investigation log: root-causes, verification, open questions
-│   ├── patches/            # 11 accepted fixes for the vendored parser (+ deferred investigations), each with a .md writeup
+│   ├── patches/            # 13 accepted fixes for the vendored parser (+ 2 deferred investigations), each with a .md writeup
 │   ├── scripts/            # generate_gdt.sh, coverage sweep + supporting tooling (mining, layout dumps)
 │   ├── tools/              # GenerateGdt.java — the real CLI
 │   ├── stubs/              # Minimal headers so real CommonLibSSE-NG parses without a full build
@@ -27,7 +27,7 @@ skyrim-re-toolkit/
 
 **The problem:** CommonLibSSE-NG contains thousands of reverse-engineered C++ class definitions, struct layouts, vtables, and bitfields. Getting them into Ghidra currently means either (a) hunting for a floating `types.h` file in a Discord server, or (b) manually recreating every struct by hand.
 
-**The solution:** A parser pipeline that reads CommonLibSSE-NG headers and emits Ghidra Data Type Archives (`.gdt`) and IDA Type Libraries (`.til`), built on [`playday3008/GhidraClangPoweredParse`](https://github.com/playday3008/GhidraClangPoweredParse) (a libclang-based Ghidra extension), vendored as a submodule and patched with **eleven accepted fixes** (patches 0001–0006, 0009, and 0011–0014; template base-class inlining (0007) remains deferred — see `type-importer/patches/`) developed and verified against real CommonLibSSE-NG headers.
+**The solution:** A parser pipeline that reads CommonLibSSE-NG headers and emits Ghidra Data Type Archives (`.gdt`) and IDA Type Libraries (`.til`), built on [`playday3008/GhidraClangPoweredParse`](https://github.com/playday3008/GhidraClangPoweredParse) (a libclang-based Ghidra extension), vendored as a submodule and patched with **thirteen accepted fixes** (patches 0001–0006, 0009–0015; 0007 template base-class inlining and 0008 `isPolymorphic` template-blindness remain deferred — see `type-importer/patches/`) developed and verified against real CommonLibSSE-NG headers. A full-namespace coverage sweep now reports **1,832 classes byte-accurate** against the headers' own `static_assert`s (up from ~1,000), gated in CI so no change can silently regress a previously-correct class.
 
 - **Primary approach:** libclang preprocessing → flattened C-compatible structs → Ghidra's Java type-manager API
 - **Handles:** `BSTArray<T>`, `REL::Relocation`, `stl::enumeration`, multiple inheritance (including template-specialization base classes), MSVC bitfield packing, `std::`-qualified builtin types
@@ -42,7 +42,7 @@ skyrim-re-toolkit/
 
 **The solution (planned):** A CI-driven repository that publishes pre-built type archives for every supported Skyrim runtime — SE 1.5.97, AE 1.6.640/1.6.1170/1.7.99, VR 1.4.15, GOG 1.6.1179.
 
-**Status: early scaffold, AE only.** A GitHub Actions workflow (`.github/workflows/symbol-archive-build.yml`, manual dispatch) wraps `type-importer/scripts/generate_gdt.sh` to build a full-namespace AE `.gdt` and publish it as a workflow artifact. See `symbol-archive/README.md` for the honest accuracy caveat — `type-importer`'s own coverage sweep currently shows ~45% of checkable classes as byte-accurate, so this is a real, traceable build artifact for testing, not yet a "trust every struct" release. SE/VR/GOG runtimes and versioned GitHub Releases are not started.
+**Status: early scaffold, AE only.** A GitHub Actions workflow (`.github/workflows/symbol-archive-build.yml`, manual dispatch) wraps `type-importer/scripts/generate_gdt.sh` to build a full-namespace AE `.gdt` and publish it as a workflow artifact. See `symbol-archive/README.md` for the honest accuracy caveat — 1,832 classes are byte-accurate today, so this is a real, traceable build artifact, with the rest of the long tail documented rather than silently wrong. SE/VR/GOG runtimes and versioned GitHub Releases are not started (a first AE 1.6.1170 release is the next planned step). See `demo/` for a worked before/after showing what the archive buys you in Ghidra.
 
 ### 3. runtime-harness
 
@@ -126,11 +126,11 @@ See their sections above for status. `runtime-harness` requires Windows + Visual
 | Milestone | Status | Notes / Blockers |
 |-----------|--------|----------|
 | v0.1 — GDT for `TESForm`→`TESObjectREFR` chain (AE 1.6.1170) | ✅ **Done, verified** | See `type-importer/DESIGN.md` and `type-importer/patches/` |
-| v0.1.1 — Extend to more of the class hierarchy | In progress | Full-namespace coverage sweep built and running (see `type-importer/scripts/coverage_report.py`); ~45% of checkable classes byte-accurate as of the last sweep, with a prioritized punch list tracked for follow-up patches |
+| v0.1.1 — Extend to more of the class hierarchy | In progress | Full-namespace coverage sweep built and running (see `type-importer/scripts/coverage_report.py`); **1,832 classes byte-accurate**, most of the modder-facing hotspot list exact, with a prioritized punch list tracked for follow-up patches |
 | v0.1.2 — IDA `.til` output | Not started | `.gdt` path is proven; `.til` export is a separate code path |
 | v0.2 — Other runtimes (SE 1.5.97, AE 1.7.99, VR, GOG) | Not started | Tooling is runtime-agnostic; needs per-runtime validation against real binaries (Address Library cross-check) |
 | v0.3 — CI auto-build on CommonLibSSE-NG releases | In progress | `type-importer` has a CI regression gate (`.github/workflows/type-importer-coverage.yml`); `symbol-archive` has a manual-dispatch AE build (`.github/workflows/symbol-archive-build.yml`). Both Linux-native GitHub Actions runners. Automatic rebuild on submodule bump not started |
-| v0.4 — AIProcessInspector / runtime-harness plugin | In progress | Windows build machine online; minimal CommonLibSSE-NG plugin skeleton in `runtime-harness/`, toolchain bring-up underway |
+| v0.4 — AIProcessInspector / runtime-harness plugin | In progress | Windows build machine online; minimal CommonLibSSE-NG plugin **builds to a verified SKSE DLL** (`runtime-harness/`, static x64, all three SKSE exports); not yet run in-game |
 | v0.5 — Cross-game type propagation (Skyrim → Fallout 4 → Starfield) | Not started | `libxse/commonlib-shared` header unification |
 | v1.0 — Stable release with full documentation | Not started | Community validation; maintainer feedback |
 
