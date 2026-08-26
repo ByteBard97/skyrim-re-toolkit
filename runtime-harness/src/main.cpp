@@ -25,6 +25,8 @@
 //     SKSE::log::log_directory() (SKSE/Logger.h:38),
 //     SKSE::stl::report_and_fail (SKSE/Impl/PCH.h:660).
 
+#include "AIProcessInspector.h"
+
 #include <RE/Skyrim.h>
 #include <SKSE/SKSE.h>
 
@@ -63,6 +65,15 @@ void OnMessage(SKSE::MessagingInterface::Message* message)
         case SKSE::MessagingInterface::kDataLoaded:
             SKSE::log::info("kDataLoaded received -- game data is fully loaded.");
             break;
+        case SKSE::MessagingInterface::kNewGame:
+            SKSE::log::info("kNewGame received -- a new game started.");
+            break;
+        case SKSE::MessagingInterface::kPreLoadGame:
+            SKSE::log::info("kPreLoadGame received -- a save is about to load.");
+            break;
+        case SKSE::MessagingInterface::kPostLoadGame:
+            SKSE::log::info("kPostLoadGame received -- a save finished loading.");
+            break;
         default:
             break;
     }
@@ -84,6 +95,8 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
         SKSE::log::error("Failed to register messaging listener.");
         return false;
     }
+
+    AIProcessInspector::Install();
 
     SKSE::log::info("Loaded.");
     return true;

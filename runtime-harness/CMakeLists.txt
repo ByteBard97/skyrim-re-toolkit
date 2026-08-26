@@ -46,7 +46,8 @@ set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
 add_subdirectory("${RUNTIME_HARNESS_COMMONLIB_PATH}" commonlibsse-ng)
 
 set(sources
-    src/main.cpp)
+    src/main.cpp
+    src/AIProcessInspector.cpp)
 
 # Without the registry port's add_commonlibsse_plugin() helper, declare
 # the DLL directly. The SKSE plugin version data AE requires is exported
