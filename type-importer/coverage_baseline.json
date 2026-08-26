@@ -155,7 +155,7 @@
     "status": "NO_GROUND_TRUTH"
   },
   "Actor": {
-    "actual": 112,
+    "actual": 144,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -470,7 +470,7 @@
     "status": "OK"
   },
   "ArrowProjectile": {
-    "actual": 112,
+    "actual": 144,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -3835,7 +3835,7 @@
     "status": "OK"
   },
   "BarrierProjectile": {
-    "actual": 112,
+    "actual": 144,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -3870,9 +3870,9 @@
     "status": "OK"
   },
   "BaseExtraList": {
-    "actual": 1,
+    "actual": 24,
     "expected": null,
-    "status": "EMPTY"
+    "status": "NO_GROUND_TRUTH"
   },
   "BaseExtraList::PresenceBitfield": {
     "actual": 24,
@@ -3900,7 +3900,7 @@
     "status": "OK"
   },
   "BeamProjectile": {
-    "actual": 208,
+    "actual": 240,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -4115,7 +4115,7 @@
     "status": "OK"
   },
   "Character": {
-    "actual": 112,
+    "actual": 144,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -4450,7 +4450,7 @@
     "status": "OK"
   },
   "ConeProjectile": {
-    "actual": 112,
+    "actual": 144,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -5810,7 +5810,7 @@
     "status": "NO_GROUND_TRUTH"
   },
   "Explosion": {
-    "actual": 280,
+    "actual": 312,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -6000,9 +6000,9 @@
     "status": "OK"
   },
   "ExtraDataList": {
-    "actual": 1,
+    "actual": 32,
     "expected": null,
-    "status": "EMPTY"
+    "status": "NO_GROUND_TRUTH"
   },
   "ExtraDecalGroup": {
     "actual": 24,
@@ -6825,7 +6825,7 @@
     "status": "OK"
   },
   "FlameProjectile": {
-    "actual": 112,
+    "actual": 144,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -8475,7 +8475,7 @@
     "status": "OK"
   },
   "GrenadeProjectile": {
-    "actual": 112,
+    "actual": 144,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -8650,7 +8650,7 @@
     "status": "MISMATCH"
   },
   "Hazard": {
-    "actual": 112,
+    "actual": 144,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -9910,7 +9910,7 @@
     "status": "EMPTY"
   },
   "Inventory3DManager": {
-    "actual": 80,
+    "actual": 112,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -10600,7 +10600,7 @@
     "status": "OK"
   },
   "MissileProjectile": {
-    "actual": 112,
+    "actual": 144,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -11680,7 +11680,7 @@
     "status": "OK"
   },
   "PlayerCharacter": {
-    "actual": 112,
+    "actual": 144,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -11855,7 +11855,7 @@
     "status": "OK"
   },
   "Projectile": {
-    "actual": 112,
+    "actual": 144,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -13675,7 +13675,7 @@
     "status": "EMPTY"
   },
   "TESObjectCELL": {
-    "actual": 72,
+    "actual": 104,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -13770,7 +13770,7 @@
     "status": "EMPTY"
   },
   "TESObjectREFR": {
-    "actual": 112,
+    "actual": 144,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },

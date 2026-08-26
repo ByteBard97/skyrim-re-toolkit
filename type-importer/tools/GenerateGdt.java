@@ -64,6 +64,7 @@ public class GenerateGdt {
     public static void main(String[] args) throws Exception {
         String commonlib = null, stubs = null, winsdkCrt = null, winsdkUcrt = null;
         String output = null, runtimeDefine = "ENABLE_SKYRIM_AE=1", reportCsv = null;
+        String tailPaddingHints = null;
         List<String> headers = new ArrayList<>();
 
         for (int i = 0; i < args.length; i++) {
@@ -75,6 +76,7 @@ public class GenerateGdt {
                 case "--output" -> output = args[++i];
                 case "--runtime" -> runtimeDefine = args[++i];
                 case "--report-csv" -> reportCsv = args[++i];
+                case "--tail-padding-hints" -> tailPaddingHints = args[++i];
                 default -> headers.add(args[i]);
             }
         }
@@ -159,6 +161,11 @@ public class GenerateGdt {
         fileDtMgr.endTransaction(txId, true);
         fileDtMgr.save();
 
+        if (tailPaddingHints != null) {
+            applyTailPaddingHints(fileDtMgr, tailPaddingHints);
+            fileDtMgr.save();
+        }
+
         System.out.println("Committed " + added + " types (" + failed + " failed) to "
             + gdtFile.getAbsolutePath() + " (" + gdtFile.length() + " bytes)");
 
@@ -216,5 +223,89 @@ public class GenerateGdt {
         }
         System.out.println("Wrote coverage report (" + sorted.size() + " types) to " + path
             + " and " + unresolved.size() + " unresolved name(s) to " + unresolvedFile);
+    }
+
+    /**
+     * Post-processing step for the "invisible relocated member" pattern
+     * (see DESIGN.md and type-importer/patches/0019-*.md): some classes'
+     * real fields under a given runtime are accessed only via
+     * {@code REL::RelocateMember[IfNewer]}, not declared as compiled
+     * struct members, so libclang -- correctly, per the actual header
+     * source -- resolves them as smaller than their true in-memory size
+     * (in the worst case, a genuinely empty class). This widens a named
+     * class's committed Structure with a trailing opaque byte array up to
+     * an externally-supplied minimum size, mined from those
+     * RelocateMember call sites by
+     * scripts/mine_relocate_member_offsets.py.
+     * <p>
+     * This is a heuristic LOWER BOUND, not a proven exact size (there is
+     * no static_assert or binary ground truth to check it against) --
+     * the appended field is deliberately named/commented to make that
+     * clear to anyone inspecting the resulting .gdt in Ghidra, per
+     * DESIGN.md's option (b) ("flag as layout-incomplete") combined with
+     * option (a) ("append the trailing bytes") rather than silently
+     * picking one.
+     *
+     * @param hintsPath a CSV file of {@code ClassName,MinSizeInBytes} lines
+     */
+    private static void applyTailPaddingHints(FileDataTypeManager fileDtMgr, String hintsPath) throws Exception {
+        List<String[]> hints = new ArrayList<>();
+        for (String line : Files.readAllLines(new File(hintsPath).toPath())) {
+            line = line.strip();
+            if (line.isEmpty()) continue;
+            String[] parts = line.split(",", 2);
+            hints.add(new String[]{parts[0].strip(), parts[1].strip()});
+        }
+
+        int txId = fileDtMgr.startTransaction("Apply RelocateMember tail-padding hints");
+        for (String[] hint : hints) {
+            String className = hint[0];
+            int minSize = Integer.parseInt(hint[1]);
+
+            DataType found = null;
+            java.util.Iterator<DataType> it = fileDtMgr.getAllDataTypes();
+            while (it.hasNext()) {
+                DataType d = it.next();
+                if (d.getName().equals(className)) {
+                    found = d;
+                    break;
+                }
+            }
+
+            if (found == null) {
+                System.out.println("tail-padding-hints: '" + className + "' not found in resolved types, skipping");
+                continue;
+            }
+            if (!(found instanceof Structure struct)) {
+                System.out.println("tail-padding-hints: '" + className + "' is not a Structure ("
+                    + found.getClass().getSimpleName() + "), skipping");
+                continue;
+            }
+
+            // Ghidra reports getLength()==1 for a struct with zero real
+            // components (its own "empty struct" convention, not an actual
+            // occupied byte) -- adding a trailing field to such a struct
+            // REPLACES that phantom byte rather than appending after it, so
+            // the gap to fill is the full minSize, not minSize - 1.
+            int currentSize = struct.getNumComponents() == 0 ? 0 : struct.getLength();
+            int gap = minSize - currentSize;
+            if (gap <= 0) {
+                System.out.println("tail-padding-hints: '" + className + "' already >= " + minSize
+                    + " bytes (actual " + currentSize + "), not padding");
+                continue;
+            }
+
+            ArrayDataType padding = new ArrayDataType(ghidra.program.model.data.CharDataType.dataType, gap, 1);
+            struct.add(padding, "inferred_tail__see_RelocateMember_offsets_not_asserted", null);
+            struct.setDescription(
+                "Widened from " + currentSize + " to " + minSize + " bytes: real fields beyond "
+                + currentSize + " are accessed via REL::RelocateMember[IfNewer], not declared as "
+                + "compiled struct members under this runtime. This is a heuristic lower bound "
+                + "mined from those call sites (scripts/mine_relocate_member_offsets.py), NOT a "
+                + "proven exact size -- see type-importer/DESIGN.md and patches/0019-*.md.");
+            System.out.println("tail-padding-hints: widened '" + className + "' from " + currentSize
+                + " to " + struct.getLength() + " bytes (target " + minSize + ")");
+        }
+        fileDtMgr.endTransaction(txId, true);
     }
 }

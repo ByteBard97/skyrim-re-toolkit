@@ -27,6 +27,12 @@
 # --runtime; pair with `mine_static_asserts.py --runtime ENABLE_SKYRIM_SE`
 # for a matching ground-truth sweep.
 #
+# Set TAIL_PADDING_HINTS to a `ClassName,MinSizeInBytes` CSV (see
+# mine_relocate_member_offsets.py) to widen specific classes' committed
+# structs post-hoc for the "invisible relocated member" pattern -- see
+# DESIGN.md and patches/0019-*.md. Passed through verbatim as
+# GenerateGdt's --tail-padding-hints.
+#
 # Set REPORT_CSV to also emit a coverage-sweep report (see
 # ../COVERAGE_SWEEP_PLAN.md and scripts/coverage_report.py) -- writes
 # $REPORT_CSV (ClassName,SizeInBytes for every resolved type) and
@@ -125,6 +131,24 @@ javac -cp "$CP" -d "$BUILD_DIR" "${JAVAC_FLAGS[@]}" \
 REPORT_ARGS=()
 if [ -n "${REPORT_CSV:-}" ]; then
     REPORT_ARGS=(--report-csv "$REPORT_CSV")
+fi
+# Defaults to the committed tail_padding_hints.csv (see patches/0019-*.md)
+# -- but ONLY for AE, the runtime it was mined against (BaseExtraList /
+# ExtraDataList's real fields are invisible-under-AE specifically; SE/VR
+# already resolve them correctly without padding, per
+# RUNTIME_SE_1_5_97.md -- applying this hint file to a non-AE runtime
+# would wrongly inflate an already-correct struct). A plain AE
+# invocation -- including CI's AE matrix leg -- stays consistent with
+# coverage_baseline.json, which already reflects this fix. Set
+# TAIL_PADDING_HINTS="" explicitly to opt out even for AE.
+_EFFECTIVE_RUNTIME="${RUNTIME_DEFINE:-ENABLE_SKYRIM_AE=1}"
+if [ "${_EFFECTIVE_RUNTIME%%=*}" = "ENABLE_SKYRIM_AE" ]; then
+    TAIL_PADDING_HINTS="${TAIL_PADDING_HINTS-$TYPE_IMPORTER_DIR/tail_padding_hints.csv}"
+else
+    TAIL_PADDING_HINTS="${TAIL_PADDING_HINTS-}"
+fi
+if [ -n "$TAIL_PADDING_HINTS" ]; then
+    REPORT_ARGS+=(--tail-padding-hints "$TAIL_PADDING_HINTS")
 fi
 
 # LLVM installs its own SIGSEGV handler ("crash recovery") when an index is
