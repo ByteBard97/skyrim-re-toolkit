@@ -20,6 +20,19 @@ The type archive tells you what those offsets *mean*: see
 opaque bit-twiddling into legible form logic. (To be clear: this makes the
 binary *readable*, it does not prevent crashes.)
 
+**In Ghidra itself, not just as a text diff:**
+
+![Ghidra decompiler window showing FUN_1401e1270 retyped to TESObjectREFR, with self->super_TESForm.formFlags and formType._impl instead of raw offsets](screenshots/ghidra_typed_decompile.png)
+
+This is a real screenshot of a real `SkyrimSE.exe` (Steamless-unpacked,
+AE build 24604991) opened in Ghidra 12.1.3, with this repo's generated
+`.gdt` applied — not a mockup. The Decompile panel on the right shows
+`FUN_1401e1270(TESObjectREFR *self)` with real field accesses
+(`self->super_TESForm.formFlags`, `.formType._impl`) instead of raw
+offsets into an `undefined8`. The [`examples/`](examples/README.md)
+directory has the same before/after as plain text if you want to diff it
+directly.
+
 ## First: unpack the SteamStub DRM
 
 Retail `SkyrimSE.exe` from Steam is wrapped in SteamStub DRM — its `.text`
