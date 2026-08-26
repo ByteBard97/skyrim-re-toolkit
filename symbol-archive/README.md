@@ -53,7 +53,7 @@ each resulting `.gdt` as a workflow build artifact.
    header, which pulls a real SKSE PCH that collides with
    `type-importer`'s layout-only stub — see `type-importer/DESIGN.md`).
 2. `type-importer/scripts/generate_gdt.sh` patches the vendored
-   `GhidraClangPoweredParse` extension (patches 0001-0018, see
+   `GhidraClangPoweredParse` extension (patches 0001-0019, 0021, see
    `type-importer/patches/`), builds it, and runs the patched parser
    against that full header list once per matrix runtime (currently
    `ENABLE_SKYRIM_AE`, `ENABLE_SKYRIM_SE`, `ENABLE_SKYRIM_VR`).
