@@ -104,7 +104,7 @@ None of these are vendored in-repo (large and/or license-bearing — see `type-i
 
 ```bash
 cd type-importer/scripts
-JAVA_HOME=/path/to/jdk-21 \
+JAVA_HOME=/path/to/jdk-22 \
 GHIDRA_INSTALL_DIR=/path/to/ghidra_12 \
 LD_LIBRARY_PATH=/path/to/dir-containing-libclang.so \
   ./generate_gdt.sh /path/to/xwin-splat-dir /tmp/CommonLibSSE_AE.gdt \

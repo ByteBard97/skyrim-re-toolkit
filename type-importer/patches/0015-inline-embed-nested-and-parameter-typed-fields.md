@@ -2,7 +2,7 @@
 
 ## The problem
 
-The "small consistent-delta cluster" from `type-importer/LOOP_GOAL.md`:
+The "small consistent-delta cluster" from this investigation's internal working notes:
 `TESNPC` (-16), `TESFaction` (-32), `EffectSetting` (-16), `BGSLocation`
 (-8), `CombatController` (-8), `TESWorldSpace` (-144) — all resolved,
 all short of their real `static_assert`-confirmed size by a small,

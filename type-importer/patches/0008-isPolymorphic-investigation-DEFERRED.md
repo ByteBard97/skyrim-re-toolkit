@@ -87,7 +87,7 @@ first knowing whether patch 0007's own scale-dependent issue would
 resurface here too — is a genuinely separate, comparably-sized
 investigation, not a small follow-on fix.
 
-Per `LOOP_GOAL.md`'s scope discipline ("one focused attempt... defer
+Per this investigation's internal working notes' scope discipline ("one focused attempt... defer
 rather than iterate multiple rounds"), this is being left as a precisely
 root-caused, actionable note rather than pursued into a second
 investigation cycle right now.

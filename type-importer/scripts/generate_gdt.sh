@@ -93,7 +93,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "Applying patches 0001-0005 to $GCPP_DIR..." >&2
+echo "Applying accepted patches to $GCPP_DIR (see patches/ for the current set)..." >&2
 cd "$GCPP_DIR"
 git status --short | grep -q . && {
     echo "error: $GCPP_DIR has uncommitted changes -- refusing to patch over them" >&2

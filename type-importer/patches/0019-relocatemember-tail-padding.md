@@ -7,7 +7,7 @@ lives entirely in this repo's own `tools/GenerateGdt.java` and new
 ## Background
 
 `BaseExtraList`/`ExtraDataList` were the two permanently-deferred hotspot
-classes (`COVERAGE_SWEEP_PLAN.md`, `LOOP_GOAL.md`): under
+classes (`COVERAGE_SWEEP_PLAN.md`, this investigation's internal working notes): under
 `ENABLE_SKYRIM_AE`, `BaseExtraList`'s real `data`/`presence` pointer
 members are declared only `#ifndef ENABLE_SKYRIM_AE` — a real, genuinely
 empty class per the actual header source (confirmed by a real `clang-cl`
@@ -141,4 +141,4 @@ closed without real binary/Address-Library ground truth (see
 `ADDRESS_LIBRARY_VALIDATION.md` for why that's out of reach here) —
 37/39 -> effectively 39/39 of the original hotspot list has either an
 exact resolution or the best-achievable heuristic one, per
-`LOOP_GOAL.md`'s stop condition.
+this investigation's internal working notes' stop condition.

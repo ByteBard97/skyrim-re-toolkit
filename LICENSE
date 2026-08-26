@@ -19,11 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Note: this license covers the toolkit code in this repository (the parsers,
-scripts, CI workflows, and runtime-harness plugin source). Generated type
-archives (`.gdt`/`.til` files) produced by this toolkit are derived from
-CommonLibSSE-NG headers and inherit CommonLibSSE-NG's GPL-3.0 license (plus
-its modding exception) — see the root README's "Ground rules" section.

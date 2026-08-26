@@ -58,5 +58,5 @@ Full 1630-header sweep via the committed `generate_gdt.sh` pipeline:
   0017).
 - `TESQuest`: unaffected (already exact from patch 0016).
 
-This closes out the Havok cluster — the last item in `LOOP_GOAL.md`'s
+This closes out the Havok cluster — the last item in this investigation's internal working notes'
 priority order. `coverage_baseline.json` updated.

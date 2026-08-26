@@ -85,7 +85,7 @@ File → Add Archive** and select the downloaded `.gdt`, then right-click →
 
 | Milestone | Status |
 |---|---|
-| AE `.gdt` build artifact via manual CI dispatch | Done |
+| AE `.gdt` build artifact via manual CI dispatch | Wired, not yet exercised for a real run (0 workflow runs to date — see Status above) |
 | Hotspot-list accuracy verified | Fully closed — 37/39 exact, last 2 given real inferred sizes via patch 0019 — see `type-importer/COVERAGE_SWEEP_PLAN.md` |
 | Versioned GitHub Release publishing | Wired (opt-in `publish_release` + `release_tag_prefix` inputs, per-runtime tags); not yet exercised for a real release |
 | SE / VR / GOG runtime coverage | Layouts validated in `type-importer` (SE, VR) and confirmed unnecessary (AE 1.7.99, GOG); SE/VR now wired into this workflow's build matrix, but not yet live-verified (YAML-validated only — see Status above) |

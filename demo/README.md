@@ -64,8 +64,9 @@ Feed the `.unpacked.exe` to the driver below.
 
 Prerequisites: your own legal copy of Skyrim SE/AE 1.6.1170, Ghidra 12+,
 JDK 22+, and a generated `.gdt` (build one with
-`../type-importer/scripts/generate_gdt.sh`, or download a release
-artifact). Nothing from the game is redistributed by this demo.
+`../type-importer/scripts/generate_gdt.sh` — see `symbol-archive/`'s README
+for the CI build workflow's current status, no public release artifact yet).
+Nothing from the game is redistributed by this demo.
 
 ```bash
 JAVA_HOME=~/tools/jdk-25 GHIDRA_INSTALL_DIR=~/tools/ghidra \

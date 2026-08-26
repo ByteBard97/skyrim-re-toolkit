@@ -9,7 +9,7 @@ full-sweep verification). A second, targeted attempt at the remaining 10
 different code path, confirming this is scale-dependent libclang
 behavior rather than a fixable logic bug in this codebase's Java layer.
 Per this project's own "two focused attempts, then defer" rule
-(`type-importer/LOOP_GOAL.md`), this patch stays unmerged.
+(this investigation's internal working notes), this patch stays unmerged.
 `coverage_baseline.json` and `scripts/generate_gdt.sh` remain at
 0001-0006 only. See "Known remaining regressions" below for the
 technical detail, and "Second attempt" for why a further attempt isn't
@@ -172,7 +172,7 @@ Measured via `scripts/check_regression.py` against `coverage_baseline.json`
   and validated; it is not undone by the 10 residual regressions, which
   are a narrower, separately-caused issue.
 
-## Second attempt (this session, attempt 2 of 2 per LOOP_GOAL.md's rule) -- confirms this is NOT a fixable code bug at the Java layer
+## Second attempt (this session, attempt 2 of 2 per internal working notes' rule) -- confirms this is NOT a fixable code bug at the Java layer
 
 Followed this file's own recommendation above: wrote a minimal, isolated
 libclang C program (no Java/Panama FFI involved at all -- links directly
@@ -304,7 +304,7 @@ spellings exclusively — are the obvious candidate fixes. Sweeps now take
 
 ## Original (obsolete) recommendation, kept for the record
 
-Per `type-importer/LOOP_GOAL.md`'s "two focused attempts, then defer"
+Per this investigation's internal working notes' "two focused attempts, then defer"
 rule, this patch is now deferred rather than attempted a third time in
 this session. Whoever picks it up next should NOT re-attempt another
 Java-level algorithmic variation on `canonicalType()` -- that avenue has
