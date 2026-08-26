@@ -49,12 +49,23 @@ LIVE_CHECK_RE = re.compile(
     r"LayoutValidator: LIVE (?P<what>.+?) formID=(?P<formid>[0-9A-Fa-f]+)\(raw=(?P<rawformid>[0-9A-Fa-f]+),(?P<formid_status>OK|MISMATCH)\) "
     r"formType=0x(?P<formtype>[0-9A-Fa-f]+)\(raw=0x(?P<rawformtype>[0-9A-Fa-f]+),(?P<formtype_status>OK|MISMATCH)\)"
 )
+LIVE_RTTI_RE = re.compile(
+    r"LayoutValidator: LIVE rtti=(?P<name>\S+) mangled_name=(?P<mangled>\S+)\((?P<status>OK|MISMATCH)\)"
+)
+# vtbl check is informational only (see LayoutValidator.cpp's comment on why
+# it's not compared against a specific expected VTABLE_* address) -- parsed
+# for completeness, no OK/MISMATCH verdict to extract.
+LIVE_VTBL_RE = re.compile(
+    r"LayoutValidator: LIVE (?P<what>.+?) vtbl=0x(?P<vtbl>[0-9A-Fa-f]+) rva=0x(?P<rva>[0-9A-Fa-f]+)"
+)
 
 
 def parse_log(text):
     layout = {}
     addr = {"module_base": None, "vtables": [], "rtti": []}
     live = []
+    live_rtti = []
+    live_vtbl = []
 
     for line in text.splitlines():
         m = LAYOUT_RE.search(line)
@@ -113,7 +124,25 @@ def parse_log(text):
             })
             continue
 
-    return {"layout": layout, "addr": addr, "live": live}
+        m = LIVE_RTTI_RE.search(line)
+        if m:
+            live_rtti.append({
+                "name": m.group("name"),
+                "mangled_name": m.group("mangled"),
+                "status": m.group("status"),
+            })
+            continue
+
+        m = LIVE_VTBL_RE.search(line)
+        if m:
+            live_vtbl.append({
+                "what": m.group("what"),
+                "vtbl": int(m.group("vtbl"), 16),
+                "rva": int(m.group("rva"), 16),
+            })
+            continue
+
+    return {"layout": layout, "addr": addr, "live": live, "live_rtti": live_rtti, "live_vtbl": live_vtbl}
 
 
 def diff_against_baseline(layout, baseline):

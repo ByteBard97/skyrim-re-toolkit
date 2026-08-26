@@ -124,24 +124,70 @@ Both `kDataLoaded` firings produced identical, clean output:
   verify against live memory (`TESForm`'s layout is unguarded, so the
   compiled offsets are directly comparable to the live AE process).
 
+## Addendum: RTTI readback + vtable-pointer check (same session, after the report above)
+
+Two of the TODO items below turned out not to need gameplay after all —
+both run at `kDataLoaded`, which this build showed fires at the main menu
+already (see above). Landed in a follow-up compile/deploy/relaunch cycle
+(same session, builds 5 and 6; the committed evidence log
+`examples/RuntimeHarness_T3-3_layoutvalidator.log.txt` is from build 6 —
+build 5's log was not retained, see below).
+
+- **RTTI decorated-name readback: done, passed.** Reads
+  `RE::RTTI::TypeDescriptor::mangled_name()` (`RE::msvc::type_info` in
+  the vendored `RTTI.h` — a real accessor, not a hand-rolled offset) at
+  the resolved `RTTI_TESForm` address and string-compares against
+  `.?AVTESForm@@`. Real log line:
+  `LayoutValidator: LIVE rtti=TESForm mangled_name=.?AVTESForm@@(OK)`.
+  This is a genuine positive identity check beyond bare address
+  resolution — proves the Address Library ID points at TESForm's own
+  RTTI descriptor, not a neighbouring one.
+- **Live vtable-pointer identity check: investigated, and the originally
+  planned version turned out to be an invalid check, not a missing
+  feature.** First attempt compared the live instance's vptr directly
+  against `RE::VTABLE_TESForm[0]` and logged `MISMATCH`
+  (`raw=0x7FF792114D50` vs `VTABLE_TESForm[0]=0x7FF7920B0B00`) on build
+  5's run — **that intermediate log was not saved before the next
+  relaunch overwrote it**, so this exact pairing isn't in any committed
+  file; treat it as a recorded observation from this session, not
+  re-derivable evidence. The mismatch is expected, not a bug: `TESForm`
+  is an abstract base, so the live instance at formID `0x00000007` is
+  actually a `TESNPC` (its own `formType` check reads `OK` on the same
+  line) and its vptr correctly points to `TESNPC`'s own vtable, never
+  `TESForm`'s. Comparing a derived instance's vptr against a base
+  class's vtable is not a valid layout check regardless of whether the
+  compiled layout is correct. Fixed in build 6: the check no longer
+  asserts a verdict, it only logs the raw vptr and its RVA from the
+  module base, for a human (or a future check with the derived class's
+  own `VTABLE_*` Address Library ID) to use. Real log line (build 6):
+  `LayoutValidator: LIVE TESForm(0x07) vtbl=0x7FF792114D50 rva=0x17E4D50 note=not-compared-to-VTABLE_TESForm-see-comment`.
+
+`parse_layout_log.py` was extended with two new regexes
+(`LIVE_RTTI_RE`, `LIVE_VTBL_RE`) to parse both line shapes into the JSON
+output (`live_rtti`, `live_vtbl` keys) rather than silently dropping
+them; both T3-4's original two sample-log self-tests (exit 0 clean, exit
+1 on injected mismatch) and a fresh run against the real build-6 log
+were verified after the change, confirming the new fields actually
+populate with real data, not just that the exit code stayed correct.
+
 ## What this does NOT close
 
-Per `LAYOUT_VALIDATOR.md`'s own TODO list — none of these were attempted
-this pass:
+Per `LAYOUT_VALIDATOR.md`'s own TODO list, genuinely still open — all
+three need an actual game session past `kDataLoaded`, not just the main
+menu, so none were attempted this pass:
 
-- RTTI decorated-name readback (positive identity check beyond address
-  resolution).
-- `PlayerCharacter::GetSingleton()` sanity at `kNewGame`/`kPostLoadGame`
-  (needs an actual game session, not just main-menu `kDataLoaded`).
+- `PlayerCharacter::GetSingleton()` sanity at `kNewGame`/`kPostLoadGame`.
 - Live `Actor::ACTOR_RUNTIME_DATA` / `GetActorRuntimeData()` sanity (the
   AE `RelocateMember` path — nothing in this pass touches it, since the
   live check only covers `TESForm`).
 - `ExtraDataList` live walk.
-- Live vtable-pointer identity check against the resolved `RE::VTABLE_*`
-  addresses.
 
-These remain real, scoped future work, not silently dropped — same list
-as before this pass, unchanged.
+A real version of the vtable-pointer identity check (against the live
+instance's *actual* class's own `VTABLE_*` ID, once one is resolved) is
+now a new, better-scoped candidate for future work, replacing the
+originally planned but invalid version.
+
+These remain real, scoped future work, not silently dropped.
 
 ## Housekeeping note
 

@@ -149,10 +149,34 @@ So what does an in-process validator add that `static_assert` doesn't?
 
 ## TODO for the live-verification pass
 
-Tracked in `LayoutValidator.cpp` as `TODO(live-verify)` comments:
+Tracked in `LayoutValidator.cpp` as `TODO(live-verify)` comments.
 
-- RTTI type_descriptor decorated-name readback (positive vtable/RTTI
-  identity, not just resolution).
+Two done since T3-3, neither needed gameplay (both run at `kDataLoaded`,
+which fires at the main menu):
+
+- ~~RTTI type_descriptor decorated-name readback~~ **Done**: reads
+  `RE::RTTI::TypeDescriptor::mangled_name()` at the resolved
+  `RTTI_TESForm` address and string-compares against `.?AVTESForm@@` —
+  a real positive identity check, not just address resolution. Passed
+  clean on the real run (`mangled_name=.?AVTESForm@@(OK)`).
+- ~~Live instance vtable-pointer identity check against resolved
+  `RE::VTABLE_*` addresses~~ **Investigated, reclassified as an invalid
+  invariant, not implemented as designed.** `TESForm` is an abstract
+  base — every live instance is actually some derived class (the player
+  base at formID `0x00000007` is a live `TESNPC`, confirmed by its own
+  `formType` check passing), so its vptr correctly points to ITS OWN
+  class's vtable, never `TESForm`'s. Comparing against
+  `RE::VTABLE_TESForm[0]` reported `MISMATCH` on the very first real run
+  (`raw=0x7FF792114D50` vs `VTABLE_TESForm[0]=0x7FF7920B0B00`) while the
+  `formID`/`formType` checks on the same instance both read `OK` — a
+  wrong check design, not a layout defect. The log now reports the raw
+  vptr + RVA with no pass/fail verdict; a real version of this check
+  would need the live instance's *actual* class's own `VTABLE_*`
+  Address Library ID, which isn't among the ones this pass resolves.
+
+Genuinely still open (need an actual game session past `kDataLoaded`,
+not just the main menu):
+
 - `PlayerCharacter::GetSingleton()` checks at `kNewGame` /
   `kPostLoadGame` (nullptr at `kDataLoaded` by design): formID `0x14`,
   formType `ActorCharacter`.
@@ -160,8 +184,6 @@ Tracked in `LayoutValidator.cpp` as `TODO(live-verify)` comments:
   validates the AE `RelocateMember` path, which nothing else covers.
 - `ExtraDataList` live walk off a loaded cell's refrs — runtime ground
   truth for the last two baseline-EMPTY hotspot classes.
-- Live instance vtable-pointer identity check against resolved
-  `RE::VTABLE_*` addresses.
 - ~~A small script that parses the `LayoutValidator: LAYOUT` lines into
   JSON for a mechanical three-way diff against `coverage_baseline.json`.~~
   **Done**: `runtime-harness/tools/parse_layout_log.py`. Parses all three

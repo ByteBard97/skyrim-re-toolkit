@@ -4,6 +4,7 @@
 #include <SKSE/SKSE.h>
 
 #include <cstddef>
+#include <cstring>
 
 namespace LayoutValidator
 {
@@ -114,10 +115,20 @@ namespace LayoutValidator
             SKSE::log::info("LayoutValidator: ADDR rtti=TESForm id=513848/392216 resolved=0x{:X} rva=0x{:X}",
                 rtti.address(), rtti.address() - base);
 
-            // TODO(live-verify): read the RTTI type_descriptor's decorated
-            // `name` at the resolved address and string-compare against
-            // ".?AVTESForm@@" -- proves the Address Library ID actually
-            // points at TESForm's descriptor and not a neighbouring one.
+            // Positive identity check, not just resolution: read the
+            // resolved address as an RE::RTTI::TypeDescriptor (== the MSVC
+            // type_info layout, RTTI.h -- vfptr/spare at 0x00/0x08, the
+            // decorated name string at 0x10, RE::msvc::type_info::mangled_name())
+            // and string-compare against TESForm's real MSVC-mangled name.
+            // If the Address Library ID resolved to a neighbouring
+            // descriptor instead of TESForm's own, this catches it; a bare
+            // address resolution cannot.
+            const auto* typeDesc = reinterpret_cast<const RE::RTTI::TypeDescriptor*>(rtti.address());
+            const char* mangledName = typeDesc->mangled_name();
+            constexpr const char* kExpectedTESFormName = ".?AVTESForm@@";
+            const bool             rttiNameOk = std::strcmp(mangledName, kExpectedTESFormName) == 0;
+            SKSE::log::info("LayoutValidator: LIVE rtti=TESForm mangled_name={}({})",
+                mangledName, rttiNameOk ? "OK" : "MISMATCH");
         }
 
         // -----------------------------------------------------------------
@@ -152,6 +163,33 @@ namespace LayoutValidator
                 a_what, a_form->GetFormID(), rawFormID, formIDOk ? "OK" : "MISMATCH",
                 static_cast<std::uint8_t>(a_form->GetFormType()), static_cast<std::uint8_t>(rawFormType),
                 formTypeOk ? "OK" : "MISMATCH");
+
+            // Live vtable-pointer check. An object's vptr sits at its own
+            // address 0 (standard MSVC layout, TESForm has no bases --
+            // TESForm.h). NOTE, corrected after the first real run: this
+            // does NOT identity-check against RE::VTABLE_TESForm[0]. TESForm
+            // is an abstract base -- every live instance is actually some
+            // derived class (formID 0x00000007's formType above is NPC
+            // (0x2B), i.e. this is a live TESNPC, confirmed by the
+            // formID/formType checks passing), so its vptr correctly points
+            // to ITS OWN class's vtable, not TESForm's. An
+            // exact-match-against-TESForm's-vtable comparison would report a
+            // MISMATCH on every real object and prove nothing -- that's not
+            // a layout defect, it's a wrong invariant, confirmed empirically
+            // (raw=0x7FF792114D50 vs VTABLE_TESForm[0]=0x7FF7920B0B00 on the
+            // first real run, while formID/formType both read OK). What IS
+            // checkable without knowing every derived class's own vtable ID
+            // (REL::Module has no public total-image-size accessor -- only
+            // per-Segment sizes -- so an in-module bounds check would mean
+            // guessing at a total, which this project's ground rules
+            // against inventing offsets/sizes rule out): report the raw
+            // vptr and its RVA from the module base for a human (or a
+            // future check against a real derived-class VTABLE_* ID) to
+            // read, with no pass/fail verdict attached.
+            const auto livePtr = *reinterpret_cast<const std::uintptr_t*>(raw);
+            const auto moduleBase = REL::Module::get().base();
+            SKSE::log::info("LayoutValidator: LIVE {} vtbl=0x{:X} rva=0x{:X} note=not-compared-to-VTABLE_TESForm-see-comment",
+                a_what, livePtr, livePtr - moduleBase);
         }
 
         void RunLiveChecks()
@@ -168,8 +206,8 @@ namespace LayoutValidator
                     static_cast<std::uint8_t>(playerBase->GetFormType()));
             }
 
-            // TODO(live-verify): the remaining live checks, roughly in
-            // order of value:
+            // TODO(live-verify): remaining checks that genuinely need an
+            // actual game session (not just kDataLoaded at the main menu):
             //   - RE::PlayerCharacter::GetSingleton(): nullptr at
             //     kDataLoaded (no game started yet) -- needs kNewGame /
             //     kPostLoadGame timing, then check formID==0x14 and
@@ -184,9 +222,11 @@ namespace LayoutValidator
             //     race pointer plausibility (valid pointer, race formType
             //     == FormType::Race) -- validates the RelocateMember path
             //     on AE, which compile-time offsets cannot cover.
-            //   - Compare a live instance's vtable pointer against the
-            //     RE::VTABLE_* address resolved above (identity check that
-            //     the object really is the class the headers claim).
+            // RTTI decorated-name readback and the live vtable-pointer
+            // identity check (both listed here as TODOs through T3-3) are
+            // done -- see CheckLiveForm() and the rtti block above; neither
+            // needed gameplay, both run at kDataLoaded like everything else
+            // in this function.
         }
     }
 
