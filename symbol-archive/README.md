@@ -29,12 +29,15 @@ a full sweep of `CommonLibSSE-NG/include/RE/` and publishes the resulting
   hierarchy, `Actor`/`Character`/`PlayerCharacter`, inventory, item
   types, quests/packages, Havok, etc.) is tracked separately in
   `../type-importer/COVERAGE_SWEEP_PLAN.md` and is a much stronger
-  accuracy signal than the archive's raw class count — 37/39 are exact,
-  with the remaining 2 root-caused and documented rather than silently
-  wrong. **Still don't treat every struct in this archive as trustworthy
+  accuracy signal than the archive's raw class count — the list is now
+  fully closed: 37/39 are exact, and the remaining 2 have real inferred
+  sizes (patch 0019) rather than silent 1-byte placeholders. **Still
+  don't treat every struct in this archive as trustworthy
   without cross-checking against a real `static_assert` or independent
   verification** outside the hotspot list — that remains true until
   `type-importer`'s overall pass rate is much higher.
+
+**What this buys you, visually**: see [`../demo/screenshots/ghidra_typed_decompile.png`](../demo/README.md) — a real screenshot of a `.gdt` from this same pipeline applied to a real `SkyrimSE.exe` in Ghidra, showing typed field access (`self->super_TESForm.formFlags`) instead of raw offsets.
 
 ## How the build works
 
@@ -71,7 +74,7 @@ File → Add Archive** and select the downloaded `.gdt`, then right-click →
 | Milestone | Status |
 |---|---|
 | AE `.gdt` build artifact via manual CI dispatch | Done |
-| Hotspot-list accuracy verified | 37/39 exact — see `type-importer/COVERAGE_SWEEP_PLAN.md` |
+| Hotspot-list accuracy verified | Fully closed — 37/39 exact, last 2 given real inferred sizes via patch 0019 — see `type-importer/COVERAGE_SWEEP_PLAN.md` |
 | Versioned GitHub Release publishing | Wired (opt-in `publish_release` input); not yet exercised for a real release |
 | SE / VR / GOG runtime coverage | Layouts validated in `type-importer` (SE, VR) and confirmed unnecessary (AE 1.7.99, GOG); wiring SE/VR builds into this workflow not started |
-| Automatic rebuild on CommonLibSSE-NG submodule bump | Not started — blocked on higher sweep pass rate |
+| Automatic *validation* on CommonLibSSE-NG submodule bump | Done — `.github/dependabot.yml` watches CommonLibSSE-NG weekly and opens a PR on a new upstream commit, which `type-importer`'s existing coverage gate then regression-checks automatically. This subproject's own `.gdt` rebuild is still manual-dispatch only (see Triggers below) — Dependabot doesn't push a new `.gdt` build artifact, only a reviewed, regression-checked PR bumping the pin |
