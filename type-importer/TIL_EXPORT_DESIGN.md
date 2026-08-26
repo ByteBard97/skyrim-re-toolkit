@@ -20,7 +20,7 @@ information the existing pipeline already emits as a Ghidra `.gdt` — same
 classes, same field offsets, same sizes, same multi-vtable flattening — so IDA
 users analyzing `SkyrimSE.exe` get what Ghidra users already get.
 
-Success metric, same as the `.gdt` side: the ~2,064 classes currently `OK`
+Success metric, same as the `.gdt` side: the ~2,082 classes currently `OK`
 (byte-accurate against the headers' own `static_assert`s, per
 `coverage_baseline.json` as of 2026-08-26) must come out byte-identical in
 the `.til`, and no class may silently change size or offset in translation.
@@ -76,8 +76,9 @@ Everything a `.til` emitter needs is already computed, in-process, by
   `tail_padding_hints.csv`).
 - **Provenance per class**, via `coverage_baseline.json`: `expected` size from
   the mined `static_assert`, `actual` committed size, `status`
-  (OK / NO_GROUND_TRUTH / MISMATCH / EMPTY / UNRESOLVED). 2,064 OK, 1,852
-  NO_GROUND_TRUTH, 879 EMPTY, 47 MISMATCH, 27 UNRESOLVED as of this writing.
+  (OK / NO_GROUND_TRUTH / MISMATCH / EMPTY / UNRESOLVED). 2,082 OK, 1,852
+  NO_GROUND_TRUTH, 878 EMPTY, 30 MISMATCH, 27 UNRESOLVED as of this writing
+  (AE baseline, post patch 0025).
 
 None of this requires IDA. The only IDA-specific step in this entire design
 is the final `store_til()` call.

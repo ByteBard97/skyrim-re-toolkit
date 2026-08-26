@@ -16,7 +16,7 @@ game process**, closing the loop with type-importer's static analysis:
 
 - type-importer parses the vendored CommonLibSSE-NG headers with libclang
   into Ghidra `.gdt` archives and tracks layout accuracy in
-  `type-importer/coverage_baseline.json` (2,058 of 3,017 checkable
+  `type-importer/coverage_baseline.json` (2,082 of 3,017 checkable
   classes byte-accurate against the headers' own `static_assert`s; the
   39-class modder-relevant hotspot list is closed — 37/39 byte-exact,
   `BaseExtraList`/`ExtraDataList` deferred with documented reasons in
