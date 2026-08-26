@@ -157,6 +157,14 @@ Tracked in `LayoutValidator.cpp` as `TODO(live-verify)` comments:
   truth for the last two baseline-EMPTY hotspot classes.
 - Live instance vtable-pointer identity check against resolved
   `RE::VTABLE_*` addresses.
-- A small script (type-importer side) that parses the
-  `LayoutValidator: LAYOUT` lines into JSON for a mechanical three-way
-  diff against `coverage_baseline.json`.
+- ~~A small script that parses the `LayoutValidator: LAYOUT` lines into
+  JSON for a mechanical three-way diff against `coverage_baseline.json`.~~
+  **Done**: `runtime-harness/tools/parse_layout_log.py`. Parses all three
+  line kinds (`LAYOUT`/`ADDR`/`LIVE`) into JSON and, with
+  `--diff-baseline`, prints a parser-vs-header-vs-compiled three-way
+  table and exits 1 on any confirmed mismatch. Verified against two
+  hand-written sample logs in `runtime-harness/tools/sample_logs/`
+  (`RuntimeHarness_layout_ok.log` passes with exit 0; a deliberately
+  injected `TESForm` size mismatch in `RuntimeHarness_layout_mismatch.log`
+  is correctly caught with exit 1) — built and tested entirely
+  Linux-side, before any Windows compile exists to produce a real log.
