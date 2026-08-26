@@ -1,0 +1,58 @@
+# Real RuntimeHarness.log excerpts, captured against a live Skyrim AE 1.6.1170
+# process (SKSE64 2.2.6), 2026-08-26. Trimmed to the relevant sections and
+# lightly redacted (character-name fields in save filenames replaced with
+# XXXXXXXXXXXX -- some of CommonLibSSE-NG's savegame filename fields embed a
+# hex-encoded character name; everything else, including all timestamps and
+# form IDs, is unmodified real output). Full session logs are much longer
+# (900+ lines); this is not the complete file.
+
+## Plugin load + hook install
+
+[12:25:30.509] [info] RuntimeHarness v0-1-0-0 loading (runtime: Skyrim 1-6-1170-0)
+[12:25:30.509] [info] AIProcessInspector: Actor::Update hook installed (Actor + Character vtables).
+[12:25:30.509] [info] HavokStepLogger: bhkCharacterState::Update hook installed (6 concrete state vtables).
+[12:25:30.509] [info] SavegameTracer: BGSSaveLoadManager::ProcessEvent(BSSaveDataEvent) hook installed.
+[12:25:30.509] [info] Loaded.
+[12:25:35.479] [info] kDataLoaded received -- game data is fully loaded.
+
+## SavegameTracer -- ProcessEvent(BSSaveDataEvent) firing with a real,
+## non-empty saveGameList (220 entries total in this session; 5 shown)
+
+[12:25:44.183] [info] SavegameTracer: BSSaveDataEvent 0x59499ef38 fired
+[12:25:44.183] [info] SavegameTracer: saveGameList has 220 entries
+[12:25:44.183] [info]   Save22_F3D415A1_1_XXXXXXXXXXXX_Tamriel_000157_20211213052538_10_1 -- player '' () at 'Skyrim', playtime
+[12:25:44.183] [info]   Save23_F3D415A1_1_XXXXXXXXXXXX_Tamriel_000158_20211213052657_10_1 -- player '' () at 'Skyrim', playtime
+[12:25:44.183] [info]   Save24_F3D415A1_1_XXXXXXXXXXXX_Tamriel_000206_20211213053459_10_1 -- player '' () at 'Skyrim', playtime
+[12:25:44.183] [info]   Save25_F3D415A1_1_XXXXXXXXXXXX_Tamriel_000213_20211213054202_11_1 -- player '' () at 'Skyrim', playtime
+[12:25:44.183] [info]   Save26_F3D415A1_1_XXXXXXXXXXXX_Tamriel_000214_20211213054255_11_1 -- player '' () at 'Skyrim', playtime
+
+## AIProcessInspector -- real, changing package-evaluation data immediately
+## after a save load, many distinct live NPCs
+
+[12:25:49.368] [info] kPostLoadGame received -- a save finished loading.
+[12:25:49.691] [info] actor 00106B85 -> package 0010C505 () [Package]
+[12:25:49.691] [info] actor 00105EE3 -> package 0010C508 () [Package]
+[12:25:49.691] [info] actor 000AAF99 -> package 000AAFA7 () [Package]
+[12:25:49.691] [info] actor 000654F7 -> package 000FF23E () [Package]
+[12:25:49.691] [info] actor 000654FB -> package <none>
+[12:25:49.691] [info] actor 0002BFA2 -> package 000F42FE () [Package]
+[12:25:49.691] [info] actor 000654EE -> package 000AA7C5 () [Package]
+[12:25:49.691] [info] actor 000A9DE7 -> package 0004D364 () [Package]
+[12:25:49.691] [info] actor 000527F1 -> package FF000CB4 () [Do Nothing]
+[12:25:49.691] [info] actor 00105984 -> package FF000DC5 () [Flee]
+[12:25:50.076] [info] actor 000654F7 -> package 00101AF1 () [Package]
+[12:25:53.059] [info] actor 0002BFA2 -> package FF000DED () [GetUp from Chair/Bed]
+[12:25:53.059] [info] actor 000198BA -> package 000467B9 () [Package]
+
+## SavegameTracer -- a second, smaller firing later in the same session
+## (a real quicksave/autosave with playtime and race populated)
+
+[13:29:22.430] [info] SavegameTracer: BSSaveDataEvent 0x5978cf388 fired
+[13:29:22.430] [info] SavegameTracer: saveGameList has 1 entries
+[13:29:22.430] [info]   Autosave1_4D567809_0_XXXXXXXXXXXX_Tamriel_000007_20260826160902_1_1 -- player 'XXXXXXXXXXXX' (Nord) at 'Skyrim', playtime 000.07.14
+[13:29:22.450] [info] kPreLoadGame received -- a save is about to load.
+[13:29:25.514] [info] kPostLoadGame received -- a save finished loading.
+
+## HavokStepLogger -- not shown above because, at time of writing, it has not
+## yet produced any output in real gameplay. See runtime-harness/README.md
+## for the "deployed, inconclusive" status and what's known so far.

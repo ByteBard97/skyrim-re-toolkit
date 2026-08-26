@@ -130,7 +130,10 @@ Confirmed working end to end against a live Skyrim AE 1.6.1170 install
 with SKSE64 2.2.6: `AIProcessInspector` logged real, changing
 package-evaluation data for a dozen-plus NPCs, and `SavegameTracer`
 logged a real `ProcessEvent(BSSaveDataEvent)` firing with a live
-`saveGameList` query. Getting there required starting a **new game**,
+`saveGameList` query. See
+[`examples/RuntimeHarness.log.excerpt`](examples/RuntimeHarness.log.excerpt)
+for real (lightly redacted) log output backing both claims, not just a
+description of what they do. Getting there required starting a **new game**,
 not loading one of the pre-existing saves on that box — those are
 several years old and reference mod plugins not present on this
 vanilla-plus-SKSE install, and crash on load with missing masters.
