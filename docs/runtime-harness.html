@@ -62,14 +62,17 @@
       over time as expected.</p>
     </div>
     <div class="card">
-      <h3>HavokStepLogger <span class="badge badge-warn">deployed, inconclusive</span></h3>
+      <h3>HavokStepLogger <span class="badge badge-warn">open question</span></h3>
       <p>Collision/ragdoll state per physics step. Hooks <code>bhkCharacterState::Update</code> across all
       six concrete character-state vtables (OnGround/Jumping/InAir/Climbing/Flying/Swimming) and logs
       physics-state transitions with velocity magnitude. Not yet actor-attributed (keyed by
       <code>hkpCharacterContext</code> address, not a form ID). Deployed and installed cleanly in-game, but
-      produced no log output in ~10 minutes of gameplay, including confirmed jump input — the vfunc index
-      and the input delivery were both independently verified working, so the root cause is unclear; most
-      likely just needs more playtime past the scripted opening sequence to settle, not a known bug.</p>
+      produced zero log output across 70+ minutes of real gameplay (Helgen intro through open-world
+      Whiterun, including combat-adjacent NPC activity) — long enough to rule out timing. The vfunc index,
+      input delivery, and a possible <code>PlayerCharacter</code>-specific hierarchy were all independently
+      checked and ruled out. Current best guess: Havok's character-state dispatch may not go through a
+      standard C++ virtual call on these classes at all — unverifiable without disassembly or Havok SDK
+      source, both out of scope for this project. An honest open question, not a known-working hook.</p>
     </div>
     <div class="card">
       <h3>SavegameTracer <span class="badge badge-good">verified in-game</span></h3>
