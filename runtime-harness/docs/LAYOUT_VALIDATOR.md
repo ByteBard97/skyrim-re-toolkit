@@ -164,7 +164,7 @@ Tracked in `LayoutValidator.cpp` as `TODO(live-verify)` comments:
   `--diff-baseline`, prints a parser-vs-header-vs-compiled three-way
   table and exits 1 on any confirmed mismatch. Verified against two
   hand-written sample logs in `runtime-harness/tools/sample_logs/`
-  (`RuntimeHarness_layout_ok.log` passes with exit 0; a deliberately
-  injected `TESForm` size mismatch in `RuntimeHarness_layout_mismatch.log`
+  (`RuntimeHarness_layout_ok.log.txt` passes with exit 0; a deliberately
+  injected `TESForm` size mismatch in `RuntimeHarness_layout_mismatch.log.txt`
   is correctly caught with exit 1) — built and tested entirely
   Linux-side, before any Windows compile exists to produce a real log.

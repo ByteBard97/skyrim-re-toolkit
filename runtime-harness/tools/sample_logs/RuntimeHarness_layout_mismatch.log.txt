@@ -1,0 +1,21 @@
+[12:25:30.509] [info] RuntimeHarness v0-1-0-0 loading (runtime: Skyrim 1-6-1170-0)
+[12:25:30.509] [info] LayoutValidator: LAYOUT class=TESForm sizeof=0x18 off.formFlags=0x8 off.formID=0xC off.formType=0x0
+[12:25:30.509] [info] LayoutValidator: LAYOUT class=NiAVObject sizeof=0x110 off.parent=0x20 off.local=0x60 off.world=0xA0 off.worldBound=0xE0 off.userData=0xF8
+[12:25:30.509] [info] LayoutValidator: LAYOUT class=BGSLocation sizeof=0xF0 off.parentLoc=0x38 off.keywordData=0x40 off.cleared=0xE8
+[12:25:30.509] [info] LayoutValidator: LAYOUT class=TESQuest sizeof=0x268 off.currentStage=0x120 off.formEditorID=0x1F8
+[12:25:30.509] [info] LayoutValidator: LAYOUT class=TESObjectREFR sizeof=0x90 off.data=0x30 off.parentCell=0x50 off.loadedData=0x58 off.extraList=0x60 note=se-view
+[12:25:30.509] [info] LayoutValidator: LAYOUT class=Actor sizeof=0x90 note=se-view runtime-data-via=GetActorRuntimeData
+[12:25:30.509] [info] LayoutValidator: LAYOUT class=Actor::ACTOR_RUNTIME_DATA sizeof=0x1D0 off.currentProcess=0x0 off.currentCombatTarget=0x40 off.race=0x60 note=relocated-to-0xE0-se-0xE8-ae
+[12:25:30.509] [info] LayoutValidator: LAYOUT class=Character sizeof=0x90 note=se-view
+[12:25:30.509] [info] LayoutValidator: LAYOUT class=BaseExtraList sizeof=0x18 off.data=0x0 off.presence=0x10 note=se-view
+[12:25:30.509] [info] LayoutValidator: LAYOUT class=ExtraDataList sizeof=0x20 note=se-view members-private
+[12:25:30.509] [info] LayoutValidator: LAYOUT class=TESObjectCELL sizeof=0x68 off.cellFlags=0x30 off.cellState=0x38 off.extraList=0x40 note=se-view
+[12:25:30.509] [info] LayoutValidator: LAYOUT class=bhkCharacterState sizeof=0x10 note=abstract-vtable-only
+[12:25:35.479] [info] kDataLoaded received -- game data is fully loaded.
+[12:25:35.480] [info] LayoutValidator: ADDR module.base=0x7FF612340000
+[12:25:35.480] [info] LayoutValidator: ADDR vtable=TESForm[0] id=231469/187895 resolved=0x7FF6128F1000 rva=0x5B1000
+[12:25:35.480] [info] LayoutValidator: ADDR vtable=Actor[0] id=260538/207511 resolved=0x7FF6129A2000 rva=0x662000
+[12:25:35.480] [info] LayoutValidator: ADDR vtable=TESObjectREFR[0] resolved=0x7FF612880000 rva=0x540000
+[12:25:35.480] [info] LayoutValidator: ADDR vtable=TESObjectREFR[1] resolved=0x7FF612880100 rva=0x540100
+[12:25:35.480] [info] LayoutValidator: ADDR rtti=TESForm id=513848/392216 resolved=0x7FF612BC0000 rva=0x880000
+[12:25:35.480] [info] LayoutValidator: LIVE TESForm(0x07) formID=00000007(raw=00000007,OK) formType=0x2B(raw=0x2B,OK)
