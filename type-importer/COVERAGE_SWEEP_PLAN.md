@@ -1,5 +1,12 @@
 # Coverage Sweep — Plan
 
+**Note:** this file's patch-by-patch narrative stops after patch 0018 — not
+because tracking stopped, but to avoid duplicating ~50-100 lines of history
+per patch across two files that could drift out of sync. Patches 0019
+onward (including 0021's `isPolymorphic` fix, 0022's follow-on, and 0023's
+Empty Base Optimization fix) are documented only in `patches/*.md`, which
+is the authoritative source going forward.
+
 Goal: use the now-working, patched `GhidraClangPoweredParse` pipeline (patches
 0001-0005) to sweep as much of `CommonLibSSE-NG/include/RE/` as possible,
 and produce a report of which classes resolve correctly, which resolve with
