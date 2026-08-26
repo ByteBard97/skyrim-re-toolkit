@@ -14941,13 +14941,13 @@
   },
   "NiCamera::RUNTIME_DATA": {
     "actual": 152,
-    "expected": null,
-    "status": "NO_GROUND_TRUTH"
+    "expected": 152,
+    "status": "OK"
   },
   "NiCamera::RUNTIME_DATA2": {
     "actual": 56,
-    "expected": null,
-    "status": "NO_GROUND_TRUTH"
+    "expected": 56,
+    "status": "OK"
   },
   "NiCamera_vtable": {
     "actual": 64,
@@ -16468,16 +16468,6 @@
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
-  },
-  "RUNTIME_DATA": {
-    "actual": null,
-    "expected": 152,
-    "status": "UNRESOLVED"
-  },
-  "RUNTIME_DATA2": {
-    "actual": null,
-    "expected": 56,
-    "status": "UNRESOLVED"
   },
   "RaceSexCamera": {
     "actual": 88,

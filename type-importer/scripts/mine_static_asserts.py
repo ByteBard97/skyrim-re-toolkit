@@ -216,6 +216,22 @@ def scan_file(path: Path, results: dict, ambiguous: dict, unevaluated: dict):
                 ambiguous.setdefault(cls, []).append((size, str(path)))
 
         # Record-scope bookkeeping (uses the comment-stripped line).
+        # Skip entirely for a branch that's definitively NOT taken
+        # (resolved false, not merely unresolved) -- that text is dead
+        # code for our target runtime and must not affect `pending` or
+        # brace-counted `depth`/`record_stack`. Otherwise an #if/#elif/
+        # #else chain with an unequal number of braces per branch (e.g.
+        # one branch opens a struct, another doesn't) desyncs `depth`
+        # from reality and corrupts `record_stack` for everything that
+        # follows in the file. Real example: NiCamera.h's RUNTIME_DATA
+        # struct is opened once (unconditionally) but closed by THREE
+        # separate `};` -- one per #ifndef/#elif/#else branch -- which
+        # used to pop `record_stack` twice too many and silently drop
+        # NiCamera itself off the stack, causing the later RUNTIME_DATA2
+        # static_assert to mine as a bare, unqualified name that collided
+        # with MapMenu's and Console's own same-named nested structs.
+        if not currently_active() and not any_unevaluated():
+            continue
         if re.search(r'\btemplate\b', code):
             saw_template = True
         dm = RECORD_DECL_RE.search(code)
