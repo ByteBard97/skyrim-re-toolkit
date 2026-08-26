@@ -1,4 +1,4 @@
-# Runtime-Harness MCP Server — Design Doc (v0.1 read-only + v0.2 control)
+# Runtime-Harness MCP Server — Design Doc (v0.1/v0.2 superseded by v0.3: integrate with `devbench`)
 
 Status: pre-implementation, no code written. Grounded in real, committed
 artifacts, not speculation: `tools/parse_layout_log.py` (existing, working)
@@ -319,12 +319,14 @@ which already cites both). Not adopted here because:
   surface is a much larger thing to reason about safely than "load this
   save" and "move the player here." Every unused tool in that surface is
   still something a client (or a bug) could invoke.
-- **What IS adopted from them, deliberately:** SkyLink AI's plugin-side
-  architecture (a thin named-pipe listener in the SKSE plugin, with the
-  actual protocol logic in a separate external process) and SkyrimNet's
-  core safety technique (mutate game state *on the game thread*, never via
-  simulated input/`SendInput`). Both are proven-feasible prior art already
-  cited in v0.1; this section reuses the pattern, not the tool count.
+- **What IS adopted from them, deliberately:** SkyrimNet's core safety
+  technique (mutate game state *on the game thread*, never via simulated
+  input/`SendInput`) — real, proven-feasible prior art already cited in
+  v0.1, reused here regardless of process architecture. (An earlier
+  version of this bullet also credited SkyLink AI's separate-process
+  split as adopted; the "Architecture" section below now runs everything
+  in-process instead, per the user's explicit no-separate-process
+  preference — see that section's own superseded note for why.)
 
 ## Addendum: reviewing a user-supplied research report against the real headers
 
@@ -384,52 +386,77 @@ as fact), each claim was checked rather than transcribed:
   all; noted only so it doesn't get silently folded into v0.2's scope by
   a future reader of the source report.
 
-## Architecture — no MCP code in the plugin at all
+## Architecture — SUPERSEDED, see revision below
 
-Researched, not assumed: there is no official C++ MCP SDK as of this
-writing (the `modelcontextprotocol` org has an open, unresolved proposal
-discussion for one — issue #603). A few unofficial community C++ libraries
-exist (e.g. `hkr04/cpp-mcp`) but none are vetted or official, and pulling
-one into `RuntimeHarness` would mean vetting a new third-party dependency
-for a Windows SKSE plugin just to speak a protocol the plugin doesn't need
-to speak directly.
+The section originally here proposed a two-process split (thin plugin-side
+pipe listener + a separate Python MCP process on the Linux box). That
+framing was wrong: the user has stated **twice**, directly, that a separate
+MCP server process is not wanted. The real constraint was mischaracterized
+as "in-process vs. separate process" when it's actually "stdio vs. network
+transport" — stdio genuinely can't work embedded in Skyrim (stdout isn't a
+clean pipe once the engine/loader are writing to the console too, so a
+JSON-RPC stream over it would get corrupted), but HTTP/SSE or WebSocket
+transport works fine embedded, with no process boundary required at all.
+See the revised architecture immediately below, which replaces this
+section. Kept here (not deleted) so the reasoning that got corrected is on
+record, same as `patches/0007-*.md`'s own superseded-by convention.
 
-**The split v0.1 already committed to solves this for free:** the plugin
-exposes the smallest possible surface, and the actual MCP protocol layer
-(JSON-RPC, tool registration) runs as a separate process on the Linux dev
-box, using the official Python MCP SDK — the same server v0.1's read-only
-log-tailing tools already run in. SkyLink AI itself follows exactly this
-split (SKSE plugin + separate C# bridge process, not one binary that
-speaks MCP). Concretely:
+## Architecture (revised) — embedded, single process, no separate MCP server
+
+**`RuntimeHarness.dll` runs the entire MCP protocol server itself**, in a
+background thread, using an embedded C++ MCP library rather than talking
+to a process on the Linux box:
 
 ```
 MCP client (editor/agent/chat tool)
-      |  MCP protocol (JSON-RPC over stdio/SSE)
+      |  MCP protocol over HTTP/SSE or WebSocket (NOT stdio -- see above)
       v
-Python MCP server (Linux dev box)     <- same process as v0.1's log-tailing tools
-      |  new: write side, over the existing SSH channel to the Windows box
+RuntimeHarness.dll (Windows box), background std::thread
+      |  hkr04/cpp-mcp (verified real: github.com/hkr04/cpp-mcp, C++, 318
+      |  stars, not archived, "Lightweight C++ MCP SDK", HTTP/SSE
+      |  transport + tool-registration API per its own description --
+      |  this SUPERSEDES the earlier "no third-party MCP library" call,
+      |  which was reasoned correctly off the WRONG architecture)
       v
-Named-pipe client (small Python helper, or a raw pipe write over SSH-forwarded socket)
-      |  Windows named pipe: \\.\pipe\RuntimeHarnessControl
+Thread-safe request queue: mutex + condition_variable guarded FIFO,
+  std::packaged_task/std::future per request-response pair -- the ONLY
+  thing shared between the MCP thread and the main thread. The MCP
+  thread never touches RE::* directly, ever.
       v
-RuntimeHarness.dll (Windows box) -- named-pipe LISTENER thread (new, small, raw
-  Win32 CreateNamedPipe/ConnectNamedPipe/ReadFile -- no third-party MCP
-  library, no JSON parsing beyond a tiny fixed command format)
-      |  SKSE::TaskInterface::AddTask(...) -- marshals onto the game's own
-      |  main thread, the same technique SkyrimNet uses instead of SendInput
+SKSE::TaskInterface::AddTask(...) (real, verified: `const TaskInterface*
+  SKSE::GetTaskInterface() noexcept` in `SKSE/API.h:24`, `void AddTask(TaskFn)
+  const` in `SKSE/Interfaces.h:196` -- already how this project's other
+  main-thread work happens, e.g. this project's own messaging-interface
+  pattern in `main.cpp`) drains the queue safely on the main thread,
+  once per tick/frame.
       v
 Real CommonLibSSE-NG API calls (BGSSaveLoadManager::Load, TESObjectREFR::MoveTo, ...)
 ```
 
-The pipe listener thread's only job is: read a small fixed-format command
-off the pipe, validate it against the minimal command set below, and hand
-the actual game-state mutation to `SKSE::TaskInterface::AddTask()` (real,
-existing API — `SKSE/Interfaces.h:196`, already used implicitly by this
-project's messaging-interface pattern in `main.cpp`) so it executes safely
-on the main thread instead of racing the pipe's own worker thread. No
-`SendInput`/`keybd_event` anywhere in this design — matching v0.1's
-existing "the server never touches the game's input" principle, extended
-from "never" to "only ever via the game's own thread-safe task queue."
+No `SendInput`/`keybd_event` anywhere in this design, same as the
+superseded version — matching v0.1's "the server never touches the game's
+input" principle, extended to "only ever via the game's own thread-safe
+task queue."
+
+**Trade-off, stated explicitly rather than silently accepted:** embedding
+the full MCP protocol layer in-process means a bug in that layer (a
+malformed request, a parsing crash, a threading bug in the queue) can
+crash Skyrim itself — unlike the superseded two-process design, where a
+bug in the protocol layer would take down a Python process on the Linux
+box, not the game. This is a real cost of the user's stated
+no-separate-process preference, not a hidden one. Mitigated, not
+eliminated, by: the MCP thread never calling `RE::*` directly (all game
+mutation happens through the queued/main-thread path, so a protocol-layer
+bug can't corrupt game state directly, only crash the plugin's own
+thread) and keeping the command surface itself minimal (see below) so
+there's less protocol-adjacent code to get wrong in the first place.
+
+**On the earlier WebSocket-transport research-report note above:** this
+revision makes that finding directly load-bearing rather than a mere
+alternative — `SkyrimScripting/SKSE_Template_WebSockets` (verified real)
+is now a concretely relevant reference for the embedded HTTP/SSE-or-
+WebSocket server thread this architecture needs, not just a named-pipe
+alternative for a separate-process design that no longer exists.
 
 ## Command set — each one tied to a real friction point from tonight, not a wishlist
 
@@ -455,8 +482,9 @@ flagged as not yet confirmed.
   with the target resolved from `TESForm::LookupByID(form_id)` — both
   real, existing APIs.
 - **`get_control_status()`** — read-only, but listed here because it's
-  part of the control channel: confirms the pipe listener is alive and
-  reports whether the last command it ran succeeded, without needing a
+  part of the control channel: confirms the embedded MCP server thread is
+  alive and reports whether the last command it ran succeeded, without
+  needing a
   round-trip through the game log. The "did that actually work" tool this
   channel needs that v0.1's log-tailing tools structurally can't provide
   (a command's own success isn't necessarily logged).
@@ -483,25 +511,33 @@ backlog framing, deferred honestly rather than guessed):**
   general "run this" primitive of any kind.
 - **No NPC/quest/dialogue control.** That's SkyrimNet/SkyLink's actual
   target; explicitly out of scope here (see "Why not adopt" above).
-- **No unauthenticated network exposure.** The named pipe is a local
-  Windows IPC primitive (not a TCP socket) reachable only from the same
-  box or over the existing SSH channel already used to drive it — no new
-  network-facing listener is introduced.
+- **No unauthenticated exposure beyond localhost.** Unlike the superseded
+  named-pipe design, the revised embedded HTTP/SSE-or-WebSocket server IS
+  a real network listener, not a local-only IPC primitive — this needs to
+  bind to `127.0.0.1` only (never `0.0.0.0`) and, since the box is reached
+  over the existing SSH channel for everything else this project already
+  does, an MCP client on the Linux dev box should reach it through an SSH
+  local-port-forward rather than the port being exposed on the box's LAN
+  interface. This is a real, slightly larger exposure than the superseded
+  design had (a bound TCP port vs. a named pipe with no network presence
+  at all) and is written down here as part of the honest trade-off this
+  revision accepts, not glossed over.
 
 ## Verification plan
 
-1. **Offline: command-format validation.** The pipe listener's fixed
-   command parser gets the same "known input, known output" test
-   discipline as v0.1's log parsers — malformed/oversized/unknown commands
-   must be rejected before any `AddTask` call, testable without a running
-   game (a unit test driving the parsing function directly).
+1. **Offline: command-format validation.** The embedded MCP server's
+   request-to-command mapping gets the same "known input, known output"
+   test discipline as v0.1's log parsers — malformed/oversized/unknown
+   requests must be rejected before any `AddTask` call, testable without
+   a running game (a unit test driving the parsing/validation function
+   directly).
 2. **Compile-time: real API existence.** Every cited API
    (`BGSSaveLoadManager::Load`, `LoadMostRecentSaveGame`,
    `TESObjectREFR::MoveTo`, `SKSE::TaskInterface::AddTask`) needs to
    actually compile against the vendored CommonLibSSE-NG headers before
-   any pipe-handling code is trusted — cheap, no Windows box required for
-   this step alone (the type-importer sweep pipeline already parses these
-   same headers).
+   any of this is trusted — cheap, no Windows box required for this step
+   alone (the type-importer sweep pipeline already parses these same
+   headers).
 3. **Gated (Windows box + live game session, same gate as
    `HavokStepLogger`/v0.1's own live items):** `load_save` against a real
    save file, confirm `kPostLoadGame` fires and the loaded save matches
@@ -511,3 +547,134 @@ backlog framing, deferred honestly rather than guessed):**
    working). This is real implementation work (T3-8, BACKLOG.md) — this
    doc is the design that work executes against, not a claim that any of
    it has run yet.
+
+---
+
+# v0.3 — SUPERSEDES v0.1 (read-only) and v0.2 (control): integrate with `alandtse/devbench` instead of building either from scratch
+
+**This is the "don't reverse-engineer/reinvent what the community already
+produced" principle** — the same one this repo's own root `README.md`
+states as its Architecture design principle for `type-importer` (package
+CommonLibSSE-NG's community RE knowledge instead of deriving offsets by
+hand) — applied to tooling infrastructure instead of type data. Verified
+before writing a word of this section, not taken on description alone:
+fetched `alandtse/devbench`'s actual `README.md` via `gh api` (real repo,
+not fabricated — C++, GPL-3.0, 10 stars, pushed 2 days before this was
+written, so actively maintained, not abandoned).
+
+## What devbench already is
+
+A standalone SKSE plugin — already built, already working, per its own
+docs — that runs an in-process server on `127.0.0.1` exposing a
+`ToolRegistry` over **both** MCP (`/mcp`, JSON-RPC/streamable-HTTP) and
+plain REST (`/api/tool/<name>`) from one shared registry. Directly
+relevant to everything v0.1/v0.2 above set out to build:
+
+| What v0.1/v0.2 designed | What devbench already ships |
+|---|---|
+| Read-only log-tailing with `stale_seconds` honesty (v0.1) — because `RuntimeHarness` only writes a file | `inspect` tool: **synchronous, live** state reads (`scene`, `player`, `inventory`, `quests`, `effects`, `refs`, `mods`, `vm`) run on the main thread and return the real value *now*, not a log-tail snapshot from N seconds ago. Strictly better ground truth than what v0.1 could ever offer without new plugin IPC work. |
+| `load_save`/`get_control_status` (v0.2) — new C++, `BGSSaveLoadManager::Load` marshaled through a hand-built pipe/WebSocket server | `game action='loadLast'` / `action='load'` — already built, already exposed. **This is tonight's exact friction point** (a human needing to press Continue), already solved, zero new code required on our side. |
+| `teleport_player_to` (v0.2) — new C++, `TESObjectREFR::MoveTo` | `console` tool (`player.moveto`/`coc`/`setpos` etc., with real output capture via the marker-fence technique) already covers this, and more generally than one hand-picked API call would. |
+| An embedded MCP protocol server, threading model, request queue, transport choice (the entire "Architecture (revised)" section above) | Already built and running: `ToolRegistry` + `McpAdapter`/`RestAdapter` over one `httplib` server, `MainThread::RunAndWait` for the exact same "marshal to main thread, return synchronously" pattern this doc's own revision converged on independently. Confirms that pattern was the right one to converge on — but it doesn't need re-implementing. |
+| Guessed-sleep session automation ("wait for the main menu to settle") | `scenario` tool with `waitFor` steps keyed on real Skyrim lifecycle events (`waitFor lifecycle:postLoadGame`) instead of a fixed delay — exactly the class of problem tonight's Continue-press friction belongs to, solved generally. |
+
+## What this project still owns, and what changes
+
+`RuntimeHarness`'s actual value — `AIProcessInspector`, `LayoutValidator`,
+`SavegameTracer`, and (once its open root cause is fixed) `HavokStepLogger`
+— **does not go away or get replaced.** Those are this project's real
+reverse-engineering work: hooks into engine subsystems nothing else
+exposes. What changes is *how their data reaches an MCP client*: instead
+of writing to a log file for a separate reader to tail (v0.1) or building
+a competing embedded MCP server (v0.2's revision), `RuntimeHarness`
+becomes a **devbench tool provider** via its C ABI.
+
+```
+RuntimeHarness.dll (this project's real RE hooks, unchanged)
+      |  kPostLoad: DevBenchAPI::GetDevBenchInterface001() -- returns
+      |  null gracefully if devbench isn't installed (soft dependency,
+      |  RuntimeHarness keeps working standalone via its log file either way)
+      v
+dvb->RegisterTool("runtimeharness.ai_package", schema, handler, ctx)
+dvb->RegisterToolExtension("inspect", "runtimeharness.layout_diff", schema, handler, ctx)
+      |  handler runs on devbench's server thread; anything touching
+      |  RE::* still marshals through SKSE::TaskInterface, same as every
+      |  design in this doc has always required
+      v
+devbench.dll's ToolRegistry -- reachable over /mcp AND /api/tool/<name>,
+  alongside devbench's own built-in `game`/`console`/`inspect`/`scenario`
+  tools, on ONE port, to ONE MCP client connection
+```
+
+**Integration cost, concretely:** `include/DevBenchAPI.h` + `DevBenchAPI.cpp`
+are MIT-licensed and meant to be dropped directly into a consumer plugin
+(no vcpkg required for the simplest path — "copy the two API files
+directly... no vcpkg involved," per devbench's own README) or pulled via a
+vcpkg overlay port. `RuntimeHarness` already builds via CMake; devbench
+itself builds via xmake, but that's irrelevant to us — we never build
+devbench, we link two small MIT files and devbench.dll is a separate,
+independently-installed SKSE plugin at runtime, the same way any two SKSE
+mods coexist in one `Data/SKSE/Plugins/` folder.
+
+**Licensing, matching this project's existing posture:**
+devbench the plugin is GPL-3.0; we never link against or redistribute its
+GPL-3.0 code. The integration surface we'd actually consume
+(`DevBenchAPI.h`/`.cpp`) is separately, deliberately MIT-licensed by
+devbench's own author specifically so consumers avoid that entanglement —
+the same GPL-boundary reasoning this project already applies to
+CommonLibSSE-NG-derived `.gdt` archives (GPL-3.0 inherited) vs. the
+toolkit's own code (MIT), just running the other direction here (we
+consume an MIT surface in front of someone else's GPL-3.0 plugin, rather
+than us being the GPL-3.0-derived side).
+
+## What v0.1/v0.2 above are still good for
+
+Not deleted, same convention as `patches/0007-*.md`'s superseded-by note
+and this doc's own earlier "Architecture — SUPERSEDED" section: v0.1's
+real log-line regexes (AIProcessInspector/SavegameTracer parsing) and
+v0.2's verified real-API citations (`BGSSaveLoadManager::Load`,
+`TESObjectREFR::MoveTo`, `SKSE::TaskInterface::AddTask`) are directly
+reusable as the *handler bodies* registered with devbench's `RegisterTool`
+— the API research wasn't wasted, only the "build our own transport/
+protocol/threading layer to deliver it" plan was superseded. `parse_layout_log.py`
+also stays useful standalone for offline analysis of committed log files
+(`examples/RuntimeHarness.log.excerpt`, sample logs) regardless of what
+serves live queries.
+
+## Verification plan (v0.3)
+
+1. **Confirm devbench's C-ABI header matches this doc's description**
+   before writing any registration code — this section is grounded in
+   devbench's own `README.md` (fetched real, not paraphrased from a
+   secondary source), not yet in a direct read of `include/DevBenchAPI.h`
+   itself. That header read is the first real step of implementation, not
+   assumed done by this doc.
+2. **Soft-dependency behavior**: `RuntimeHarness` must build and run
+   identically with devbench absent (verifies `GetDevBenchInterface001()`
+   returning null is handled as a no-op, not a crash) — testable on a
+   build with devbench simply not installed in `Data/SKSE/Plugins/`.
+3. **Gated (Windows box + live game session):** install devbench
+   alongside `RuntimeHarness`, confirm `runtimeharness.*` tools appear in
+   `tools/list` alongside devbench's built-ins, confirm one registered
+   tool (e.g. `AIProcessInspector`'s current-package data) returns live,
+   correct data via a real MCP call — and separately, confirm
+   `game action='loadLast'` alone (no `RuntimeHarness` code involved)
+   actually solves tonight's original friction end-to-end.
+
+## Work breakdown (v0.3, replaces v0.2's T3-8 scope)
+
+- [ ] Read `include/DevBenchAPI.h` + `cmake/ports/devbench-api/README.md`
+      directly (not just this doc's README-derived summary) before
+      writing integration code.
+- [ ] Drop `DevBenchAPI.h`/`.cpp` into `RuntimeHarness`, wire the
+      `kPostLoad` null-checked registration call.
+- [ ] Register a first real tool wrapping existing, already-working data
+      — `AIProcessInspector`'s current package-per-actor state is the
+      natural first choice (already a clean in-memory map, no new hook
+      needed, immediately useful, low risk).
+- [ ] Verify per the plan above.
+- [ ] Once proven, register `LayoutValidator`'s live diff and
+      `SavegameTracer`'s save-list data the same way.
+- [ ] Update `BACKLOG.md`'s T3-8 row and this doc's status line to drop
+      the "blocked/ready" framing tied to the superseded pipe/WebSocket
+      plan.
