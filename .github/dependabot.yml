@@ -1,0 +1,39 @@
+version: 2
+updates:
+  # v0.3 "automatic rebuild on submodule bump" (see README roadmap and
+  # type-importer/DESIGN.md): watches type-importer/vendor/CommonLibSSE-NG
+  # for new upstream commits and opens a PR bumping the pinned submodule
+  # revision. type-importer-coverage.yml already triggers on
+  # `pull_request` for any change under `type-importer/**` (a submodule
+  # pointer bump matches that path) and runs the full AE/SE/VR coverage
+  # sweep, failing the check if the bump regresses any previously-correct
+  # class against the committed coverage_baseline*.json files -- so no
+  # separate "flag/open an issue" step is needed here: a failing PR check
+  # already blocks the bump from landing silently, and is more visible
+  # (and avoids duplicate-issue noise on every failed weekly check) than
+  # a redundant opened issue would be.
+  #
+  # GhidraClangPoweredParse (the OTHER vendored submodule) is
+  # deliberately NOT tracked here: patches/0001-0018 are pinned against a
+  # specific version of it, and an unreviewed auto-bump could silently
+  # break patch application (generate_gdt.sh's `patch -p1` step would
+  # fail loudly, but a *successful* patch apply against a changed fork
+  # could also silently apply cleanly while no longer doing what the
+  # patch intended -- not something to risk auto-PRing without a human
+  # first checking upstream's changelog). Bump it manually if/when
+  # needed, following the coordination note in
+  # type-importer/TRACK1_TYPE_IMPORTER.md (check with the user first --
+  # runtime-harness's build depends on the vendored tree staying stable).
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
+    exclude-paths:
+      - "type-importer/vendor/GhidraClangPoweredParse"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "type-importer"
+    labels:
+      - "dependencies"
+      - "type-importer"
+    open-pull-requests-limit: 3
