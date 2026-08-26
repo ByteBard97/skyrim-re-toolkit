@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Known Limitations — skyrim-re-toolkit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Every honest caveat about skyrim-re-toolkit's current accuracy and coverage, in one place, with links to the underlying evidence.">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-brand">skyrim-re-<span>toolkit</span></div>
+    <nav class="topbar-nav">
+      <a href="index.html">Home</a>
+      <a href="type-importer.html">type-importer</a>
+      <a href="symbol-archive.html">symbol-archive</a>
+      <a href="runtime-harness.html">runtime-harness</a>
+      <a href="known-limitations.html" class="active">Known Limitations</a>
+      <a href="contributing.html">Contributing</a>
+    </nav>
+    <div class="topbar-gh"><a href="https://github.com/ByteBard97/skyrim-re-toolkit">GitHub ↗</a></div>
+  </div>
+</div>
+
+<main>
+
+  <div class="eyebrow">Read this before you trust a number</div>
+  <h1>Known Limitations</h1>
+  <p class="lede">
+    Every honest caveat about this toolkit's current accuracy and coverage, gathered in one place
+    instead of scattered across five READMEs and a dozen patch docs. Nothing here is new — it's all
+    already documented elsewhere; this page just saves you the hunt.
+  </p>
+
+  <h2>type-importer — parser accuracy</h2>
+
+  <div class="callout">
+    <strong>Not every class is byte-accurate yet.</strong> Coverage is measured against
+    <code>coverage_baseline.json</code> per runtime via <code>scripts/check_regression.py</code> — see
+    <a href="type-importer.html">type-importer</a> for the current OK/checkable counts.
+  </div>
+
+  <ul class="plain">
+    <li>
+      <strong>The patch-0008 cluster (deferred, gated on Geoff to reopen).</strong>
+      <code>isPolymorphic()</code> is template-blind for a base class that's itself a class-template
+      specialization (e.g. <code>FxDelegateHandler : public GRefCountBase&lt;FxDelegateHandler, ...&gt;</code>)
+      — root-caused, not fixed. See
+      <a href="https://github.com/ByteBard97/skyrim-re-toolkit/blob/master/type-importer/patches/0008-isPolymorphic-investigation-DEFERRED.md">patches/0008-isPolymorphic-investigation-DEFERRED.md</a>.
+    </li>
+    <li>
+      <strong>~17-18 classes still UNRESOLVED</strong> after patch 0026 closed the <code>BSString</code>-shaped
+      typedef-of-template-specialization family (27 → 17/18, all three runtimes). What's left is a
+      smaller, unrelated grab-bag — including a genuine <code>RUNTIME_DATA2</code> name collision across
+      three unrelated classes — documented rather than forced into one narrative. See
+      <a href="https://github.com/ByteBard97/skyrim-re-toolkit/blob/master/type-importer/patches/0026-fix-typedef-coverage-report-gap.md">patches/0026</a>.
+    </li>
+    <li>
+      <strong>Patch 0007 is superseded, not applied.</strong> Its original diagnosis (a TypePool
+      first-registration-wins keying bug on synthetic template names) turned out to be stale — later
+      patches reworked the mechanism entirely — but the coverage gap it was chasing
+      (<code>hkInplaceArray&lt;T,N&gt;</code>, <code>BSTObjectDictionary&lt;...&gt;</code> as a base, etc.)
+      is now closed by patch 0025 via a different, current root cause. 0007's own doc carries a
+      superseded-by note; nothing from it is in the accepted patch set.
+    </li>
+  </ul>
+
+  <h2>runtime-harness — live verification status</h2>
+
+  <div class="stat-grid">
+    <div class="stat"><span class="num">✓</span><span class="label">AIProcessInspector — confirmed live</span></div>
+    <div class="stat"><span class="num">✓</span><span class="label">SavegameTracer — confirmed live</span></div>
+    <div class="stat"><span class="num">?</span><span class="label">HavokStepLogger — silent, root cause unresolved</span></div>
+  </div>
+
+  <ul class="plain">
+    <li>
+      <strong>HavokStepLogger has produced zero log lines</strong> across 70+ minutes of real gameplay
+      (Helgen opening, open-world Whiterun, combat). The vfunc index it hooks was hand-verified against
+      the full inheritance chain and is very unlikely to be an indexing bug. Checked against real prior
+      art (<a href="https://github.com/ersh1/Precision">ersh1/Precision</a>, the standard Havok-hooking
+      reference in the SKSE community): it doesn't vtable-hook <code>bhkCharacterState::Update</code> at
+      all — it hooks <code>bhkWorld</code>'s physics-step function directly via an Xbyak mid-function
+      trampoline. <strong>Current vtable hook: open question, not a known-good hook.</strong> Scoped
+      follow-on (rebuild Precision-style) identified but not attempted. See
+      <a href="https://github.com/ByteBard97/skyrim-re-toolkit/blob/master/runtime-harness/README.md">runtime-harness/README.md</a> (search "HavokStepLogger").
+    </li>
+    <li>
+      <strong>SavegameTracer can't read its own event payloads.</strong> <code>BSSaveDataEvent</code> and
+      <code>BGSSaveLoadManagerEvent</code> are only ever forward-declared in the vendored tree, never
+      defined — so the inspector dumps <code>BGSSaveLoadManager::saveGameList</code> (fully defined)
+      instead, which is a real and useful substitute but not the event payload itself.
+    </li>
+    <li>
+      <strong>LayoutValidator (T3-3) has three still-open TODOs</strong>, all gated on a real gameplay
+      session past the main menu (never armed this pass — <code>kDataLoaded</code> fires at the main menu,
+      so no save/gameplay happened): <code>PlayerCharacter::GetSingleton()</code> sanity at
+      <code>kNewGame</code>/<code>kPostLoadGame</code>, live <code>Actor::ACTOR_RUNTIME_DATA</code> /
+      <code>GetActorRuntimeData()</code> sanity (the AE <code>RelocateMember</code> path), and an
+      <code>ExtraDataList</code> live walk. See
+      <a href="https://github.com/ByteBard97/skyrim-re-toolkit/blob/master/runtime-harness/docs/T3-3_LAYOUTVALIDATOR_REPORT.md">T3-3_LAYOUTVALIDATOR_REPORT.md</a>.
+    </li>
+  </ul>
+
+  <h2>Access blockers</h2>
+  <ul class="plain">
+    <li>
+      <strong>IDA <code>.til</code> export execution (T1-4)</strong> is blocked on IDA access. The design
+      and intermediate-JSON format are done and don't need it — only running the actual export against
+      real IDA does. See
+      <a href="https://github.com/ByteBard97/skyrim-re-toolkit/blob/master/type-importer/TIL_EXPORT_DESIGN.md">TIL_EXPORT_DESIGN.md</a>.
+    </li>
+    <li>
+      <strong>Publishing a real public GitHub Release</strong> is wired and dry-run-safe but has never
+      been dispatched for real — it's a public action, gated on a human decision, not a technical blocker.
+    </li>
+  </ul>
+
+  <div class="callout warn">
+    <strong>If a number on another page looks stale relative to this one, this page is not necessarily
+    wrong</strong> — coverage numbers move as patches land. Check the linked patch docs and
+    <code>coverage_baseline*.json</code> for the current state; this page tracks known <em>categories</em>
+    of limitation, not a live number feed.
+  </div>
+
+</main>
+
+<footer>
+  <p>MIT-licensed toolkit code; generated type archives inherit CommonLibSSE-NG's GPL-3.0 (+ modding
+  exception) license.</p>
+  <p>
+    <a href="https://github.com/ByteBard97/skyrim-re-toolkit">GitHub</a> ·
+    <a href="https://github.com/ByteBard97/skyrim-re-toolkit/issues">Issues</a> ·
+    <a href="https://github.com/ByteBard97/skyrim-re-toolkit/discussions">Discussions</a>
+  </p>
+</footer>
+
+</body>
+</html>
