@@ -20,18 +20,27 @@ The type archive tells you what those offsets *mean*: see
 opaque bit-twiddling into legible form logic. (To be clear: this makes the
 binary *readable*, it does not prevent crashes.)
 
-**In Ghidra itself, not just as a text diff:**
+**In Ghidra itself, not just as a text diff — before and after:**
 
-![Ghidra decompiler window showing FUN_1401e1270 retyped to TESObjectREFR, with self->super_TESForm.formFlags and formType._impl instead of raw offsets](screenshots/ghidra_typed_decompile.png)
+**Before** — fresh import, auto-analyzed, no type archive applied:
 
-This is a real screenshot of a real `SkyrimSE.exe` (Steamless-unpacked,
-AE build 24604991) opened in Ghidra 12.1.3, with this repo's generated
-`.gdt` applied — not a mockup. The Decompile panel on the right shows
-`FUN_1401e1270(TESObjectREFR *self)` with real field accesses
-(`self->super_TESForm.formFlags`, `.formType._impl`) instead of raw
-offsets into an `undefined8`. The [`examples/`](examples/README.md)
-directory has the same before/after as plain text if you want to diff it
-directly.
+![Ghidra decompiler window showing FUN_1401e1270 with untyped param_1/param_2 parameters and raw pointer-offset arithmetic like (longlong)param_1 + 0x1a](screenshots/ghidra_untyped_decompile.png)
+
+**After** — same binary, same function, this repo's `.gdt` applied:
+
+![Ghidra decompiler window showing the same function retyped to TESObjectREFR, with self->super_TESForm.formFlags and formType._impl instead of raw offsets](screenshots/ghidra_typed_decompile.png)
+
+Both are real screenshots of a real `SkyrimSE.exe` (Steamless-unpacked, AE
+build 24604991) opened in Ghidra 12.1.3, same function
+(`FUN_1401e1270`), same address — not mockups, not the same image edited
+twice. The "before" shot is a completely separate, freshly-imported
+Ghidra project with no archive ever applied, not an undo of the "after"
+one. The Decompile panel goes from `FUN_1401e1270(longlong *param_1,
+undefined8 param_2)` with `*(uint *)(param_1 + 2)`-style raw offset
+arithmetic to `FUN_1401e1270(TESObjectREFR *self)` with
+`self->super_TESForm.formFlags` and `.formType._impl`. The
+[`examples/`](examples/README.md) directory has the same before/after as
+plain text if you want to diff it directly.
 
 ## First: unpack the SteamStub DRM
 

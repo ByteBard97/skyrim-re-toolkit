@@ -3,22 +3,29 @@
 **CI-driven builds of `.gdt` type archives for Skyrim runtimes, generated
 from `type-importer`'s pipeline.**
 
-## Status: early scaffold, AE only
+## Status: early scaffold, AE/SE/VR matrix wired (not yet live-verified)
 
 This subproject wraps `type-importer/scripts/generate_gdt.sh` in a GitHub
 Actions workflow (`.github/workflows/symbol-archive-build.yml`) that runs
-a full sweep of `CommonLibSSE-NG/include/RE/` and publishes the resulting
-`.gdt` as a workflow build artifact.
+a full sweep of `CommonLibSSE-NG/include/RE/` per runtime and publishes
+each resulting `.gdt` as a workflow build artifact.
 
-- **Runtime coverage**: this workflow builds AE only (`ENABLE_SKYRIM_AE=1`).
-  `type-importer` itself has since validated SE 1.5.97 and VR 1.4.15
-  layouts too (CI-gated there); wiring SE/VR builds into this workflow is
-  still not started. AE 1.7.99/GOG need no separate build — they share AE
-  1.6.1170's macro and Address Library ID scheme.
+- **Runtime coverage**: the workflow now matrix-builds **AE, SE, and VR**
+  (`ENABLE_SKYRIM_AE`/`ENABLE_SKYRIM_SE`/`ENABLE_SKYRIM_VR`), mirroring
+  `type-importer-coverage.yml`'s own runtime matrix now that Track 1 has
+  validated SE 1.5.97 and VR 1.4.15 layouts. AE 1.7.99/GOG need no
+  separate build entry — they share AE 1.6.1170's macro and Address
+  Library ID scheme. **Not yet live-verified end to end**: the matrix
+  change was YAML-validated (`python3 yaml.safe_load`) but not run for
+  real, since the shared `GhidraClangPoweredParse` submodule was mid-use
+  by another track's work at the time — needs a follow-up
+  `workflow_dispatch` run to confirm the SE/VR legs actually build clean.
 - **Distribution**: a workflow artifact attached to each run by default;
   the workflow now also supports opt-in publishing to a versioned GitHub
-  Release (see `.github/workflows/symbol-archive-build.yml`'s
-  `publish_release` input) — not yet exercised for a real public release.
+  Release per runtime (see `.github/workflows/symbol-archive-build.yml`'s
+  `publish_release`/`release_tag_prefix` inputs, e.g. a prefix `v1`
+  produces tags `ae-1.6.1170-v1`, `se-1.5.97-v1`, `vr-1.4.15-v1`) — not
+  yet exercised for a real public release.
 - **Accuracy**: **not every class in this archive is byte-accurate.**
   `type-importer`'s own coverage sweep (see
   `../type-importer/COVERAGE_SWEEP_PLAN.md` and
@@ -46,21 +53,26 @@ a full sweep of `CommonLibSSE-NG/include/RE/` and publishes the resulting
    header, which pulls a real SKSE PCH that collides with
    `type-importer`'s layout-only stub — see `type-importer/DESIGN.md`).
 2. `type-importer/scripts/generate_gdt.sh` patches the vendored
-   `GhidraClangPoweredParse` extension (patches 0001-0006, see
+   `GhidraClangPoweredParse` extension (patches 0001-0018, see
    `type-importer/patches/`), builds it, and runs the patched parser
-   against that full header list with `ENABLE_SKYRIM_AE=1`.
-3. The resulting `.gdt` is uploaded as a build artifact, named
-   `CommonLibSSE_AE_<commonlibssng-commit-sha>.gdt` so it's traceable
-   back to the exact CommonLibSSE-NG submodule revision it was built
-   from.
+   against that full header list once per matrix runtime (currently
+   `ENABLE_SKYRIM_AE`, `ENABLE_SKYRIM_SE`, `ENABLE_SKYRIM_VR`).
+3. Each resulting `.gdt` is uploaded as a build artifact, named
+   `CommonLibSSE_<runtime>_<commonlibssng-commit-sha>.gdt` so it's
+   traceable back to the exact CommonLibSSE-NG submodule revision it was
+   built from.
 
 ## Triggers
 
-- Manual dispatch (`workflow_dispatch`) — the only way to build one right
-  now. Push-triggered builds tied to CommonLibSSE-NG submodule updates
-  are natural future work once `type-importer`'s pass rate is higher
-  (rebuilding on every submodule bump isn't worth the CI minutes yet
-  given how much of the sweep is still wrong).
+- Manual dispatch (`workflow_dispatch`) — the only way to build (any
+  runtime in the matrix) right now. Push-triggered builds tied to
+  CommonLibSSE-NG submodule updates are natural future work once
+  `type-importer`'s pass rate is higher (rebuilding on every submodule
+  bump isn't worth the CI minutes yet given how much of the sweep is
+  still wrong) — note this is distinct from `.github/dependabot.yml`,
+  which already automatically opens a PR and regression-checks
+  `type-importer`'s own coverage on a CommonLibSSE-NG bump; it does not
+  trigger this workflow's `.gdt` rebuild.
 
 ## Using the archive
 
@@ -75,6 +87,6 @@ File → Add Archive** and select the downloaded `.gdt`, then right-click →
 |---|---|
 | AE `.gdt` build artifact via manual CI dispatch | Done |
 | Hotspot-list accuracy verified | Fully closed — 37/39 exact, last 2 given real inferred sizes via patch 0019 — see `type-importer/COVERAGE_SWEEP_PLAN.md` |
-| Versioned GitHub Release publishing | Wired (opt-in `publish_release` input); not yet exercised for a real release |
-| SE / VR / GOG runtime coverage | Layouts validated in `type-importer` (SE, VR) and confirmed unnecessary (AE 1.7.99, GOG); wiring SE/VR builds into this workflow not started |
+| Versioned GitHub Release publishing | Wired (opt-in `publish_release` + `release_tag_prefix` inputs, per-runtime tags); not yet exercised for a real release |
+| SE / VR / GOG runtime coverage | Layouts validated in `type-importer` (SE, VR) and confirmed unnecessary (AE 1.7.99, GOG); SE/VR now wired into this workflow's build matrix, but not yet live-verified (YAML-validated only — see Status above) |
 | Automatic *validation* on CommonLibSSE-NG submodule bump | Done — `.github/dependabot.yml` watches CommonLibSSE-NG weekly and opens a PR on a new upstream commit, which `type-importer`'s existing coverage gate then regression-checks automatically. This subproject's own `.gdt` rebuild is still manual-dispatch only (see Triggers below) — Dependabot doesn't push a new `.gdt` build artifact, only a reviewed, regression-checked PR bumping the pin |

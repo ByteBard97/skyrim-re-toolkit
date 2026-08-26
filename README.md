@@ -19,8 +19,8 @@ skyrim-re-toolkit/
 │   ├── tools/              # GenerateGdt.java — the real CLI
 │   ├── stubs/              # Minimal headers so real CommonLibSSE-NG parses without a full build
 │   └── vendor/             # CommonLibSSE-NG + GhidraClangPoweredParse (git submodules)
-├── symbol-archive/         # CI-built AE .gdt workflow artifact (early scaffold, see its README)
-└── runtime-harness/        # SKSE plugins for live engine inspection (skeleton, first Windows build in progress)
+├── symbol-archive/         # CI-built .gdt workflow artifacts, AE/SE/VR matrix (early scaffold, see its README)
+└── runtime-harness/        # SKSE plugins for live engine inspection (AIProcessInspector verified in-game; two more written, not yet deployed)
 ```
 
 ### 1. type-importer
@@ -42,7 +42,7 @@ skyrim-re-toolkit/
 
 **The solution (planned):** A CI-driven repository that publishes pre-built type archives for every supported Skyrim runtime — SE 1.5.97, AE 1.6.640/1.6.1170/1.7.99, VR 1.4.15, GOG 1.6.1179.
 
-**Status: early scaffold, AE only.** A GitHub Actions workflow (`.github/workflows/symbol-archive-build.yml`, manual dispatch) wraps `type-importer/scripts/generate_gdt.sh` to build a full-namespace AE `.gdt` and publish it as a workflow artifact. See `symbol-archive/README.md` for the honest accuracy caveat — 1,934 classes are byte-accurate today, so this is a real, traceable build artifact, with the rest of the long tail documented rather than silently wrong. SE/VR layouts are now validated (see `type-importer/`); a first public, versioned GitHub Release (not just a workflow artifact) is the next planned step. See `demo/` for a worked before/after showing what the archive buys you in Ghidra.
+**Status: early scaffold, AE/SE/VR matrix wired (not yet live-verified).** A GitHub Actions workflow (`.github/workflows/symbol-archive-build.yml`, manual dispatch) wraps `type-importer/scripts/generate_gdt.sh` to build a full-namespace `.gdt` per runtime (AE, SE, VR) and publish each as a workflow artifact, with opt-in publishing to a versioned GitHub Release. See `symbol-archive/README.md` for the honest accuracy caveat — 1,934 classes are byte-accurate today, so this is a real, traceable build artifact, with the rest of the long tail documented rather than silently wrong — and for why the SE/VR matrix legs are YAML-validated but not yet confirmed with a real build. See `demo/` for a worked before/after showing what the archive buys you in Ghidra.
 
 ### 3. runtime-harness
 
