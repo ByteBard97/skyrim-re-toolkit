@@ -177,3 +177,31 @@ of 100+ classes in one patch, more than all other remaining `MISMATCH`
 clusters combined. Worth prioritizing patch 0007's libclang/JIT
 reliability investigation specifically because of this, not just for
 its own sake.
+
+## Correction: patch 0007 is NOT a prerequisite — it's obsolete and regressive
+
+The "blocked on patch 0007" framing above (both updates) was tested
+directly and found wrong. Re-applying patch 0007 as-is on top of current
+mainline (patches 0001-0018) **regresses an already-`OK` class**:
+`ArmorRatingVisitor` measures 64/64 (`OK`) in the current baseline, and
+40 (missing exactly `sizeof(BSScrapArrayAllocator)`) with 0007 applied.
+0007 predates patches 0009/0015/0016, whose more general field-embedding
+mechanism has since superseded 0007's own approach for this class's shape
+(`BSTArray<T, Allocator>`-style container embedding) — 0007 should not be
+revived for any purpose, including "just for its bindings/investigation
+machinery." It has been reverted from the working tree.
+
+**This class of bug's actual prerequisite was only three self-contained
+libclang bindings 0007 introduced** (`Cursor.specializedTemplate()`,
+`Type.numTemplateArguments()`, `Type.templateArgumentType()`) — pure
+additions to `Cursor.java`/`LibClang.java`/`Type.java` with no interaction
+with 0007's `ParsedStructure`/`TypePool`/`SourceParser` field-embedding
+changes. Patch 0021 cherry-picks exactly those three bindings and adds a
+new, self-contained `isPolymorphic(Type)` overload that reuses them for
+this bug specifically — fixing one level of the substitution chain (10-11
+of the 122 classes). See `patches/0021-fix-ispolymorphic-template-specialization.md`
+for the fix, its `GCPP_DEBUG_POLY` trace confirming exactly where the
+substitution wall still is for the remaining classes (`FxDelegateHandler`/
+`IMenu` included), and why that remaining wall needs textual/structural
+substitution into a nested template-id — a comparably-sized follow-on
+investigation, not a small extension.

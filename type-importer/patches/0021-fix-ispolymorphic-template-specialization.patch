@@ -1,0 +1,302 @@
+diff -ruN a/src/main/java/playday3008/gcpp/clang/Cursor.java b/src/main/java/playday3008/gcpp/clang/Cursor.java
+--- a/src/main/java/playday3008/gcpp/clang/Cursor.java	2026-08-25 21:40:31.499369284 -0400
++++ b/src/main/java/playday3008/gcpp/clang/Cursor.java	2026-08-25 21:40:25.795966040 -0400
+@@ -216,6 +216,17 @@
+         return new Cursor(defSegment, arena);
+     }
+ 
++    /**
++     * For an implicit class-template-specialization declaration cursor,
++     * returns the cursor for the PRIMARY (uninstantiated) template
++     * declaration -- see LibClang.getSpecializedCursorTemplate's comment.
++     * Returns a null/invalid cursor if this cursor isn't a specialization.
++     */
++    public Cursor specializedTemplate() {
++        MemorySegment templSegment = LibClang.getSpecializedCursorTemplate(arena, segment);
++        return new Cursor(templSegment, arena);
++    }
++
+     // ========================================================================
+     // Visitor pattern
+     // ========================================================================
+diff -ruN a/src/main/java/playday3008/gcpp/clang/LibClang.java b/src/main/java/playday3008/gcpp/clang/LibClang.java
+--- a/src/main/java/playday3008/gcpp/clang/LibClang.java	2026-08-25 21:40:31.499390534 -0400
++++ b/src/main/java/playday3008/gcpp/clang/LibClang.java	2026-08-25 21:40:25.795907568 -0400
+@@ -416,6 +416,20 @@
+     private static final MethodHandle CLANG_GET_CURSOR_DEFINITION = downcall("clang_getCursorDefinition",
+         FunctionDescriptor.of(CX_CURSOR, CX_CURSOR));
+ 
++    // Given the cursor for an implicit class-template-specialization
++    // declaration, returns the cursor for the PRIMARY (uninstantiated)
++    // template declaration it came from -- e.g. for BSTArray<void*>'s decl,
++    // returns the cursor for `template <class T, class Allocator> class
++    // BSTArray`. Unlike the instantiated specialization's own declaration
++    // (which clang_visitChildren finds ZERO children for -- see
++    // patches/0003-inline-template-specialization-fields.md), the PRIMARY
++    // template's declaration is real, written source, so clang_visitChildren
++    // walks its base-specifiers/members normally. Used to recover base
++    // classes for template specializations used as inline-embedded fields
++    // (see patches/0006-*.md).
++    private static final MethodHandle CLANG_GET_SPECIALIZED_CURSOR_TEMPLATE = downcall("clang_getSpecializedCursorTemplate",
++        FunctionDescriptor.of(CX_CURSOR, CX_CURSOR));
++
+     // The actual fix for the same investigation -- see FIELD_VISITOR_DESC's comment
+     // above and patches/0003-inline-template-specialization-fields.md.
+     private static final MethodHandle CLANG_TYPE_VISIT_FIELDS = downcall("clang_Type_visitFields",
+@@ -442,6 +456,19 @@
+     private static final MethodHandle CLANG_GET_ARRAY_ELEMENT_TYPE = downcall("clang_getArrayElementType",
+         FunctionDescriptor.of(CX_TYPE, CX_TYPE));
+ 
++    // Number of template arguments (including default-substituted ones) an
++    // instantiated class-template-specialization type carries, and the
++    // concrete type of the i-th one. Used to resolve dependent base classes
++    // (e.g. BSTArray<T, Allocator = BSTArrayHeapAllocator>'s "Allocator"
++    // base, written symbolically on the primary template) back to their
++    // concrete substituted type for a specific instantiation -- see
++    // patches/0006-*.md.
++    private static final MethodHandle CLANG_TYPE_GET_NUM_TEMPLATE_ARGUMENTS = downcall("clang_Type_getNumTemplateArguments",
++        FunctionDescriptor.of(ValueLayout.JAVA_INT, CX_TYPE));
++
++    private static final MethodHandle CLANG_TYPE_GET_TEMPLATE_ARGUMENT_AS_TYPE = downcall("clang_Type_getTemplateArgumentAsType",
++        FunctionDescriptor.of(CX_TYPE, CX_TYPE, ValueLayout.JAVA_INT));
++
+     private static final MethodHandle CLANG_GET_ARRAY_SIZE = downcall("clang_getArraySize",
+         FunctionDescriptor.of(ValueLayout.JAVA_LONG, CX_TYPE));
+ 
+@@ -803,6 +830,14 @@
+         }
+     }
+ 
++    public static MemorySegment getSpecializedCursorTemplate(SegmentAllocator allocator, MemorySegment cursor) {
++        try {
++            return (MemorySegment) CLANG_GET_SPECIALIZED_CURSOR_TEMPLATE.invokeExact(allocator, cursor);
++        } catch (Throwable t) {
++            throw new RuntimeException("clang_getSpecializedCursorTemplate failed", t);
++        }
++    }
++
+     public static int typeVisitFields(MemorySegment type, MemorySegment visitor, MemorySegment clientData) {
+         try {
+             return (int) CLANG_TYPE_VISIT_FIELDS.invokeExact(type, visitor, clientData);
+@@ -859,6 +894,22 @@
+         }
+     }
+ 
++    public static int typeGetNumTemplateArguments(MemorySegment type) {
++        try {
++            return (int) CLANG_TYPE_GET_NUM_TEMPLATE_ARGUMENTS.invokeExact(type);
++        } catch (Throwable t) {
++            throw new RuntimeException("clang_Type_getNumTemplateArguments failed", t);
++        }
++    }
++
++    public static MemorySegment getTemplateArgumentAsType(SegmentAllocator allocator, MemorySegment type, int index) {
++        try {
++            return (MemorySegment) CLANG_TYPE_GET_TEMPLATE_ARGUMENT_AS_TYPE.invokeExact(allocator, type, index);
++        } catch (Throwable t) {
++            throw new RuntimeException("clang_Type_getTemplateArgumentAsType failed", t);
++        }
++    }
++
+     public static MemorySegment getArrayElementType(SegmentAllocator allocator, MemorySegment type) {
+         try {
+             return (MemorySegment) CLANG_GET_ARRAY_ELEMENT_TYPE.invokeExact(allocator, type);
+diff -ruN a/src/main/java/playday3008/gcpp/clang/Type.java b/src/main/java/playday3008/gcpp/clang/Type.java
+--- a/src/main/java/playday3008/gcpp/clang/Type.java	2026-08-25 21:40:31.499416904 -0400
++++ b/src/main/java/playday3008/gcpp/clang/Type.java	2026-08-25 21:40:25.795832646 -0400
+@@ -82,6 +82,24 @@
+     }
+ 
+     /**
++     * Number of template arguments (including default-substituted ones)
++     * this instantiated class-template-specialization type carries, or a
++     * negative value if this isn't a template specialization.
++     */
++    public int numTemplateArguments() {
++        return LibClang.typeGetNumTemplateArguments(segment);
++    }
++
++    /**
++     * The concrete type of the i-th template argument of this
++     * instantiated class-template-specialization type.
++     */
++    public Type templateArgumentType(int index) {
++        MemorySegment typeSeg = LibClang.getTemplateArgumentAsType(arena, segment, index);
++        return new Type(typeSeg, arena);
++    }
++
++    /**
+      * For array types, returns the element type.
+      */
+     public Type arrayElementType() {
+diff -ruN a/src/main/java/playday3008/gcpp/processing/SourceParser.java b/src/main/java/playday3008/gcpp/processing/SourceParser.java
+--- a/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-25 21:40:31.499482379 -0400
++++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-25 21:40:25.796216306 -0400
+@@ -597,15 +597,24 @@
+ 
+         List<ParsedStructure.FieldInfo> allFields = new ArrayList<>();
+ 
+-        if (!virtualMethods.isEmpty() && !primaryBaseIsPolymorphic) {
++        if (!virtualMethods.isEmpty()) {
++            // Register the vtable's own method-signature struct unconditionally --
++            // it's useful Ghidra-visible naming/typing for this class's virtual
++            // methods regardless of whether THIS class introduces a brand-new
++            // vptr slot or extends one it inherits. Only the "vptr" FIELD itself
++            // is conditional on primaryBaseIsPolymorphic (see above): an
++            // inherited vtable is still reached through the base's own vptr,
++            // already embedded by the base-class field loop below.
+             String vtableName = name + "_vtable";
+             pool.addParsedType(new ParsedVtable(vtableName, virtualMethods, name, category));
+-            allFields.add(new ParsedStructure.FieldInfo(
+-                "vptr", vtableName + " *", false, 0, false, null));
+-            LOGGER.debug("Class '{}': created vtable with {} virtual method(s)", name, virtualMethods.size());
+-        } else if (!virtualMethods.isEmpty()) {
+-            LOGGER.debug("Class '{}': {} virtual method(s) extend the primary base's existing vtable "
+-                + "(no new vptr field emitted)", name, virtualMethods.size());
++            if (!primaryBaseIsPolymorphic) {
++                allFields.add(new ParsedStructure.FieldInfo(
++                    "vptr", vtableName + " *", false, 0, false, null));
++                LOGGER.debug("Class '{}': created vtable with {} virtual method(s)", name, virtualMethods.size());
++            } else {
++                LOGGER.debug("Class '{}': {} virtual method(s) extend the primary base's existing vtable "
++                    + "(no new vptr field emitted)", name, virtualMethods.size());
++            }
+         }
+ 
+         for (int i = 0; i < baseClasses.size(); i++) {
+@@ -740,31 +749,130 @@
+     private boolean isPolymorphic(Cursor classDecl) {
+         if (classDecl == null)
+             return false;
++        return isPolymorphic(classDecl.type());
++    }
++
++    /**
++     * Type-based overload of {@link #isPolymorphic(Cursor)}, needed for a base
++     * that is itself a class-template SPECIALIZATION (e.g. {@code IMenu}'s
++     * primary base {@code FxDelegateHandler}'s own primary base
++     * {@code GRefCountBase<FxDelegateHandler, GStatGroups::kGStat_Default_Mem>}).
++     * <p>
++     * {@code clang_visitChildren} finds ZERO children for a specialization's
++     * own declaration cursor (the same quirk patch 0003 established for
++     * field extraction) -- so the plain cursor-based walk above silently
++     * concludes "no virtual method, no bases" and returns false for any
++     * specialization, even one that plainly inherits a vtable. Confirmed
++     * this is not a rare shape: 122 of 178 (68.5%) of the AE coverage
++     * sweep's MISMATCH classes carry a spurious +8-byte redundant vptr
++     * traceable to exactly this gap (see patches/0008-*-DEFERRED.md).
++     * <p>
++     * Fix: when the declaration is a specialization, fall back to the
++     * PRIMARY (uninstantiated) template's declaration -- real written
++     * source, so clang_visitChildren walks it normally (same fallback
++     * patch 0007 established for base-class field embedding) -- and
++     * positionally substitute any base spelled as a bare template
++     * parameter (e.g. {@code GRefCountBaseStatImpl<Base, StatType>}'s own
++     * "Base") with this SPECIFIC instantiation's concrete argument type,
++     * via {@code clang_Type_getTemplateArgumentAsType} (patch 0007's own
++     * binding, reused here -- see Cursor.specializedTemplate() and
++     * Type.templateArgumentType()). Recurses on the substituted TYPE (not
++     * just its declaration cursor), so a chain of several specializations
++     * deep (GRefCountBase -&gt; GRefCountBaseStatImpl -&gt; GRefCountImpl)
++     * resolves all the way down to a plain, non-template class where the
++     * ordinary cursor walk finds the real virtual destructor.
++     * <p>
++     * Deliberately self-contained: unlike patch 0007's full attempt at
++     * reusing this same substitution logic for base-class FIELD embedding
++     * (deferred -- see patches/0007-*.md's own regression against
++     * ArmorRatingVisitor), this only answers a yes/no question and never
++     * constructs or registers any ParsedStructure/ParsedType, so it
++     * carries none of that patch's TypePool/anon_tmpl_ naming risk.
++     */
++    private boolean isPolymorphic(Type type) {
++        if (type == null)
++            return false;
+ 
++        Cursor decl = type.declaration();
++        if (decl == null)
++            return false;
++
++        Cursor primary = decl.specializedTemplate();
++        boolean isSpecialization = primary.kind() != CursorKind.INVALID_FILE;
++        Cursor declToWalk = isSpecialization ? primary : decl;
++
++        boolean debugThis = System.getenv("GCPP_DEBUG_POLY") != null
++            && type.spelling() != null
++            && type.spelling().contains(System.getenv("GCPP_DEBUG_POLY"));
++
++        // Every template PARAMETER in declaration order, type and non-type
++        // alike (e.g. GRefCountBase<class T, std::uint32_t STAT>'s "STAT"
++        // is NON_TYPE_TEMPLATE_PARAMETER, not TEMPLATE_TYPE_PARAMETER) --
++        // needed so paramNames' index lines up positionally with
++        // clang_Type_getTemplateArgumentAsType's own argument indexing
++        // below. Collecting only TEMPLATE_TYPE_PARAMETER children here
++        // would silently misalign every base-spelling substitution for any
++        // template mixing type and non-type parameters.
++        List<String> paramNames = new ArrayList<>();
+         boolean[] found = {false};
+-        List<Cursor> bases = new ArrayList<>();
++        List<Type> rawBaseTypes = new ArrayList<>();
+ 
+-        classDecl.visitChildren((cursor, parent) -> {
++        declToWalk.visitChildren((cursor, parent) -> {
+             if (found[0])
+                 return Cursor.ChildVisitResult.BREAK;
+             switch (cursor.kind()) {
++                case TEMPLATE_TYPE_PARAMETER, NON_TYPE_TEMPLATE_PARAMETER, TEMPLATE_TEMPLATE_PARAMETER ->
++                    paramNames.add(cursor.spelling());
+                 case C_X_X_METHOD, DESTRUCTOR -> {
+                     if (cursor.isVirtualMethod()) {
+                         found[0] = true;
+                         return Cursor.ChildVisitResult.BREAK;
+                     }
+                 }
+-                case C_X_X_BASE_SPECIFIER -> bases.add(cursor.type().declaration());
++                case C_X_X_BASE_SPECIFIER -> rawBaseTypes.add(cursor.type());
+                 default -> {}
+             }
+             return Cursor.ChildVisitResult.CONTINUE;
+         });
+ 
++        if (debugThis) {
++            System.err.println("[POLY] type=" + type.spelling()
++                + " found=" + found[0] + " numBases=" + rawBaseTypes.size()
++                + " paramNames=" + paramNames);
++        }
++
+         if (found[0])
+             return true;
+ 
+-        for (Cursor base : bases) {
+-            if (isPolymorphic(base))
++        // Only meaningful (and only safe to call) when declToWalk is the
++        // PRIMARY template -- type.canonicalType() here is THIS
++        // instantiation's own concrete argument list, positionally matched
++        // against the primary template's own parameter order (same
++        // reasoning as parseFieldsFromType's base-embedding, patches/0006/
++        // 0007-*.md).
++        Type canonicalForArgs = isSpecialization ? type.canonicalType() : null;
++        int numArgs = isSpecialization ? canonicalForArgs.numTemplateArguments() : 0;
++        if (debugThis) {
++            System.err.println("[POLY] type=" + type.spelling() + " numArgs=" + numArgs);
++        }
++
++        for (Type baseType : rawBaseTypes) {
++            Type concreteBaseType = baseType;
++            String baseSpelling = baseType.spelling();
++            if (isSpecialization && baseSpelling != null) {
++                int paramIndex = paramNames.indexOf(baseSpelling);
++                if (paramIndex >= 0 && paramIndex < numArgs) {
++                    Type substituted = canonicalForArgs.templateArgumentType(paramIndex);
++                    if (substituted != null) {
++                        concreteBaseType = substituted;
++                    }
++                }
++            }
++            if (debugThis) {
++                System.err.println("[POLY] type=" + type.spelling()
++                    + " base=" + baseSpelling + " -> concrete=" + concreteBaseType.spelling());
++            }
++            if (isPolymorphic(concreteBaseType))
+                 return true;
+         }
+         return false;
