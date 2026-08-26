@@ -136,3 +136,44 @@ undercounted its reach. No new root cause found here, no fix attempted
 (per the recommendation above — still blocked on patch 0007's deferred
 substitution-machinery reliability question); this is a scope update
 only.
+
+## Second update: full coverage-sweep MISMATCH audit — this is the single
+## biggest remaining gap in the whole codebase
+
+Grouping the AE `coverage_baseline.json`'s 178 `MISMATCH` classes (post
+patch 0019) by `actual - expected` delta found one dominant cluster:
+**122 of 178 (68.5%) are off by exactly +8 bytes.** Sampling confirms
+this is overwhelmingly the *same* bug, not 122 independent ones — every
+class checked (`GFxState`, `GWaitable`, `GFxResourceLib` directly;
+`IMenu`/`FxDelegateHandler` already confirmed above; most of the
+remaining `GFx*`/`GAS*`/`G*` Scaleform-UI family transitively, via
+chains like `GFxMovieDef → ... → GRefCountBase<T, StatType>` or
+`GFxStream : public GFxLogBase<GFxStream>`) ultimately derives, directly
+or transitively, from a class-template-specialization base with virtual
+methods — exactly `isPolymorphic()`'s known blind spot. A shallow
+direct-base-only check (no transitive closure, given the size of this
+investigation) only confirmed 48/122 directly; the other 74 need a
+transitive base walk to individually confirm, but every manually-checked
+sample matches, and no counter-example (a +8 class with a demonstrably
+different cause) was found.
+
+**Two small, deliberately unverified exceptions worth flagging** for
+whoever picks this up next: `Archive` and `BGSDefaultObjectManager` use
+*multiple* inheritance where a template-specialization base is the
+*second*, non-primary base (`BGSDefaultObjectManager : public TESForm,
+public BSTSingletonImplicit<BGSDefaultObjectManager>`) — a genuinely
+different shape than the single/primary-inheritance case this
+investigation root-caused, and worth checking separately before
+assuming they're the same bug (they might be a distinct, possibly more
+tractable, MI-specific instance).
+
+**No fix attempted here either** — this is a scope-quantification pass,
+not a third attempt at the underlying bug (still blocked on the same
+patch 0007 dependency as above). The practical upshot: **this one
+already-diagnosed, already-deferred issue is very likely the single
+highest-leverage remaining gap in the entire coverage sweep** — fixing
+it (once patch 0007's blocker clears) would likely resolve on the order
+of 100+ classes in one patch, more than all other remaining `MISMATCH`
+clusters combined. Worth prioritizing patch 0007's libclang/JIT
+reliability investigation specifically because of this, not just for
+its own sake.
