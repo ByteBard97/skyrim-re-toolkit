@@ -67,6 +67,7 @@ void OnMessage(SKSE::MessagingInterface::Message* message)
     switch (message->type) {
         case SKSE::MessagingInterface::kDataLoaded:
             SKSE::log::info("kDataLoaded received -- game data is fully loaded.");
+            LayoutValidator::OnDataLoaded();
             break;
         case SKSE::MessagingInterface::kNewGame:
             SKSE::log::info("kNewGame received -- a new game started.");

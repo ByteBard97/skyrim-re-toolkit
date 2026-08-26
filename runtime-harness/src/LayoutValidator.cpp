@@ -29,10 +29,16 @@ namespace LayoutValidator
             SKSE::log::info("LayoutValidator: LAYOUT class=TESForm sizeof=0x{:X} off.formFlags=0x{:X} off.formID=0x{:X} off.formType=0x{:X}",
                 sizeof(RE::TESForm), offsetof(RE::TESForm, formFlags),
                 offsetof(RE::TESForm, formID), offsetof(RE::TESForm, formType));
-            SKSE::log::info("LayoutValidator: LAYOUT class=NiAVObject sizeof=0x{:X} off.parent=0x{:X} off.local=0x{:X} off.world=0x{:X} off.worldBound=0x{:X} off.userData=0x{:X}",
+            // userData is only a named member of NiAVObject in the
+            // VR-only or dynamic-multi-runtime-without-VR branches
+            // (NiAVObject.h); this build has ENABLE_SKYRIM_SE/AE/VR all
+            // ON simultaneously (dynamic runtime dispatch), which lands
+            // in the header's #else branch -- no named userData field
+            // there, so it's not offsetof-able in this compiled view.
+            SKSE::log::info("LayoutValidator: LAYOUT class=NiAVObject sizeof=0x{:X} off.parent=0x{:X} off.local=0x{:X} off.world=0x{:X} off.worldBound=0x{:X} note=all-runtimes-build-no-named-userData",
                 sizeof(RE::NiAVObject), offsetof(RE::NiAVObject, parent),
                 offsetof(RE::NiAVObject, local), offsetof(RE::NiAVObject, world),
-                offsetof(RE::NiAVObject, worldBound), offsetof(RE::NiAVObject, userData));
+                offsetof(RE::NiAVObject, worldBound));
             SKSE::log::info("LayoutValidator: LAYOUT class=BGSLocation sizeof=0x{:X} off.parentLoc=0x{:X} off.keywordData=0x{:X} off.cleared=0x{:X}",
                 sizeof(RE::BGSLocation), offsetof(RE::BGSLocation, parentLoc),
                 offsetof(RE::BGSLocation, keywordData), offsetof(RE::BGSLocation, cleared));
@@ -56,9 +62,13 @@ namespace LayoutValidator
                 offsetof(RE::Actor::ACTOR_RUNTIME_DATA, race));
             SKSE::log::info("LayoutValidator: LAYOUT class=Character sizeof=0x{:X} note=se-view",
                 sizeof(RE::Character));
-            SKSE::log::info("LayoutValidator: LAYOUT class=BaseExtraList sizeof=0x{:X} off.data=0x{:X} off.presence=0x{:X} note=se-view",
-                sizeof(RE::BaseExtraList), offsetof(RE::BaseExtraList, data),
-                offsetof(RE::BaseExtraList, presence));
+            // data/presence are only named members #ifndef ENABLE_SKYRIM_AE
+            // (ExtraDataList.h) -- this build has ENABLE_SKYRIM_AE ON, so
+            // they're accessor-only here (GetData()/GetPresence()), not
+            // offsetof-able; sizeof is still the ground truth for this
+            // compiled view.
+            SKSE::log::info("LayoutValidator: LAYOUT class=BaseExtraList sizeof=0x{:X} note=ae-build-members-accessor-only",
+                sizeof(RE::BaseExtraList));
             // ExtraDataList's members (_extraData/_lock) are private
             // (ExtraDataList.h:198), so only sizeof is compilable here.
             SKSE::log::info("LayoutValidator: LAYOUT class=ExtraDataList sizeof=0x{:X} note=se-view members-private",
@@ -178,24 +188,16 @@ namespace LayoutValidator
             //     RE::VTABLE_* address resolved above (identity check that
             //     the object really is the class the headers claim).
         }
-
-        void OnMessage(SKSE::MessagingInterface::Message* a_message)
-        {
-            if (a_message->type == SKSE::MessagingInterface::kDataLoaded) {
-                RunLiveChecks();
-            }
-        }
     }
 
     void Install()
     {
         LogCompileTimeLayout();
+        SKSE::log::info("LayoutValidator: layout report logged; live-instance check runs on kDataLoaded (main.cpp).");
+    }
 
-        if (!SKSE::GetMessagingInterface()->RegisterListener(OnMessage)) {
-            SKSE::log::error("LayoutValidator: failed to register messaging listener.");
-            return;
-        }
-
-        SKSE::log::info("LayoutValidator: layout report logged; live-instance check registered (kDataLoaded).");
+    void OnDataLoaded()
+    {
+        RunLiveChecks();
     }
 }

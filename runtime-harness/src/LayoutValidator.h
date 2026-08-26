@@ -17,26 +17,34 @@
 //      0x20), TESForm.h:360), so this phase is primarily a build-config
 //      fingerprint: it proves the deployed DLL was compiled from the exact
 //      vendored CommonLibSSE-NG tree the .gdt archives come from, with the
-//      multi-runtime macro configuration (no ENABLE_SKYRIM_AE/SE/VR) that
-//      the CMakeLists.txt build uses.
+//      multi-runtime macro configuration the CMakeLists.txt build uses.
 //
-//      IMPORTANT multi-runtime caveat baked into the numbers: with no
-//      runtime macro defined, every "#ifndef ENABLE_SKYRIM_AE" member
-//      block IS compiled in, so the plugin's compiled view of
-//      Actor/TESObjectREFR/BaseExtraList/TESObjectCELL is the SE layout
-//      (Actor == 0x2B0 with runtime data at 0xE0, TESObjectREFR == 0x98,
-//      BaseExtraList == 0x10). On an AE runtime (1.6.629+) the real
-//      objects are 8 bytes larger in the runtime-data region and all
-//      field access goes through REL::RelocateMemberIfNewer accessors
-//      (e.g. Actor::GetActorRuntimeData, Actor.h:710). The logged
-//      offsetof values for those classes are therefore SE-view offsets --
-//      ground truth for the compiled layout, NOT directly comparable to
-//      AE live memory. Unguarded classes (TESForm, TESQuest, BGSLocation,
-//      NiAVObject, bhkCharacterState) share one layout across runtimes and
-//      their offsets ARE directly comparable to live memory.
+//      IMPORTANT, corrected after the first real Windows compile: this
+//      build's CMakeLists.txt (type-importer/vendor/CommonLibSSE-NG's
+//      ENABLE_SKYRIM_SE/AE/VR options) defaults all THREE macros ON
+//      simultaneously (dynamic runtime dispatch), not none of them as
+//      originally assumed here. That lands every guarded class in the
+//      headers' "#else" branch, which is a DIFFERENT, narrower view than
+//      either the SE-only or AE-only layout: e.g. Actor compiles to
+//      sizeof 0x78 (not 0x2B0), TESObjectREFR to 0x78 (not 0x98),
+//      BaseExtraList to 0x1 with data/presence inaccessible via offsetof
+//      (accessor-only), TESObjectCELL to 0x50, NiAVObject with no named
+//      userData member. These are ground truth for THIS compiled plugin,
+//      not for any single real runtime's live memory -- they cannot be
+//      diffed against type-importer/coverage_baseline.json (parsed in
+//      AE mode) without accounting for the mismatch. Unguarded classes
+//      (TESForm, TESQuest, BGSLocation, NiAVObject's parent/local/world/
+//      worldBound, bhkCharacterState) share one layout across all three
+//      macro states and their offsets ARE directly comparable to live
+//      memory and to the baseline.
 //
-//   2. LIVE CHECK (runs on kDataLoaded, via a message listener registered
-//      by Install()). Resolves published vtables/RTTI through Address
+//   2. LIVE CHECK (runs on kDataLoaded -- main.cpp's single messaging
+//      listener calls OnDataLoaded() directly. Observed in-game: a second
+//      RegisterListener() call from this file returned true but its
+//      callback never fired, while main.cpp's own registration did --
+//      so every inspector needing kDataLoaded routes through main.cpp's
+//      one registration instead of registering its own). Resolves published
+//      vtables/RTTI through Address
 //      Library (RE::VTABLE_TESForm[0], RE::VTABLE_Actor[0],
 //      RE::VTABLE_TESObjectREFR[0..3], RE::RTTI_TESForm -- all from the
 //      vendored Offsets_VTABLE.h/Offsets_RTTI.h) and logs their resolved
@@ -53,9 +61,13 @@
 
 namespace LayoutValidator
 {
-    // Logs the compile-time layout report and registers the kDataLoaded
-    // listener for the live check. Must be called after SKSE::Init()
-    // (REL::Relocation resolution and the messaging interface both need
-    // it).
+    // Logs the compile-time layout report. Must be called after
+    // SKSE::Init() (REL::Relocation resolution needs it).
     void Install();
+
+    // Runs the live-instance check (Address Library resolution +
+    // raw-vs-accessor field reads). Call from main.cpp's kDataLoaded
+    // handler -- see the file header comment for why this isn't a
+    // self-registered listener.
+    void OnDataLoaded();
 }

@@ -1,13 +1,13 @@
 # LayoutValidator — design doc
 
-**Status: skeleton implemented, NOT yet built or run.** The code
-(`src/LayoutValidator.h` / `src/LayoutValidator.cpp`, wired into
-`main.cpp` and `CMakeLists.txt`) is compile-plausible against the
-vendored CommonLibSSE-NG v3.7.0 tree but has never been through MSVC —
-this subproject is Windows/MSVC-only (see `README.md`, "Platform") and
-no Windows build was available when this was written. First action on
-the Windows build machine: build, fix whatever falls out, deploy, and
-check `RuntimeHarness.log`.
+**Status: built, deployed, and live-verified (2026-08-26).** See
+[`T3-3_LAYOUTVALIDATOR_REPORT.md`](T3-3_LAYOUTVALIDATOR_REPORT.md) for
+the full first-compile report — two real bugs found and fixed (a wrong
+build-config assumption in this doc's original text, corrected below;
+and a messaging-listener conflict with `main.cpp`), plus the actual
+three-way diff result against `coverage_baseline.json` (0 confirmed
+mismatches). Real log evidence:
+[`examples/RuntimeHarness_T3-3_layoutvalidator.log.txt`](../examples/RuntimeHarness_T3-3_layoutvalidator.log.txt).
 
 ## What this is
 
@@ -80,16 +80,21 @@ So what does an in-process validator add that `static_assert` doesn't?
 ### What it CANNOT prove (honest limitations)
 
 - **AE-specific member positions are not verifiable via `offsetof` in
-  this build.** The plugin builds with no `ENABLE_SKYRIM_AE/SE/VR`
-  macro (multi-runtime NG configuration), so every
-  `#ifndef ENABLE_SKYRIM_AE` member block *is* compiled in — the
-  plugin's compiled view of `Actor`, `TESObjectREFR`, `BaseExtraList`,
-  and `TESObjectCELL` is the **SE layout** (Actor `0x2B0` with runtime
-  data at `0xE0`; the real AE objects are shifted +8 from `0xE8` and
-  reached only through `REL::RelocateMemberIfNewer` accessors like
-  `Actor::GetActorRuntimeData()`, Actor.h:710). The logged offsets for
-  those classes are ground truth for *the compiled plugin*, not for AE
-  live memory. Validating the AE layout of divergent classes requires
+  this build.** Corrected after the first real compile (see
+  `T3-3_LAYOUTVALIDATOR_REPORT.md`): the plugin actually builds with
+  `ENABLE_SKYRIM_SE`, `ENABLE_SKYRIM_AE`, **and** `ENABLE_SKYRIM_VR` all
+  `ON` simultaneously (dynamic multi-runtime dispatch), not with none of
+  them defined as originally assumed here. That combination lands every
+  runtime-guarded class in a narrower `#else` branch of the headers —
+  different from a plain SE-only *or* AE-only view. Measured compiled
+  sizes: `Actor` `0x78`, `TESObjectREFR` `0x78`, `BaseExtraList` `0x1`
+  (its `data`/`presence` members aren't even offsetof-able in this
+  branch — accessor-only), `TESObjectCELL` `0x50`. Real AE live-object
+  field access still has to go through `REL::RelocateMemberIfNewer`
+  accessors like `Actor::GetActorRuntimeData()` (Actor.h:710) — the
+  logged offsets for these classes are ground truth for *this specific
+  compiled plugin*, not for any one real runtime's live memory.
+  Validating the AE layout of divergent classes requires
   accessor-based live reads (TODO in phase 2b), never raw-offset reads.
 - **Member semantics.** Proving `currentProcess` sits at some offset
   does not prove it points at the right `AIProcess`. Pointer-plausibility
@@ -168,3 +173,12 @@ Tracked in `LayoutValidator.cpp` as `TODO(live-verify)` comments:
   injected `TESForm` size mismatch in `RuntimeHarness_layout_mismatch.log.txt`
   is correctly caught with exit 1) — built and tested entirely
   Linux-side, before any Windows compile exists to produce a real log.
+  **Since re-run against the real log** (`RuntimeHarness_T3-3_layoutvalidator.log.txt`,
+  T3-3): all 11 classes parsed correctly, 0 confirmed mismatches against
+  `coverage_baseline.json`'s static_assert-backed values. See
+  `T3-3_LAYOUTVALIDATOR_REPORT.md`.
+
+The four items above (RTTI name readback, `PlayerCharacter` checks,
+`ACTOR_RUNTIME_DATA` sanity, `ExtraDataList` walk, vtable-pointer
+identity) remain genuinely open after T3-3 — that pass only exercised
+the `TESForm(0x00000007)` live check, which was clean.
