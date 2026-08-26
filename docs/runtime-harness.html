@@ -27,7 +27,7 @@
 
   <div class="eyebrow">Subproject 3 of 3</div>
   <h1>runtime-harness</h1>
-  <p class="lede"><span class="badge badge-progress">first inspector verified in-game</span> &nbsp; SKSE plugins that hook under-instrumented engine subsystems and log their live internal state.</p>
+  <p class="lede"><span class="badge badge-progress">two of three inspectors verified in-game</span> &nbsp; SKSE plugins that hook under-instrumented engine subsystems and log their live internal state.</p>
 
   <h2>The problem</h2>
   <p>
@@ -62,18 +62,23 @@
       over time as expected.</p>
     </div>
     <div class="card">
-      <h3>HavokStepLogger <span class="badge badge-warn">written, not yet deployed</span></h3>
+      <h3>HavokStepLogger <span class="badge badge-warn">deployed, inconclusive</span></h3>
       <p>Collision/ragdoll state per physics step. Hooks <code>bhkCharacterState::Update</code> across all
       six concrete character-state vtables (OnGround/Jumping/InAir/Climbing/Flying/Swimming) and logs
-      physics-state transitions with velocity magnitude. Compile-verified, not yet run in-game; not yet
-      actor-attributed (keyed by <code>hkpCharacterContext</code> address, not a form ID).</p>
+      physics-state transitions with velocity magnitude. Not yet actor-attributed (keyed by
+      <code>hkpCharacterContext</code> address, not a form ID). Deployed and installed cleanly in-game, but
+      produced no log output in ~10 minutes of gameplay, including confirmed jump input — the vfunc index
+      and the input delivery were both independently verified working, so the root cause is unclear; most
+      likely just needs more playtime past the scripted opening sequence to settle, not a known bug.</p>
     </div>
     <div class="card">
-      <h3>SavegameTracer <span class="badge badge-warn">written, not yet deployed</span></h3>
+      <h3>SavegameTracer <span class="badge badge-good">verified in-game</span></h3>
       <p>Hooks <code>BGSSaveLoadManager::ProcessEvent</code> via vtable — a genuine singleton, so exactly
       one concrete vtable. Dumps <code>saveGameList</code> (filename, player name, race, location,
       playtime) on every firing, since the actual event payload types are only ever forward-declared in
-      the vendored tree. Compile-verified, not yet run in-game.</p>
+      the vendored tree. Confirmed firing live in-game: a real <code>ProcessEvent</code> call with a real
+      <code>saveGameList</code> query (the list was empty at that moment, since no save existed yet in the
+      session — itself correct live data, not a failure).</p>
     </div>
   </div>
 
