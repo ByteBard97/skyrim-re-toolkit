@@ -20,11 +20,12 @@ each resulting `.gdt` as a workflow build artifact.
   produced — ~3.7MB each, traceable to CommonLibSSE-NG commit `b93280e`)
   — no longer just YAML-validated.
 - **Distribution**: a workflow artifact attached to each run by default;
-  the workflow now also supports opt-in publishing to a versioned GitHub
-  Release per runtime (see `.github/workflows/symbol-archive-build.yml`'s
-  `publish_release`/`release_tag_prefix` inputs, e.g. a prefix `v1`
-  produces tags `ae-1.6.1170-v1`, `se-1.5.97-v1`, `vr-1.4.15-v1`) — not
-  yet exercised for a real public release.
+  the workflow now also supports opt-in publishing to a single versioned
+  GitHub Release carrying all three runtimes (see
+  `.github/workflows/symbol-archive-build.yml`'s
+  `publish_release`/`release_version` inputs, e.g. version `v1` produces
+  tag `gdt-v1` with the AE/SE/VR `.gdt` files attached as assets) —
+  never yet published.
 - **Accuracy**: **not every class in this archive is byte-accurate.**
   `type-importer`'s own coverage sweep (see
   `../type-importer/COVERAGE_SWEEP_PLAN.md` and
@@ -86,6 +87,6 @@ File → Add Archive** and select the downloaded `.gdt`, then right-click →
 |---|---|
 | AE `.gdt` build artifact via manual CI dispatch | Done — real run confirmed (see Status above) |
 | Hotspot-list accuracy verified | Fully closed — 37/39 exact, last 2 given real inferred sizes via patch 0019 — see `type-importer/COVERAGE_SWEEP_PLAN.md` |
-| Versioned GitHub Release publishing | Wired (opt-in `publish_release` + `release_tag_prefix` inputs, per-runtime tags); not yet exercised for a real release |
+| Versioned GitHub Release publishing | Wired, gated behind the `publish_release` dispatch input (single `gdt-<release_version>` release carrying all three AE/SE/VR `.gdt` assets); never yet published |
 | SE / VR / GOG runtime coverage | Layouts validated in `type-importer` (SE, VR) and confirmed unnecessary (AE 1.7.99, GOG); SE/VR wired into this workflow's build matrix and confirmed with a real run — see Status above |
 | Automatic *validation* on CommonLibSSE-NG submodule bump | Done — `.github/dependabot.yml` watches CommonLibSSE-NG weekly and opens a PR on a new upstream commit, which `type-importer`'s existing coverage gate then regression-checks automatically. This subproject's own `.gdt` rebuild is still manual-dispatch only (see Triggers below) — Dependabot doesn't push a new `.gdt` build artifact, only a reviewed, regression-checked PR bumping the pin |

@@ -20,8 +20,9 @@ name: symbol-archive build (AE/SE/VR)
 #
 # Manual dispatch only for now -- see symbol-archive/README.md's roadmap
 # for why this isn't push-triggered yet. Set the publish_release input to
-# also cut a public, versioned GitHub Release for each runtime in the
-# matrix (off by default).
+# also cut a single public, versioned GitHub Release (tag
+# gdt-<release_version>) carrying all three runtime .gdt files (off by
+# default).
 #
 # Toolchain versions match type-importer-coverage.yml (keep them in sync
 # if either is bumped): Ghidra 12.1.3, LLVM/libclang 19.1.0, JDK 25
@@ -32,16 +33,17 @@ on:
     inputs:
       publish_release:
         description: >-
-          Publish this build as a public, versioned GitHub Release per
-          runtime (in addition to the usual workflow artifact). Leave
-          unchecked for a normal test/dogfooding build.
+          Publish this build as a single public, versioned GitHub
+          Release carrying all three runtime .gdt files (in addition to
+          the usual workflow artifacts). Leave unchecked for a normal
+          test/dogfooding build.
         type: boolean
         default: false
-      release_tag_prefix:
+      release_version:
         description: >-
-          Release tag prefix to use when publish_release is checked, e.g.
-          "v1" produces tags "ae-1.6.1170-v1", "se-1.5.97-v1",
-          "vr-1.4.15-v1". Required only when publishing.
+          Version suffix for the release tag when publish_release is
+          checked, e.g. "v1" produces tag "gdt-v1". Required only when
+          publishing.
         type: string
         default: ""
 
@@ -162,31 +164,85 @@ jobs:
           path: ${{ runner.temp }}/CommonLibSSE_${{ matrix.runtime_label }}_${{ steps.commonlib-rev.outputs.sha }}.gdt
           retention-days: 90
 
-      # Opt-in, manual-only: publishes a public, versioned GitHub Release
-      # (per runtime in the matrix) with the .gdt attached, so a modder
-      # can download a release asset directly instead of cloning the repo
-      # and running the pipeline (or digging through workflow-artifact
-      # history, which requires a logged-in GitHub account and expires
-      # after 90 days). Off by default -- a normal workflow_dispatch run
-      # only produces the artifact above, same as before this step
-      # existed.
-      - name: Publish GitHub Release
-        if: ${{ inputs.publish_release == true }}
+  # Opt-in, manual-only: collects the three matrix-built .gdt artifacts
+  # and publishes ONE public, versioned GitHub Release with all three
+  # attached, so a modder can download a release asset directly instead
+  # of cloning the repo and running the pipeline (or digging through
+  # workflow-artifact history, which requires a logged-in GitHub account
+  # and expires after 90 days). Off by default -- with publish_release
+  # unchecked this job never runs and the workflow is artifacts-only,
+  # exactly as before this job existed.
+  publish-release:
+    needs: build-archive
+    if: ${{ inputs.publish_release == true }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # needed to create a release; build job keeps default perms
+    steps:
+      - name: Checkout (for type-importer/coverage_baseline*.json)
+        uses: actions/checkout@v4
+
+      - name: Download all matrix .gdt artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: CommonLibSSE_*
+          path: gdts
+          merge-multiple: true
+
+      # Uses gh (preinstalled on ubuntu runners) rather than
+      # softprops/action-gh-release: this workflow otherwise only uses
+      # first-party actions, and gh keeps the release body generation in
+      # plain bash with no new third-party action to pin and trust.
+      - name: Create versioned AE/SE/VR release
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ inputs.release_tag_prefix != '' && format('{0}-{1}-{2}', matrix.runtime_label, matrix.runtime_version, inputs.release_tag_prefix) || '' }}
-          RUNTIME_LABEL: ${{ matrix.runtime_label }}
-          RUNTIME_VERSION: ${{ matrix.runtime_version }}
-          COMMONLIB_SHA: ${{ steps.commonlib-rev.outputs.sha }}
-          GDT_PATH: ${{ runner.temp }}/CommonLibSSE_${{ matrix.runtime_label }}_${{ steps.commonlib-rev.outputs.sha }}.gdt
+          RELEASE_VERSION: ${{ inputs.release_version }}
         run: |
           set -euo pipefail
-          if [ -z "$RELEASE_TAG" ]; then
-            echo "publish_release was checked but release_tag_prefix is empty -- refusing to publish an untagged release." >&2
+          if [ -z "$RELEASE_VERSION" ]; then
+            echo "publish_release was checked but release_version is empty -- refusing to publish an untagged release." >&2
             exit 1
           fi
-          gh release create "$RELEASE_TAG" \
-            "$GDT_PATH" \
+          TAG="gdt-${RELEASE_VERSION}"
+
+          shopt -s nullglob
+          GDT_FILES=(gdts/*.gdt)
+          if [ "${#GDT_FILES[@]}" -ne 3 ]; then
+            echo "expected 3 .gdt artifacts (AE/SE/VR), found ${#GDT_FILES[@]}:" >&2
+            ls -la gdts >&2
+            exit 1
+          fi
+
+          # Artifact filenames embed the short CommonLibSSE-NG submodule
+          # SHA they were built from (CommonLibSSE_<runtime>_<sha>.gdt,
+          # identical across the matrix since all legs check out the
+          # same commit).
+          COMMONLIB_SHA=$(basename "${GDT_FILES[0]}" .gdt | sed 's/.*_//')
+
+          # Accuracy numbers are computed from the checked-in coverage
+          # baselines AT PUBLISH TIME -- refresh coverage_baseline*.json
+          # before publishing and do NOT hardcode these numbers here.
+          ACCURACY_LINES=$(python3 - <<'PYEOF'
+          import json
+          for label, path in (("AE", "type-importer/coverage_baseline.json"),
+                              ("SE", "type-importer/coverage_baseline_se.json"),
+                              ("VR", "type-importer/coverage_baseline_vr.json")):
+              d = json.load(open(path))
+              checkable = sum(1 for e in d.values() if e.get("status") != "NO_GROUND_TRUTH")
+              ok = sum(1 for e in d.values() if e.get("status") == "OK")
+              print(f"- {label}: {ok:,} of {checkable:,} checkable classes byte-accurate ({100*ok/checkable:.0f}%)")
+          PYEOF
+          )
+
+          gh release create "$TAG" "${GDT_FILES[@]}" \
             --repo "${{ github.repository }}" \
-            --title "$RUNTIME_LABEL $RUNTIME_VERSION type archive ($RELEASE_TAG)" \
-            --notes "Full-namespace CommonLibSSE-NG $RUNTIME_LABEL $RUNTIME_VERSION .gdt, built from CommonLibSSE-NG @ $COMMONLIB_SHA. See symbol-archive/README.md for the accuracy caveat -- not every class in this archive is byte-accurate yet; check type-importer/coverage_baseline*.json and the hotspot list in type-importer/COVERAGE_SWEEP_PLAN.md before trusting a specific struct."
+            --title "CommonLibSSE-NG type archives AE/SE/VR ($TAG)" \
+            --notes "$(cat <<NOTESEOF
+          Full-namespace CommonLibSSE-NG .gdt type archives for Skyrim AE 1.6.1170 / SE 1.5.97 / VR 1.4.15, built from CommonLibSSE-NG @ ${COMMONLIB_SHA}.
+
+          Accuracy caveat: not every class in these archives is byte-accurate. Per the checked-in coverage baselines at publish time:
+          ${ACCURACY_LINES}
+
+          See symbol-archive/README.md and the hotspot list in type-importer/COVERAGE_SWEEP_PLAN.md before trusting a specific struct.
+          NOTESEOF
+          )"
