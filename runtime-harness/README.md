@@ -35,12 +35,22 @@ produced any log output — see its entry below.
   chain (`hkBaseObject`→`hkReferencedObject`→`hkpCharacterState`→
   `bhkCharacterState`→the six concrete classes), so it's very unlikely
   to be an indexing bug. Deployed and installed cleanly in-game, but
-  **produced zero log lines in ~7 minutes of gameplay** including
-  attempted movement/jump input — most likely because that window was
-  still the pre-control opening sequence (bound hands / cart ride),
-  where the player has no physics controller instantiated yet, rather
-  than a genuine hook failure. **Not yet confirmed working; needs a
-  retest once the player actually has movement control.**
+  **produced zero log lines across 70+ minutes of real gameplay**
+  spanning the Helgen opening, open-world Whiterun, and combat-adjacent
+  NPC activity — long enough that "still in the scripted intro" no
+  longer explains it. `PlayerCharacter` was checked and ruled out as a
+  separate-hierarchy explanation (its header has no character-controller
+  references at all, and `AIProcess::GetCharController()`'s actual
+  implementation returns a plain `bhkCharacterController*` with no
+  player/NPC branching). Current best guess: Havok's character-state
+  dispatch may not go through a standard C++ virtual call on these
+  classes at all — some Havok integrations use a separate
+  reflected/manual dispatch table (populated by
+  `hkpCharacterStateManager`) rather than the compiled vtable, in which
+  case patching the vtable slot is silently inert. Unverified without
+  disassembly or Havok SDK source, both out of scope for this project.
+  **Open question, not a known-good hook — treat as unresolved rather
+  than "just needs more playtime."**
 - `SavegameTracer` — `BGSSaveLoadManager` serialization. Hooks
   `BGSSaveLoadManager::ProcessEvent(const BSSaveDataEvent*)` via vtable
   (index 1 on `RE::VTABLE_BGSSaveLoadManager[0]`) — unlike the other two
