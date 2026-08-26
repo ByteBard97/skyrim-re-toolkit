@@ -13,12 +13,31 @@ each resulting `.gdt` as a workflow build artifact.
 - **Runtime coverage**: the workflow matrix-builds **AE, SE, and VR**
   (`ENABLE_SKYRIM_AE`/`ENABLE_SKYRIM_SE`/`ENABLE_SKYRIM_VR`), mirroring
   `type-importer-coverage.yml`'s own runtime matrix now that Track 1 has
-  validated SE 1.5.97 and VR 1.4.15 layouts. AE 1.7.99/GOG need no
-  separate build entry — they share AE 1.6.1170's macro and Address
-  Library ID scheme. **Confirmed with a real `workflow_dispatch` run**
-  (all three matrix legs completed successfully, real `.gdt` artifacts
-  produced — ~3.7MB each, traceable to CommonLibSSE-NG commit `b93280e`)
-  — no longer just YAML-validated.
+  validated SE 1.5.97 and VR 1.4.15 layouts. **Confirmed with a real
+  `workflow_dispatch` run** (all three matrix legs completed
+  successfully, real `.gdt` artifacts produced — ~3.7MB each, traceable
+  to CommonLibSSE-NG commit `b93280e`) — no longer just YAML-validated.
+  Each matrix leg also writes its per-runtime accuracy numbers (OK count
+  / checkable count, computed from the committed baseline at run time)
+  into that run's GitHub Actions step summary, so the archives are
+  auditable without downloading anything.
+
+  **AE 1.7.99 and GOG 1.6.1179 deliberately have no separate matrix
+  leg**, verified at the code level, not assumed: `REL::VariantID`
+  (`include/REL/ID.h`) — the class every Address Library ID in the
+  vendored tree resolves through — has exactly three storage slots,
+  `_seID`/`_aeID`/`_vrOffset`, one per macro
+  (`ENABLE_SKYRIM_SE`/`ENABLE_SKYRIM_AE`/`ENABLE_SKYRIM_VR`); there is no
+  fourth GOG-specific field, and a repo-wide grep for
+  `ENABLE_SKYRIM_GOG`/`SKYRIM_GOG` across the entire vendored
+  CommonLibSSE-NG `include/` tree returns zero matches. GOG resolves its
+  addresses through the same `Module::Runtime::AE` branch and the same
+  numeric `_aeID` values as AE 1.6.1170 — there is no code path, macro,
+  or ID table anywhere in this library that distinguishes GOG from AE at
+  all. A dedicated GOG (or AE 1.7.99) matrix leg would therefore compile
+  the identical headers under the identical macro and produce a
+  byte-for-byte identical `.gdt` to the existing AE leg — pure CI time
+  with zero additional signal, not a coverage gap.
 - **Distribution**: a workflow artifact attached to each run by default;
   the workflow now also supports opt-in publishing to a single versioned
   GitHub Release carrying all three runtimes (see

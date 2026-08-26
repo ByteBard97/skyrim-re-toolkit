@@ -64,12 +64,15 @@ jobs:
           - runtime_macro: ENABLE_SKYRIM_AE
             runtime_label: AE
             runtime_version: "1.6.1170"
+            baseline_file: coverage_baseline.json
           - runtime_macro: ENABLE_SKYRIM_SE
             runtime_label: SE
             runtime_version: "1.5.97"
+            baseline_file: coverage_baseline_se.json
           - runtime_macro: ENABLE_SKYRIM_VR
             runtime_label: VR
             runtime_version: "1.4.15"
+            baseline_file: coverage_baseline_vr.json
     steps:
       - name: Checkout (with submodules)
         uses: actions/checkout@v4
@@ -156,6 +159,35 @@ jobs:
             ./generate_gdt.sh "$HOME/tools/winsdk" \
               "$RUNNER_TEMP/CommonLibSSE_${{ matrix.runtime_label }}_${{ steps.commonlib-rev.outputs.sha }}.gdt" \
               $HEADERS
+
+      - name: Write ${{ matrix.runtime_label }} accuracy summary
+        env:
+          RUNTIME_LABEL: ${{ matrix.runtime_label }}
+          RUNTIME_VERSION: ${{ matrix.runtime_version }}
+          BASELINE_FILE: ${{ matrix.baseline_file }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PYEOF' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          import os
+
+          label = os.environ["RUNTIME_LABEL"]
+          version = os.environ["RUNTIME_VERSION"]
+          baseline_path = f"type-importer/{os.environ['BASELINE_FILE']}"
+
+          d = json.load(open(baseline_path))
+          checkable = sum(1 for e in d.values() if e.get("status") != "NO_GROUND_TRUTH")
+          ok = sum(1 for e in d.values() if e.get("status") == "OK")
+          total = len(d)
+          pct = (100 * ok / checkable) if checkable else 0.0
+
+          print(f"### {label} {version}")
+          print()
+          print(f"- **{ok:,} of {checkable:,} checkable classes byte-accurate ({pct:.0f}%)**")
+          print(f"- {total:,} classes tracked total in `{os.environ['BASELINE_FILE']}`")
+          print(f"- Baseline as committed at build time — not a live re-check of this build's output, see `symbol-archive/README.md`")
+          print()
+          PYEOF
 
       - name: Upload .gdt artifact
         uses: actions/upload-artifact@v4
