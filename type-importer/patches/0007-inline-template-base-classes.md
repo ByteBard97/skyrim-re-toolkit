@@ -1,5 +1,25 @@
 # Patch 0007: inline base classes of class-template-specialization fields/bases
 
+**SUPERSEDED (2026-08-26, patch 0025).** Reopened per the user's direct
+go-ahead. First finding: the architecture this doc describes no longer
+exists -- patches 0011-0018 reworked template-field/base handling into a
+purely recursive inline-embed-by-value scheme, and `anon_tmpl_*` is now
+just a cosmetic debug name, never a `TypePool` lookup key -- so the
+"first-registration-wins keying bug" this doc's THIRD investigation
+diagnosed is moot; there was nothing left to fix along that path. All 10
+classes this doc lists under "Known remaining regressions" are already
+`OK` in the current baseline, closed independently by those later
+patches. A fresh full-sweep review (same problem area -- template
+specializations used as fields/bases -- but a different, currently-live
+bug) found and fixed a real remaining gap: `parseFieldsFromType` silently
+dropped a template specialization's own base-contributed content (e.g.
+`hkInplaceArray<T,N>`'s real storage living in `hkArrayBase<T>`,
+`BSTObjectDictionary<...>`'s two policy-base vptrs) whenever it also had
+real fields of its own. See `patches/0025-inline-embed-base-contributed-
+prefix.md` for the fix and verification (0 regressions / 19 improvements
+across AE/SE/VR). This file is kept for its historical investigation
+record, not as an active TODO.
+
 **Status: DEFERRED after two focused fix attempts. Written, iterated
 through an independent full-sweep regression review, and substantially
 improved -- but NOT a zero-regression patch. 10 known regressions remain

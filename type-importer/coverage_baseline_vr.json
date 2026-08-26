@@ -1935,9 +1935,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "BGSPackageDataBool": {
-    "actual": 1,
+    "actual": 8,
     "expected": 16,
-    "status": "EMPTY"
+    "status": "MISMATCH"
   },
   "BGSPackageDataBool_vtable": {
     "actual": 80,
@@ -1950,9 +1950,9 @@
     "status": "OK"
   },
   "BGSPackageDataLocation": {
-    "actual": 8,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSPackageDataLocation_vtable": {
     "actual": 56,
@@ -2345,14 +2345,14 @@
     "status": "OK"
   },
   "BGSSaveLoadManager": {
-    "actual": 944,
+    "actual": 976,
     "expected": 976,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSSaveLoadManager::Thread": {
-    "actual": 176,
+    "actual": 192,
     "expected": 192,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSSaveLoadManager::Thread_vtable": {
     "actual": 24,
@@ -4070,9 +4070,9 @@
     "status": "EMPTY"
   },
   "BSPackedTaskQueue": {
-    "actual": 48,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSPackedTaskQueue::Semaphore": {
     "actual": 16,
@@ -11160,9 +11160,9 @@
     "status": "EMPTY"
   },
   "GameSettingCollection": {
-    "actual": 40,
+    "actual": 320,
     "expected": 320,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GameSettingCollection_vtable": {
     "actual": 48,
@@ -11440,9 +11440,9 @@
     "status": "UNRESOLVED"
   },
   "HandlerDictionary": {
-    "actual": 64,
+    "actual": 80,
     "expected": 80,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "Hazard": {
     "actual": 216,
@@ -12735,9 +12735,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "INIPrefSettingCollection": {
-    "actual": 16,
+    "actual": 296,
     "expected": 296,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "INIPrefSettingCollection_vtable": {
     "actual": 32,
@@ -12745,9 +12745,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "INISettingCollection": {
-    "actual": 16,
+    "actual": 296,
     "expected": 296,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "INISettingCollection_vtable": {
     "actual": 40,
@@ -13840,9 +13840,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "Main": {
-    "actual": 592,
+    "actual": 624,
     "expected": 624,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "MainMenu": {
     "actual": 128,
@@ -16025,9 +16025,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "RegSettingCollection": {
-    "actual": 16,
+    "actual": 296,
     "expected": 296,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "RegSettingCollection_vtable": {
     "actual": 40,
@@ -16110,9 +16110,9 @@
     "status": "UNRESOLVED"
   },
   "ResponseDictionary": {
-    "actual": 64,
+    "actual": 80,
     "expected": 80,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ReticuleController": {
     "actual": 32,
@@ -16655,7 +16655,7 @@
     "status": "NO_GROUND_TRUTH"
   },
   "SkyrimVM": {
-    "actual": 2048,
+    "actual": 2208,
     "expected": 35192,
     "status": "MISMATCH"
   },
@@ -19240,9 +19240,9 @@
     "status": "OK"
   },
   "UIMessageQueue": {
-    "actual": 2928,
+    "actual": 2944,
     "expected": 2944,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "UIRenderManager": {
     "actual": 280,
@@ -19430,7 +19430,7 @@
     "status": "OK"
   },
   "VirtualMachine": {
-    "actual": 5320,
+    "actual": 5392,
     "expected": 38168,
     "status": "MISMATCH"
   },
@@ -21260,9 +21260,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "bhkCharProxyController": {
-    "actual": 1440,
+    "actual": 1456,
     "expected": 1456,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "bhkCharProxyController_vtable": {
     "actual": 64,
@@ -21285,9 +21285,9 @@
     "status": "EMPTY"
   },
   "bhkCharacterPointCollector": {
-    "actual": 560,
+    "actual": 576,
     "expected": 576,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "bhkCharacterPointCollector_vtable": {
     "actual": 24,
@@ -21295,9 +21295,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "bhkCharacterProxy": {
-    "actual": 592,
+    "actual": 608,
     "expected": 608,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "bhkCharacterProxy_vtable": {
     "actual": 112,
@@ -21860,7 +21860,7 @@
     "status": "NO_GROUND_TRUTH"
   },
   "formatter": {
-    "actual": 8,
+    "actual": 28,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -22580,14 +22580,14 @@
     "status": "EMPTY"
   },
   "hkpAgentNnTrack": {
-    "actual": 16,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpAllCdPointCollector": {
-    "actual": 528,
+    "actual": 544,
     "expected": 544,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpAllCdPointCollector_vtable": {
     "actual": 24,
@@ -23525,9 +23525,9 @@
     "status": "EMPTY"
   },
   "hkpSimulationIsland": {
-    "actual": 136,
+    "actual": 184,
     "expected": 184,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "hkpSimulationIsland_vtable": {
     "actual": 48,

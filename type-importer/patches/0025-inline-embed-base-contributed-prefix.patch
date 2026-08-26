@@ -1,0 +1,93 @@
+--- a/src/main/java/playday3008/gcpp/processing/SourceParser.java
++++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java
+@@ -889,6 +889,40 @@
+             return false;
+ 
+         Cursor decl = type.declaration();
++
++        // A base spelled via a plain alias/typedef name pointing at a template
++        // specialization (e.g. `class VoiceSpellFireHandler : public
++        // AnimHandler` where `using AnimHandler = IHandlerFunctor<Actor,
++        // BSFixedString>;`, RE/I/IHandlerFunctor.h) never reaches the
++        // specialization-detection logic below: clang_getTypeDeclaration on a
++        // TYPEDEF/alias TYPE returns the TYPEDEF_DECL cursor itself (a
++        // one-line `using` declaration with no base-specifier/method children
++        // to walk), not the aliased record -- confirmed via GCPP_DEBUG_POLY:
++        // "type=RE::AnimHandler found=false numBases=0 paramNames=[]", even
++        // though IHandlerFunctor<Actor,BSFixedString> plainly has a virtual
++        // destructor. Before this fix this was silently invisible: the
++        // base's own vtable/field content was ALSO never recovered by the
++        // (then-buggy) inline-embedding path, so the resulting spurious
++        // "own vptr" this false-negative causes happened to land on the same
++        // total byte count as the real layout by coincidence (Ghidra's own
++        // struct-packing alignment rounds the wrong internal composition up
++        // to the same final size). Fixing the inline-embedding gap (this
++        // patch's other half) recovers the base's REAL vptr too, which
++        // exposed this as a real, separate bug: VoiceSpellFireHandler went
++        // from accidentally-OK(16) to visibly-MISMATCH(24) -- a spurious
++        // extra vptr, not a new defect. Resolve through to the canonical
++        // (fully desugared) type first when the direct declaration isn't a
++        // record -- clang_getCanonicalType strips through typedefs/aliases
++        // to the real specialization, whose declaration() then correctly
++        // reaches IHandlerFunctor's own primary template body.
++        if (decl == null || decl.kind() == CursorKind.TYPEDEF_DECL || decl.kind() == CursorKind.TYPE_ALIAS_DECL) {
++            Type canonical = type.canonicalType();
++            Cursor canonDecl = (canonical != null) ? canonical.declaration() : null;
++            if (canonDecl != null) {
++                type = canonical;
++                decl = canonDecl;
++            }
++        }
+         if (decl == null)
+             return false;
+ 
+@@ -1091,6 +1125,49 @@
+             boolean isBitField = fieldCursor.isBitField();
+             int bitWidth = isBitField ? fieldCursor.getBitFieldWidth() : 0;
+ 
++            // clang_Type_visitFields (used below) walks CXXRecordDecl::field_begin()/
++            // field_end() directly -- it reports ONLY this type's own direct
++            // FIELD_DECLs, never anything contributed by its base classes. For a
++            // template specialization used as a field or base whose real content
++            // lives partly or wholly in ITS OWN bases (e.g. hkInplaceArray<T,N> :
++            // hkArray<T,Allocator> : hkArrayBase<T> -- hkInplaceArray's only own
++            // field is "T storage[N]" at offset 0x10, with the real _data/_size/
++            // _capacityAndFlags trio living in hkArrayBase, 16 bytes this walk never
++            // sees at all; or BSTObjectDictionary<...>, whose two empty-but-
++            // polymorphic policy bases contribute two 8-byte vptrs before its own
++            // pad11/pad12/pad14/objectDefinitions/definitionLock fields even start),
++            // this silently dropped the base-contributed bytes -- confirmed via a
++            // real sweep: HandlerDictionary/ResponseDictionary (both plain classes
++            // inheriting a BSTObjectDictionary<...> specialization) measured 16
++            // bytes short of their real static_assert-confirmed 0x50, and every
++            // hkInplaceArray<T,N>-having class (hkpAllCdPointCollector,
++            // bhkCharacterProxy, bhkCharProxyController, bhkCharacterPointCollector,
++            // hkpAgentNnTrack) measured exactly 16 bytes short of its own assert --
++            // in every case exactly the base-contributed prefix this walk skips.
++            // The existing `fields.isEmpty()` opaque-padding fallback below already
++            // covers the case where NOTHING own is found (e.g. BSTEventSink<T>, a
++            // pure interface) by padding the whole type to its real sizeOf() -- but
++            // that branch never fires here because visitFields DOES find real own
++            // fields, just not the base-contributed ones ahead of them.
++            //
++            // Fix: the first field callback per type carries this type's own real,
++            // compiler-computed byte offset (clang_Cursor_getOffsetOfField, the same
++            // ground-truth API already trusted for the EBO fixes in patches
++            // 0023/0024) -- if that offset is nonzero, everything before it belongs
++            // to base classes this walk cannot see, so prepend one opaque `char[N]`
++            // field sized to exactly that many bytes. This models the aggregate
++            // base contribution (however many bases, vptrs, or singleton mixins
++            // it's made of) without needing to individually walk and resolve each
++            // one, matching this codebase's established opaque-fallback philosophy.
++            if (fields.isEmpty()) {
++                long firstFieldOffsetBytes = fieldCursor.getFieldOffset() / 8;
++                if (firstFieldOffsetBytes > 0) {
++                    fields.add(new ParsedStructure.FieldInfo(
++                        "opaque_base_prefix", "char[" + firstFieldOffsetBytes + "]",
++                        false, 0, false, null));
++                }
++            }
++
+             // A field whose raw (unwrapped) type resolves to a real STRUCT_DECL/
+             // CLASS_DECL cursor -- e.g. BSSimpleList<T>'s own "Node _listHead"
+             // field, where Node is a struct NESTED INSIDE the template itself --
