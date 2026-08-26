@@ -26,6 +26,7 @@
 //     SKSE::stl::report_and_fail (SKSE/Impl/PCH.h:660).
 
 #include "AIProcessInspector.h"
+#include "HavokStepLogger.h"
 
 #include <RE/Skyrim.h>
 #include <SKSE/SKSE.h>
@@ -97,6 +98,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
     }
 
     AIProcessInspector::Install();
+    HavokStepLogger::Install();
 
     SKSE::log::info("Loaded.");
     return true;

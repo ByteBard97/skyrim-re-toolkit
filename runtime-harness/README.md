@@ -14,7 +14,8 @@ live Skyrim AE 1.6.1170 process (SKSE64 2.2.6).
 `AIProcessInspector` (below) is confirmed working against real gameplay:
 `RuntimeHarness.log` shows a dozen-plus live NPCs' package-evaluation
 transitions during a fresh game's opening scene, changing over time as
-expected. The other two planned inspectors are still unstarted:
+expected. `HavokStepLogger` is written and compile-verified but not yet
+deployed/verified in-game. `SavegameTracer` is still unstarted:
 
 - `AIProcessInspector` — package evaluation and AI scheduler decisions.
   Hooks `Actor::Update` via vtable (on both `RE::VTABLE_Actor` and
@@ -22,7 +23,17 @@ expected. The other two planned inspectors are still unstarted:
   carry their own vtable array) and logs package-evaluation transitions
   for high-process actors. `RE::PlayerCharacter` has yet another vtable
   and is not covered by design (NPC-only inspector).
-- `HavokStepLogger` — collision/ragdoll state per physics step
+- `HavokStepLogger` — collision/ragdoll state per physics step. Hooks
+  `bhkCharacterState::Update` (vfunc index 6) on all six concrete
+  character-state vtables (`OnGround`/`Jumping`/`InAir`/`Climbing`/
+  `Flying`/`Swimming` — the abstract `bhkCharacterState`/
+  `hkpCharacterState` bases are never instantiated and none of the six
+  override `Update`, so every one needs the hook) and logs physics-state
+  transitions with velocity magnitude. Not yet actor-attributed: this
+  hook's signature carries no direct pointer back to the owning `Actor`
+  or `bhkCharacterController`, so log lines are keyed by the
+  `hkpCharacterContext` instance address rather than a form ID. Written
+  and compile-verified, **not yet deployed or run in-game**.
 - `SavegameTracer` — `BGSSaveLoadManager` serialization
 
 A further idea unlocked by the rest of this repo: a struct-layout
