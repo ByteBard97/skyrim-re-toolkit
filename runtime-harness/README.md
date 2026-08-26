@@ -14,8 +14,8 @@ live Skyrim AE 1.6.1170 process (SKSE64 2.2.6).
 `AIProcessInspector` (below) is confirmed working against real gameplay:
 `RuntimeHarness.log` shows a dozen-plus live NPCs' package-evaluation
 transitions during a fresh game's opening scene, changing over time as
-expected. `HavokStepLogger` is written and compile-verified but not yet
-deployed/verified in-game. `SavegameTracer` is still unstarted:
+expected. `HavokStepLogger` and `SavegameTracer` are both written and
+compile-verified but not yet deployed/verified in-game:
 
 - `AIProcessInspector` — package evaluation and AI scheduler decisions.
   Hooks `Actor::Update` via vtable (on both `RE::VTABLE_Actor` and
@@ -34,7 +34,19 @@ deployed/verified in-game. `SavegameTracer` is still unstarted:
   or `bhkCharacterController`, so log lines are keyed by the
   `hkpCharacterContext` instance address rather than a form ID. Written
   and compile-verified, **not yet deployed or run in-game**.
-- `SavegameTracer` — `BGSSaveLoadManager` serialization
+- `SavegameTracer` — `BGSSaveLoadManager` serialization. Hooks
+  `BGSSaveLoadManager::ProcessEvent(const BSSaveDataEvent*)` via vtable
+  (index 1 on `RE::VTABLE_BGSSaveLoadManager[0]`) — unlike the other two
+  inspectors, `BGSSaveLoadManager` is a genuine singleton
+  (`GetSingleton()`), so there's exactly one concrete vtable, no
+  Actor/Character-style multi-instance trap here. `BSSaveDataEvent` and
+  `BGSSaveLoadManagerEvent` are both only ever forward-declared in the
+  vendored tree (never defined), so their payloads can't be read; this
+  inspector instead dumps `BGSSaveLoadManager::saveGameList`
+  (`BSTArray<BGSSaveLoadFileEntry*>`, which IS fully defined) on every
+  `ProcessEvent` firing — filename, player name, race, location, and
+  playtime for every known save. Written and compile-verified, **not yet
+  deployed or run in-game**.
 
 A further idea unlocked by the rest of this repo: a struct-layout
 validator that checks `type-importer`'s generated layouts against the

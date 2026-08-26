@@ -27,6 +27,7 @@
 
 #include "AIProcessInspector.h"
 #include "HavokStepLogger.h"
+#include "SavegameTracer.h"
 
 #include <RE/Skyrim.h>
 #include <SKSE/SKSE.h>
@@ -99,6 +100,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
 
     AIProcessInspector::Install();
     HavokStepLogger::Install();
+    SavegameTracer::Install();
 
     SKSE::log::info("Loaded.");
     return true;

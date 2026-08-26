@@ -48,7 +48,8 @@ add_subdirectory("${RUNTIME_HARNESS_COMMONLIB_PATH}" commonlibsse-ng)
 set(sources
     src/main.cpp
     src/AIProcessInspector.cpp
-    src/HavokStepLogger.cpp)
+    src/HavokStepLogger.cpp
+    src/SavegameTracer.cpp)
 
 # Without the registry port's add_commonlibsse_plugin() helper, declare
 # the DLL directly. The SKSE plugin version data AE requires is exported
