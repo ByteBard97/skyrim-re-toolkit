@@ -1,4 +1,4 @@
-# Runtime-Harness MCP Server — Design Doc (v0.1)
+# Runtime-Harness MCP Server — Design Doc (v0.1 read-only + v0.2 control)
 
 Status: pre-implementation, no code written. Grounded in real, committed
 artifacts, not speculation: `tools/parse_layout_log.py` (existing, working)
@@ -289,3 +289,167 @@ purely a log reader, matching the read-only non-goal above.
   but a snapshot, not a stream. Route B's tailing behavior under real
   conditions is the one genuinely open question, flagged as gated rather
   than assumed to work.
+
+---
+
+# v0.2 — Control interface (XT-7)
+
+Status: pre-implementation, no code written. This section supersedes v0.1's
+"Not a control interface" non-goal for a narrow, explicitly-scoped reason:
+**real session friction, not a feature wishlist.** Tonight's work needed
+Geoff to physically press Continue at the main menu and be present at the
+Windows box for anything past that — a load-a-save action that has nothing
+to do with reverse-engineering and everything to do with this box being
+remote. v0.2 exists to remove that specific friction, not to build a
+general gameplay-automation surface.
+
+## Why not adopt SkyLink AI / SkyrimNet wholesale
+
+Both are real, working, popular (SkyrimNet: MCP on :8889, 44+ tools
+including console commands on the game thread; SkyLink AI: named-pipe
+bridge, 74 tools) — checked, not assumed (see v0.1's non-goals section,
+which already cites both). Not adopted here because:
+
+- **Scope mismatch.** Both target *gameplay*-object control for AI-NPC
+  systems (dialogue, quests, world state as game content). This project's
+  actual need tonight was *test-harness* control: load a specific save,
+  put the player near a target class instance, nothing about NPC behavior
+  or quest state.
+- **Attack surface.** A 40-70+ tool general console-command-passthrough
+  surface is a much larger thing to reason about safely than "load this
+  save" and "move the player here." Every unused tool in that surface is
+  still something a client (or a bug) could invoke.
+- **What IS adopted from them, deliberately:** SkyLink AI's plugin-side
+  architecture (a thin named-pipe listener in the SKSE plugin, with the
+  actual protocol logic in a separate external process) and SkyrimNet's
+  core safety technique (mutate game state *on the game thread*, never via
+  simulated input/`SendInput`). Both are proven-feasible prior art already
+  cited in v0.1; this section reuses the pattern, not the tool count.
+
+## Architecture — no MCP code in the plugin at all
+
+Researched, not assumed: there is no official C++ MCP SDK as of this
+writing (the `modelcontextprotocol` org has an open, unresolved proposal
+discussion for one — issue #603). A few unofficial community C++ libraries
+exist (e.g. `hkr04/cpp-mcp`) but none are vetted or official, and pulling
+one into `RuntimeHarness` would mean vetting a new third-party dependency
+for a Windows SKSE plugin just to speak a protocol the plugin doesn't need
+to speak directly.
+
+**The split v0.1 already committed to solves this for free:** the plugin
+exposes the smallest possible surface, and the actual MCP protocol layer
+(JSON-RPC, tool registration) runs as a separate process on the Linux dev
+box, using the official Python MCP SDK — the same server v0.1's read-only
+log-tailing tools already run in. SkyLink AI itself follows exactly this
+split (SKSE plugin + separate C# bridge process, not one binary that
+speaks MCP). Concretely:
+
+```
+MCP client (editor/agent/chat tool)
+      |  MCP protocol (JSON-RPC over stdio/SSE)
+      v
+Python MCP server (Linux dev box)     <- same process as v0.1's log-tailing tools
+      |  new: write side, over the existing SSH channel to the Windows box
+      v
+Named-pipe client (small Python helper, or a raw pipe write over SSH-forwarded socket)
+      |  Windows named pipe: \\.\pipe\RuntimeHarnessControl
+      v
+RuntimeHarness.dll (Windows box) -- named-pipe LISTENER thread (new, small, raw
+  Win32 CreateNamedPipe/ConnectNamedPipe/ReadFile -- no third-party MCP
+  library, no JSON parsing beyond a tiny fixed command format)
+      |  SKSE::TaskInterface::AddTask(...) -- marshals onto the game's own
+      |  main thread, the same technique SkyrimNet uses instead of SendInput
+      v
+Real CommonLibSSE-NG API calls (BGSSaveLoadManager::Load, TESObjectREFR::MoveTo, ...)
+```
+
+The pipe listener thread's only job is: read a small fixed-format command
+off the pipe, validate it against the minimal command set below, and hand
+the actual game-state mutation to `SKSE::TaskInterface::AddTask()` (real,
+existing API — `SKSE/Interfaces.h:196`, already used implicitly by this
+project's messaging-interface pattern in `main.cpp`) so it executes safely
+on the main thread instead of racing the pipe's own worker thread. No
+`SendInput`/`keybd_event` anywhere in this design — matching v0.1's
+existing "the server never touches the game's input" principle, extended
+from "never" to "only ever via the game's own thread-safe task queue."
+
+## Command set — each one tied to a real friction point from tonight, not a wishlist
+
+Every command below is backed by a real CommonLibSSE-NG API already
+present in the vendored headers (checked, not invented) or explicitly
+flagged as not yet confirmed.
+
+- **`load_save(filename_or_index)`** — solves tonight's actual blocker
+  (Geoff needing to press Continue by hand). Backed by
+  `BGSSaveLoadManager::Load(const char* a_fileName)` (real,
+  `RE/B/BGSSaveLoadManager.h:87`) or `LoadMostRecentSaveGame()` (same
+  file, `:90`) for the common "just continue" case — both real, existing
+  singleton methods (`BGSSaveLoadManager::GetSingleton()`), no console
+  command needed. Response includes the same `kPreLoadGame`/
+  `kPostLoadGame` lifecycle events v0.1's `get_lifecycle_status()` already
+  tracks, so a client can poll load completion with a tool it already has.
+- **`teleport_player_to(form_id)`** — solves "need to be near X to test
+  a code path" (this session's own T3-3 work needed a real save load to
+  reach `PlayerCharacter`/`ACTOR_RUNTIME_DATA` state; teleporting to a
+  specific reference is the general form of that need). Backed by
+  `TESObjectREFR::MoveTo(TESObjectREFR* a_target)` (real,
+  `RE/T/TESObjectREFR.h:456`) called on `PlayerCharacter::GetSingleton()`
+  with the target resolved from `TESForm::LookupByID(form_id)` — both
+  real, existing APIs.
+- **`get_control_status()`** — read-only, but listed here because it's
+  part of the control channel: confirms the pipe listener is alive and
+  reports whether the last command it ran succeeded, without needing a
+  round-trip through the game log. The "did that actually work" tool this
+  channel needs that v0.1's log-tailing tools structurally can't provide
+  (a command's own success isn't necessarily logged).
+
+**Explicitly NOT designed in this pass (the "maybe" items from XT-7's own
+backlog framing, deferred honestly rather than guessed):**
+
+- **Force time-of-day / weather.** `Calendar` (`RE/C/Calendar.h`) exists
+  and models the game clock, but its value storage is backed by
+  `TESGlobal` records this doc has not yet traced to a confirmed, safe
+  setter API (unlike `BGSSaveLoadManager`/`TESObjectREFR` above, where the
+  exact method signature is already in hand). Real need, not designed
+  blind — needs one more header-reading pass before it gets its own
+  command, not before this design is useful without it.
+
+**Explicit scope boundary — what this deliberately will not do:**
+
+- **No general console-command passthrough.** No `run_console_command(str)`
+  tool, ever, in this design. Every command is a named, fixed-signature
+  function tied to a real API call this doc cites by file and line — the
+  attack surface is exactly as large as the command list above, not
+  "anything the console can do."
+- **No arbitrary scripting.** No Papyrus invocation, no code injection, no
+  general "run this" primitive of any kind.
+- **No NPC/quest/dialogue control.** That's SkyrimNet/SkyLink's actual
+  target; explicitly out of scope here (see "Why not adopt" above).
+- **No unauthenticated network exposure.** The named pipe is a local
+  Windows IPC primitive (not a TCP socket) reachable only from the same
+  box or over the existing SSH channel already used to drive it — no new
+  network-facing listener is introduced.
+
+## Verification plan
+
+1. **Offline: command-format validation.** The pipe listener's fixed
+   command parser gets the same "known input, known output" test
+   discipline as v0.1's log parsers — malformed/oversized/unknown commands
+   must be rejected before any `AddTask` call, testable without a running
+   game (a unit test driving the parsing function directly).
+2. **Compile-time: real API existence.** Every cited API
+   (`BGSSaveLoadManager::Load`, `LoadMostRecentSaveGame`,
+   `TESObjectREFR::MoveTo`, `SKSE::TaskInterface::AddTask`) needs to
+   actually compile against the vendored CommonLibSSE-NG headers before
+   any pipe-handling code is trusted — cheap, no Windows box required for
+   this step alone (the type-importer sweep pipeline already parses these
+   same headers).
+3. **Gated (Windows box + live game session, same gate as
+   `HavokStepLogger`/v0.1's own live items):** `load_save` against a real
+   save file, confirm `kPostLoadGame` fires and the loaded save matches
+   the requested one; `teleport_player_to` against a real, known form ID,
+   confirm `PlayerCharacter`'s position actually changes (readable via the
+   same `LayoutValidator`-style live field read this project already has
+   working). This is real implementation work (T3-8, BACKLOG.md) — this
+   doc is the design that work executes against, not a claim that any of
+   it has run yet.
