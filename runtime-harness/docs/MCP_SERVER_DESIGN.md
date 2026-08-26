@@ -326,6 +326,64 @@ which already cites both). Not adopted here because:
   simulated input/`SendInput`). Both are proven-feasible prior art already
   cited in v0.1; this section reuses the pattern, not the tool count.
 
+## Addendum: reviewing a user-supplied research report against the real headers
+
+Geoff shared an external research report surveying MCP-in-Skyrim
+architecture options. Per this project's standing discipline (verify
+against the real vendored headers before writing anything into this doc
+as fact), each claim was checked rather than transcribed:
+
+- **Transport: WebSocket as an alternative to the named pipe above.**
+  Verified real via the GitHub API (not just trusting the report):
+  [`andreyvelsk/SkyrimWebSocket`](https://github.com/andreyvelsk/SkyrimWebSocket)
+  (a real SKSE plugin, C++, exposing `ws://127.0.0.1:8765`) is itself built
+  from [`SkyrimScripting/SKSE_Template_WebSockets`](https://github.com/SkyrimScripting/SKSE_Template_WebSockets)
+  (a real, reusable GitHub template repo, `is_template: true`, C++,
+  confirmed via `gh api`). This is worth evaluating as a starting point
+  instead of hand-writing `CreateNamedPipe`/`ConnectNamedPipe` from
+  scratch for T3-8's implementation — a WebSocket on localhost is not
+  meaningfully less safe than a named pipe here (still local-only, no
+  external exposure) and a maintained template lowers the amount of new
+  low-level Win32 code this project has to own and get right. **Not
+  switched to in this doc** — the protocol/framing choice doesn't change
+  anything else in this design (command set, task-interface marshaling,
+  scope boundary all apply identically either way), so it's left as an
+  explicit implementation-time decision for whoever picks up T3-8, not
+  re-litigated here.
+- **`ConsoleUtil`/`ExecuteCommand` as a console-command execution path —
+  NOT verified, do not cite as fact.** Grepped the entire vendored
+  `CommonLibSSE-NG/include` tree for `ConsoleUtil` and `ExecuteCommand`:
+  zero matches. This class/method may exist in a different CommonLibSSE-NG
+  version or fork than what's vendored here, but this project only trusts
+  what's actually in the vendored headers (project rule) — so this
+  doc does not adopt console-command execution as a mechanism until that
+  API is confirmed present. The command set above already avoids needing
+  it (direct API calls instead).
+- **Native input injection via `BSInputDeviceManager` for main-menu
+  navigation (e.g. selecting "Continue") — partially verified, capability
+  NOT confirmed.** The class itself is real (`RE/B/BSInputDeviceManager.h`,
+  vendored), but the only members present in this vendored version are
+  `GetDeviceKeyMapping`/`GetDeviceMappedKeycode` — read-only key-mapping
+  queries, no `SendEvent`/injection method of any kind. This is a real,
+  unsolved need (tonight's actual friction was exactly this: a human
+  pressing Continue at the main menu) but this doc does NOT claim a
+  mechanism for it that isn't in the headers. `load_save`'s two API-level
+  methods (`Load`/`LoadMostRecentSaveGame`) already solve the *save
+  loading* half of tonight's friction without needing any menu navigation
+  at all — this gap is narrower than it first sounds. True main-menu UI
+  automation (if ever needed) is left as an open question for a future
+  pass, not guessed at here.
+- **DirectX 11 swap-chain hooking for screenshot capture — real and
+  technically sound, explicitly OUT of this pass's scope, flagged as a
+  possible v0.3 direction only.** `IDXGISwapChain::Present` detouring
+  (PolyHook2/MinHook) plus a GPU-to-CPU staging texture readback is a
+  legitimate, working technique elsewhere, but it's rendering-pipeline
+  hooking and GPU memory extraction — a materially larger, higher-risk
+  feature than "load a save and move the player," and outside this pass's
+  explicit "minimal, RE-testing-focused" mandate. Not designed here at
+  all; noted only so it doesn't get silently folded into v0.2's scope by
+  a future reader of the source report.
+
 ## Architecture — no MCP code in the plugin at all
 
 Researched, not assumed: there is no official C++ MCP SDK as of this
