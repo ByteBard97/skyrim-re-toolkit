@@ -1,0 +1,65 @@
+diff -ruN gcpp_ref_0021/src/main/java/playday3008/gcpp/processing/SourceParser.java gcpp_ref_0021_fixed/src/main/java/playday3008/gcpp/processing/SourceParser.java
+--- a/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-26 12:17:37.552393026 -0400
++++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-26 12:17:57.216558442 -0400
+@@ -844,25 +844,48 @@
+         if (found[0])
+             return true;
+ 
+-        // Only meaningful (and only safe to call) when declToWalk is the
+-        // PRIMARY template -- type.canonicalType() here is THIS
+-        // instantiation's own concrete argument list, positionally matched
+-        // against the primary template's own parameter order (same
+-        // reasoning as parseFieldsFromType's base-embedding, patches/0006/
+-        // 0007-*.md).
+-        Type canonicalForArgs = isSpecialization ? type.canonicalType() : null;
+-        int numArgs = isSpecialization ? canonicalForArgs.numTemplateArguments() : 0;
+-        if (debugThis) {
+-            System.err.println("[POLY] type=" + type.spelling() + " numArgs=" + numArgs);
+-        }
++        // clang_Type_getNumTemplateArguments/getTemplateArgumentAsType operate
++        // on `type`'s own TemplateSpecializationType structure directly, NOT
++        // on whether `type.declaration()` resolves to a genuine
++        // ClassTemplateSpecializationDecl -- so they work even when `type` is
++        // still PARTIALLY dependent (one argument symbolic, e.g. a non-type
++        // parameter like GRefCountBase<T, STAT>'s own "STAT" left unresolved
++        // when reached via a base-specifier read from an ENCLOSING template's
++        // primary body). Confirmed empirically via GCPP_DEBUG_POLY: for
++        // "GRefCountBaseStatImpl<GRefCountImpl, STAT>" (a base spelled by
++        // GRefCountBase's own primary template, dependent on its own
++        // unresolved "STAT"), `type.declaration()` resolves to the bare
++        // CLASS_TEMPLATE (not a specialization -- isSpecialization=false
++        // above), yet `type.numTemplateArguments()` still correctly reports
++        // 2 and `type.templateArgumentType(0)` still correctly resolves to
++        // "GRefCountImpl" -- the real, non-dependent argument sitting right
++        // there in the type's own spelling, entirely independent of whether
++        // arg[1] (STAT) is resolved. The previous isSpecialization-gated code
++        // skipped this case entirely, silently leaving "Base" unsubstituted
++        // and dead-ending the walk exactly where patches 0007/0008/0021 all
++        // separately hit and documented this wall. No isSpecialization gate
++        // needed here at all: always attempt extraction. Use canonicalType()
++        // rather than the raw type, matching patches 0006/0007's own
++        // established reasoning: clang_Type_getNumTemplateArguments only
++        // reports EXPLICITLY-specified arguments on the raw/sugared type,
++        // not ones resolved from a parameter's own default (e.g. BSTArray<T>
++        // relying on its default Allocator) -- canonicalType() reports the
++        // full, positionally-correct list including defaults. Confirmed via
++        // the same GCPP_DEBUG_POLY trace that canonicalType() ALSO correctly
++        // reports numArgs=2/arg[0]=GRefCountImpl for the partially-dependent
++        // case, so this doesn't reintroduce the gating bug being fixed here.
++        // A plain (non-template) type simply reports 0 args either way, a
++        // safe no-op for the substitution loop below.
++        Type argsSource = type.canonicalType();
++        int numArgs = argsSource.numTemplateArguments();
+ 
+         for (Type baseType : rawBaseTypes) {
+             Type concreteBaseType = baseType;
+             String baseSpelling = baseType.spelling();
+-            if (isSpecialization && baseSpelling != null) {
++            if (baseSpelling != null) {
+                 int paramIndex = paramNames.indexOf(baseSpelling);
+                 if (paramIndex >= 0 && paramIndex < numArgs) {
+-                    Type substituted = canonicalForArgs.templateArgumentType(paramIndex);
++                    Type substituted = argsSource.templateArgumentType(paramIndex);
+                     if (substituted != null) {
+                         concreteBaseType = substituted;
+                     }

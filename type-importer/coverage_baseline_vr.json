@@ -415,9 +415,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "AlchemyMenu": {
-    "actual": 424,
+    "actual": 416,
     "expected": 416,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "AlchemyMenu::MenuIngredientEntry": {
     "actual": 16,
@@ -4275,9 +4275,9 @@
     "status": "OK"
   },
   "BSScaleformImageLoader": {
-    "actual": 80,
+    "actual": 72,
     "expected": 72,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSScaleformImageLoader::TextureEntry": {
     "actual": 24,
@@ -4305,9 +4305,9 @@
     "status": "OK"
   },
   "BSScaleformTranslator": {
-    "actual": 88,
+    "actual": 80,
     "expected": 80,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSScaleformTranslator_vtable": {
     "actual": 16,
@@ -5055,9 +5055,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "BarterMenu": {
-    "actual": 192,
+    "actual": 184,
     "expected": 184,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BarterMenu::RUNTIME_DATA": {
     "actual": 120,
@@ -5170,9 +5170,9 @@
     "status": "OK"
   },
   "BookMenu": {
-    "actual": 176,
+    "actual": 168,
     "expected": 168,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BookMenu::RUNTIME_DATA": {
     "actual": 72,
@@ -5870,7 +5870,7 @@
     "status": "NO_GROUND_TRUTH"
   },
   "Console": {
-    "actual": 120,
+    "actual": 112,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -5905,9 +5905,9 @@
     "status": "OK"
   },
   "ConsoleNativeUIMenu": {
-    "actual": 80,
+    "actual": 72,
     "expected": 72,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ConsoleNativeUIMenu::RUNTIME_DATA": {
     "actual": 8,
@@ -5935,9 +5935,9 @@
     "status": "OK"
   },
   "ConstructibleObjectMenu": {
-    "actual": 360,
+    "actual": 352,
     "expected": 352,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ConstructibleObjectMenu::CreationConfirmCallback": {
     "actual": 24,
@@ -5970,9 +5970,9 @@
     "status": "OK"
   },
   "ContainerMenu": {
-    "actual": 216,
+    "actual": 208,
     "expected": 208,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ContainerMenu::RUNTIME_DATA": {
     "actual": 144,
@@ -6020,9 +6020,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "CraftingMenu": {
-    "actual": 80,
+    "actual": 72,
     "expected": 72,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "CraftingMenu_vtable": {
     "actual": 32,
@@ -6030,9 +6030,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "CraftingSubMenu": {
-    "actual": 264,
+    "actual": 256,
     "expected": 256,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "CraftingSubMenu_vtable": {
     "actual": 56,
@@ -6040,9 +6040,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "CreationClubMenu": {
-    "actual": 168,
+    "actual": 152,
     "expected": 152,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "CreationClubMenu::RUNTIME_DATA": {
     "actual": 48,
@@ -6060,9 +6060,9 @@
     "status": "OK"
   },
   "CreditsMenu": {
-    "actual": 96,
+    "actual": 80,
     "expected": 80,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "CreditsMenu_vtable": {
     "actual": 24,
@@ -6115,9 +6115,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "CursorMenu": {
-    "actual": 88,
+    "actual": 80,
     "expected": 80,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "CursorMenu_vtable": {
     "actual": 40,
@@ -7070,9 +7070,9 @@
     "status": "OK"
   },
   "DialogueMenu": {
-    "actual": 104,
+    "actual": 96,
     "expected": 96,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "DialogueMenu::Data": {
     "actual": 16,
@@ -7255,9 +7255,9 @@
     "status": "OK"
   },
   "EnchantConstructMenu": {
-    "actual": 552,
+    "actual": 544,
     "expected": 544,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "EnchantConstructMenu::CategoryListEntry": {
     "actual": 24,
@@ -9190,9 +9190,9 @@
     "status": "OK"
   },
   "FaderMenu": {
-    "actual": 88,
+    "actual": 80,
     "expected": 80,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "FaderMenu::RUNTIME_DATA": {
     "actual": 16,
@@ -9225,9 +9225,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "FavoritesMenu": {
-    "actual": 144,
+    "actual": 136,
     "expected": 136,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "FavoritesMenu::Entry": {
     "actual": 16,
@@ -9345,9 +9345,9 @@
     "status": "OK"
   },
   "FxDelegate": {
-    "actual": 40,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "FxDelegate::CallbackDefn": {
     "actual": 16,
@@ -9365,9 +9365,9 @@
     "status": "OK"
   },
   "FxDelegateHandler": {
-    "actual": 24,
+    "actual": 16,
     "expected": 16,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "FxDelegateHandler::CallbackProcessor": {
     "actual": 8,
@@ -9400,9 +9400,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GASActionBufferData": {
-    "actual": 48,
+    "actual": 40,
     "expected": 40,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GASActionBufferData_vtable": {
     "actual": 8,
@@ -9460,9 +9460,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GASGlobalContext": {
-    "actual": 1392,
+    "actual": 1384,
     "expected": 1384,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GASGlobalContext_vtable": {
     "actual": 8,
@@ -9520,9 +9520,9 @@
     "status": "OK"
   },
   "GASStringManager": {
-    "actual": 96,
+    "actual": 88,
     "expected": 88,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GASStringManager_vtable": {
     "actual": 8,
@@ -9575,14 +9575,14 @@
     "status": "OK"
   },
   "GEvent": {
-    "actual": 104,
+    "actual": 88,
     "expected": 88,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxASCharacter": {
-    "actual": 280,
+    "actual": 272,
     "expected": 272,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxASCharacter_vtable": {
     "actual": 568,
@@ -9590,9 +9590,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxActionControl": {
-    "actual": 40,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxActionPriority": {
     "actual": 1,
@@ -9610,9 +9610,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxCharacter": {
-    "actual": 160,
+    "actual": 152,
     "expected": 152,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxCharacterDef": {
     "actual": 40,
@@ -9685,9 +9685,9 @@
     "status": "EMPTY"
   },
   "GFxExternalInterface": {
-    "actual": 32,
+    "actual": 24,
     "expected": 24,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxExternalInterface_vtable": {
     "actual": 16,
@@ -9720,9 +9720,9 @@
     "status": "EMPTY"
   },
   "GFxFunctionHandler": {
-    "actual": 24,
+    "actual": 16,
     "expected": 16,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxFunctionHandler::Params": {
     "actual": 1,
@@ -9745,9 +9745,9 @@
     "status": "EMPTY"
   },
   "GFxImageLoader": {
-    "actual": 32,
+    "actual": 24,
     "expected": 24,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxImageLoader_vtable": {
     "actual": 16,
@@ -9840,9 +9840,9 @@
     "status": "OK"
   },
   "GFxLoadProcess": {
-    "actual": 1016,
+    "actual": 1008,
     "expected": 1008,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxLoadProcess::TimelineType": {
     "actual": 1,
@@ -9855,9 +9855,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxLoadStates": {
-    "actual": 160,
+    "actual": 152,
     "expected": 152,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxLoadStates_vtable": {
     "actual": 8,
@@ -9865,9 +9865,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxLoadUpdateSync": {
-    "actual": 88,
+    "actual": 72,
     "expected": 72,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxLoadUpdateSync_vtable": {
     "actual": 8,
@@ -9885,9 +9885,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxLoaderImpl": {
-    "actual": 120,
+    "actual": 112,
     "expected": 120,
-    "status": "OK"
+    "status": "MISMATCH"
   },
   "GFxLoaderImpl_vtable": {
     "actual": 8,
@@ -9895,9 +9895,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxLoaderTask": {
-    "actual": 40,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxLoader_vtable": {
     "actual": 24,
@@ -9905,9 +9905,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxLog": {
-    "actual": 40,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxLogConstants": {
     "actual": 1,
@@ -9935,14 +9935,14 @@
     "status": "MISMATCH"
   },
   "GFxMovie": {
-    "actual": 24,
+    "actual": 16,
     "expected": 16,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxMovieBindProcess": {
-    "actual": 104,
+    "actual": 96,
     "expected": 96,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxMovieBindProcess::ImagePackVisitor": {
     "actual": 16,
@@ -9965,9 +9965,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxMovieDataDef::LoadTaskData": {
-    "actual": 496,
+    "actual": 488,
     "expected": 488,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxMovieDataDef::LoadTaskDataBase": {
     "actual": 56,
@@ -10000,14 +10000,14 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxMovieDef::MemoryContext": {
-    "actual": 24,
+    "actual": 16,
     "expected": 16,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxMovieDef::MemoryContextImpl": {
-    "actual": 104,
+    "actual": 96,
     "expected": 96,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxMovieDef::MemoryContextImpl::HeapLimit": {
     "actual": 48,
@@ -10040,9 +10040,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxMovieDefBindStates": {
-    "actual": 96,
+    "actual": 88,
     "expected": 88,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxMovieDefBindStates_vtable": {
     "actual": 8,
@@ -10055,9 +10055,9 @@
     "status": "MISMATCH"
   },
   "GFxMovieDefImpl::BindTaskData": {
-    "actual": 256,
+    "actual": 248,
     "expected": 248,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxMovieDefImpl::BindTaskData_vtable": {
     "actual": 8,
@@ -10085,9 +10085,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxMovieImageLoadTask": {
-    "actual": 80,
+    "actual": 72,
     "expected": 72,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxMovieImageLoadTask_vtable": {
     "actual": 8,
@@ -10105,9 +10105,9 @@
     "status": "OK"
   },
   "GFxMovieRoot": {
-    "actual": 11248,
+    "actual": 11240,
     "expected": 11248,
-    "status": "OK"
+    "status": "MISMATCH"
   },
   "GFxMovieRoot_vtable": {
     "actual": 584,
@@ -10115,9 +10115,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxMovieView": {
-    "actual": 32,
+    "actual": 24,
     "expected": 24,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxMovieView_vtable": {
     "actual": 368,
@@ -10240,9 +10240,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxRenderConfig": {
-    "actual": 64,
+    "actual": 56,
     "expected": 56,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxResource": {
     "actual": 32,
@@ -10305,9 +10305,9 @@
     "status": "EMPTY"
   },
   "GFxResourceLibBase": {
-    "actual": 24,
+    "actual": 16,
     "expected": 16,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxResourceLibBase_vtable": {
     "actual": 24,
@@ -10340,9 +10340,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxResourceWeakLib": {
-    "actual": 88,
+    "actual": 80,
     "expected": 80,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxResourceWeakLib::ResourceNode": {
     "actual": 4,
@@ -10430,9 +10430,9 @@
     "status": "OK"
   },
   "GFxSprite": {
-    "actual": 856,
+    "actual": 848,
     "expected": 848,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxSpriteDef": {
     "actual": 104,
@@ -10470,9 +10470,9 @@
     "status": "EMPTY"
   },
   "GFxState": {
-    "actual": 32,
+    "actual": 24,
     "expected": 24,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxStateBag": {
     "actual": 8,
@@ -10515,9 +10515,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxTask": {
-    "actual": 32,
+    "actual": 24,
     "expected": 24,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxTaskManager": {
     "actual": 1,
@@ -10555,9 +10555,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxTranslator": {
-    "actual": 40,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxTranslator::LineFormatDesc": {
     "actual": 80,
@@ -10695,9 +10695,9 @@
     "status": "EMPTY"
   },
   "GImage": {
-    "actual": 80,
+    "actual": 72,
     "expected": 72,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GImageBase": {
     "actual": 56,
@@ -10705,19 +10705,19 @@
     "status": "OK"
   },
   "GImageInfo": {
-    "actual": 72,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GImageInfoBase": {
-    "actual": 32,
+    "actual": 24,
     "expected": 24,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GImageInfoBaseImpl": {
-    "actual": 48,
+    "actual": 40,
     "expected": 40,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GImageInfoBaseImpl_vtable": {
     "actual": 24,
@@ -10835,9 +10835,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GMutex": {
-    "actual": 48,
+    "actual": 40,
     "expected": 40,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GMutexImpl": {
     "actual": 1,
@@ -10915,9 +10915,9 @@
     "status": "EMPTY"
   },
   "GRenderer": {
-    "actual": 64,
+    "actual": 56,
     "expected": 56,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GRenderer::BitmapDesc": {
     "actual": 36,
@@ -11135,9 +11135,9 @@
     "status": "EMPTY"
   },
   "GWaitable": {
-    "actual": 32,
+    "actual": 24,
     "expected": 24,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GWaitable::HandlerArray": {
     "actual": 72,
@@ -11170,9 +11170,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GiftMenu": {
-    "actual": 152,
+    "actual": 144,
     "expected": 144,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GiftMenu::RUNTIME_DATA": {
     "actual": 80,
@@ -11360,9 +11360,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "HUDMenu": {
-    "actual": 208,
+    "actual": 200,
     "expected": 200,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "HUDMenu::RUNTIME_DATA": {
     "actual": 88,
@@ -12635,9 +12635,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "IMenu": {
-    "actual": 72,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "IMenu_vtable": {
     "actual": 72,
@@ -13235,9 +13235,9 @@
     "status": "OK"
   },
   "InventoryMenu": {
-    "actual": 160,
+    "actual": 152,
     "expected": 152,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "InventoryMenu::RUNTIME_DATA": {
     "actual": 88,
@@ -13310,14 +13310,14 @@
     "status": "EMPTY"
   },
   "JournalMenu": {
-    "actual": 280,
+    "actual": 248,
     "expected": 248,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "JournalMenu::RUNTIME_DATA": {
-    "actual": 184,
+    "actual": 160,
     "expected": 160,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "JournalMenu_vtable": {
     "actual": 64,
@@ -13325,9 +13325,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "JournalTab": {
-    "actual": 32,
+    "actual": 24,
     "expected": 24,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "JournalTab_vtable": {
     "actual": 24,
@@ -13335,9 +13335,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "Journal_QuestsTab": {
-    "actual": 64,
+    "actual": 56,
     "expected": 56,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "Journal_QuestsTab_vtable": {
     "actual": 16,
@@ -13345,9 +13345,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "Journal_StatsTab": {
-    "actual": 32,
+    "actual": 24,
     "expected": 24,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "Journal_StatsTab_vtable": {
     "actual": 16,
@@ -13355,9 +13355,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "Journal_SystemTab": {
-    "actual": 64,
+    "actual": 56,
     "expected": 56,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "Journal_SystemTab_vtable": {
     "actual": 48,
@@ -13385,9 +13385,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "KinectMenu": {
-    "actual": 104,
+    "actual": 96,
     "expected": 96,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "KinectMenu_vtable": {
     "actual": 24,
@@ -13440,9 +13440,9 @@
     "status": "OK"
   },
   "LevelUpMenu": {
-    "actual": 80,
+    "actual": 72,
     "expected": 72,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "LevelUpMenu::RUNTIME_DATA": {
     "actual": 8,
@@ -13495,9 +13495,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "LoadWaitSpinner": {
-    "actual": 128,
+    "actual": 120,
     "expected": 120,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "LoadWaitSpinner::RUNTIME_DATA": {
     "actual": 32,
@@ -13515,9 +13515,9 @@
     "status": "OK"
   },
   "LoadingMenu": {
-    "actual": 152,
+    "actual": 144,
     "expected": 144,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "LoadingMenu::RUNTIME_DATA": {
     "actual": 80,
@@ -13640,9 +13640,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "LockpickingMenu": {
-    "actual": 296,
+    "actual": 288,
     "expected": 288,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "LockpickingMenu::RUNTIME_DATA": {
     "actual": 200,
@@ -13670,9 +13670,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "LoggingDisabler": {
-    "actual": 40,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "LoggingDisabler_vtable": {
     "actual": 16,
@@ -13795,9 +13795,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "MagicMenu": {
-    "actual": 128,
+    "actual": 120,
     "expected": 120,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "MagicMenu::RUNTIME_DATA": {
     "actual": 56,
@@ -13845,9 +13845,9 @@
     "status": "MISMATCH"
   },
   "MainMenu": {
-    "actual": 144,
+    "actual": 128,
     "expected": 128,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "MainMenu::RUNTIME_DATA": {
     "actual": 32,
@@ -13900,7 +13900,7 @@
     "status": "OK"
   },
   "MapMenu": {
-    "actual": 198216,
+    "actual": 198208,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -14070,9 +14070,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "MessageBoxMenu": {
-    "actual": 80,
+    "actual": 72,
     "expected": 72,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "MessageBoxMenu::RUNTIME_DATA": {
     "actual": 8,
@@ -14120,9 +14120,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "MistMenu": {
-    "actual": 344,
+    "actual": 336,
     "expected": 336,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "MistMenu::Colors": {
     "actual": 1,
@@ -14140,9 +14140,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "ModManagerMenu": {
-    "actual": 120,
+    "actual": 104,
     "expected": 104,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ModManagerMenu::RUNTIME_DATA": {
     "actual": 8,
@@ -15900,9 +15900,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "RaceSexMenu": {
-    "actual": 448,
+    "actual": 440,
     "expected": 440,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "RaceSexMenu::RUNTIME_DATA": {
     "actual": 360,
@@ -16250,9 +16250,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "SafeZoneMenu": {
-    "actual": 72,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "SafeZoneMenu_vtable": {
     "actual": 8,
@@ -16695,9 +16695,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "SleepWaitMenu": {
-    "actual": 112,
+    "actual": 104,
     "expected": 104,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "SleepWaitMenu::RUNTIME_DATA": {
     "actual": 40,
@@ -16720,9 +16720,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "SmithingMenu": {
-    "actual": 368,
+    "actual": 360,
     "expected": 360,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "SmithingMenu::SmithingConfirmCallback": {
     "actual": 24,
@@ -16895,9 +16895,9 @@
     "status": "OK"
   },
   "StatsMenu": {
-    "actual": 832,
+    "actual": 824,
     "expected": 824,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "StatsMenu::RUNTIME_DATA": {
     "actual": 744,
@@ -19080,9 +19080,9 @@
     "status": "OK"
   },
   "TitleSequenceMenu": {
-    "actual": 72,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TitleSequenceMenu_vtable": {
     "actual": 16,
@@ -19110,9 +19110,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "TrainingMenu": {
-    "actual": 264,
+    "actual": 256,
     "expected": 256,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TrainingMenu::RUNTIME_DATA": {
     "actual": 184,
@@ -19170,9 +19170,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "TutorialMenu": {
-    "actual": 96,
+    "actual": 88,
     "expected": 88,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TutorialMenu_vtable": {
     "actual": 24,
@@ -19180,9 +19180,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "TweenMenu": {
-    "actual": 104,
+    "actual": 96,
     "expected": 96,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TweenMenu::PerkData": {
     "actual": 16,
@@ -19555,9 +19555,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "WorldSpaceMenu": {
-    "actual": 96,
+    "actual": 88,
     "expected": 88,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "WorldSpaceMenu_vtable": {
     "actual": 32,

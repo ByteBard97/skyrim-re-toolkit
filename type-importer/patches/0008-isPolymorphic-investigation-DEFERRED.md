@@ -205,3 +205,24 @@ substitution wall still is for the remaining classes (`FxDelegateHandler`/
 `IMenu` included), and why that remaining wall needs textual/structural
 substitution into a nested template-id — a comparably-sized follow-on
 investigation, not a small extension.
+
+## Second correction: the remaining wall was a one-line gating bug, not a second substitution engine
+
+0021's writeup (and the paragraph directly above) concluded the remaining
+wall needed "textual/structural substitution into a nested template-id" --
+rewriting `STAT` to its concrete value inside `GRefCountBaseStatImpl<GRefCountImpl, STAT>`
+to derive a genuine instantiation. **This was wrong.** Patch 0022 found the
+actual cause: `clang_Type_getNumTemplateArguments`/`getTemplateArgumentAsType`
+already work correctly on a type like `GRefCountBaseStatImpl<GRefCountImpl, STAT>`
+even though it's only partially dependent (`STAT` unresolved,
+`GRefCountImpl` concrete) -- they read the argument list directly off the
+type's own structure, independent of whether `type.declaration()` resolves
+to a genuine specialization decl. 0021's code gated extraction behind
+exactly that declaration check (`isSpecialization`), which is false for a
+partially-dependent type, and silently skipped extraction as a result. No
+textual rewriting, no second substitution engine -- removing the gate was
+sufficient. This fixed `FxDelegateHandler`, `IMenu`, and 86 other classes
+(88 total per runtime) -- more than 7x patch 0021's own count. See
+`patches/0022-fix-ispolymorphic-partial-dependent-args.md` for the full
+writeup. Filed here so nobody re-derives "this needs bigger machinery" a
+third time.
