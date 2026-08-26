@@ -20,14 +20,27 @@ plugin's* log as a queryable interface).
 
 ## Non-goals (read this before assuming more than the log gives you)
 
-- **Not a live RPC into the game process.** `RuntimeHarness` writes to a
-  file (`spdlog` file sink) on the Windows box; it has no socket, pipe, or
-  any other IPC surface today. "Live" in this design means *near-real-time
-  log tailing while the game is running*, not a query that reaches into the
-  process's actual memory at query time. Building a real in-process query
-  channel (e.g. a named pipe the plugin listens on) is a distinct, much
-  larger feature — noted as a possible v0.2 direction below, not attempted
-  here.
+- **Not a live RPC into the game process — a deliberate choice, not an
+  unexamined limitation.** `RuntimeHarness` writes to a file (`spdlog` file
+  sink) on the Windows box; it has no socket, pipe, or any other IPC surface
+  today. "Live" in this design means *near-real-time log tailing while the
+  game is running*, not a query that reaches into the process's actual
+  memory at query time. Real in-process IPC into an SKSE plugin is proven
+  feasible by prior art — **SkyLink AI**
+  (github.com/jarvann/SkryimMCM, verified to exist) runs a named-pipe
+  bridge (`\\.\pipe\SkyrimMCP`) from an SKSE/CommonLibSSE-NG plugin to an
+  external MCP server, exposing 74 gameplay tools; **SkyrimNet** similarly
+  runs an MCP server on a local port with 40+ tools including console
+  commands on the game thread. Both are real, working systems for
+  *gameplay-object* control (player stats, quests, NPCs, world state) —
+  not this project's RE-internals target (AI scheduler decisions, Havok
+  physics-step state, savegame serialization detail). Log-tailing is chosen
+  here because it needs zero new C++/plugin work and keeps this design
+  buildable/verifiable today against what `RuntimeHarness` already emits;
+  a named-pipe query channel modeled on SkyLink's approach is a real,
+  proven-feasible v0.2 direction if RE-internals users want true low-latency
+  queries instead of log-tail freshness — not attempted here because it's a
+  distinct, much larger feature requiring new plugin-side IPC code.
 - **Not a control interface.** Read-only. The MCP server never writes to
   the game, the plugin, or the log file — there is no "spawn an NPC" or
   "force a save" tool. If that's ever wanted, it needs its own design and
