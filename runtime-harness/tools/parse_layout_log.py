@@ -52,11 +52,14 @@ LIVE_CHECK_RE = re.compile(
 LIVE_RTTI_RE = re.compile(
     r"LayoutValidator: LIVE rtti=(?P<name>\S+) mangled_name=(?P<mangled>\S+)\((?P<status>OK|MISMATCH)\)"
 )
-# vtbl check is informational only (see LayoutValidator.cpp's comment on why
-# it's not compared against a specific expected VTABLE_* address) -- parsed
-# for completeness, no OK/MISMATCH verdict to extract.
+# Two line shapes share this prefix: TESForm(0x07)'s is informational only
+# (no expected VTABLE_TESForm comparison -- see LayoutValidator.cpp's
+# comment on why that check is invalid for an abstract base); PlayerCharacter's
+# (T3-7) IS a real identity check against VTABLE_PlayerCharacter[0] and
+# carries expected=/verdict. The trailing group is optional so both parse.
 LIVE_VTBL_RE = re.compile(
     r"LayoutValidator: LIVE (?P<what>.+?) vtbl=0x(?P<vtbl>[0-9A-Fa-f]+) rva=0x(?P<rva>[0-9A-Fa-f]+)"
+    r"(?: expected=0x(?P<expected>[0-9A-Fa-f]+)\((?P<status>OK|MISMATCH)\))?"
 )
 # Game-session-only checks (kNewGame/kPostLoadGame, see RunGameSessionChecks
 # in LayoutValidator.cpp) -- not present in a kDataLoaded-only log.
@@ -150,6 +153,8 @@ def parse_log(text):
                 "what": m.group("what"),
                 "vtbl": int(m.group("vtbl"), 16),
                 "rva": int(m.group("rva"), 16),
+                "expected": int(m.group("expected"), 16) if m.group("expected") else None,
+                "status": m.group("status"),
             })
             continue
 

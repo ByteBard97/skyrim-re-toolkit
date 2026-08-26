@@ -251,6 +251,39 @@ class's own `VTABLE_*` ID (e.g. `VTABLE_PlayerCharacter` instead of
 `VTABLE_TESForm`), replacing the originally planned but invalid version
 described in Addendum 1 above.
 
+## Addendum 3: the real vtable-pointer identity check (T3-7, build 8, same session)
+
+Closed the one item left open by Addendum 1's reclassification, following
+`RE::VTABLE_PlayerCharacter`
+(`Offsets_VTABLE.h`) is a 17-entry array — one `REL::VariantID` per base
+subobject in `PlayerCharacter`'s inheritance chain. Only slot `[0]`
+corresponds to the primary vptr at a live instance's own address 0
+(standard MSVC layout); slots `[1..16]` belong to secondary bases at
+nonzero `this` offsets and are not comparable against
+`*(uintptr_t*)player` — checked this distinction before writing any code,
+since comparing the wrong slot would have reproduced the exact
+invalid-check mistake Addendum 1 retracted.
+
+Real log evidence (build 8):
+
+```
+LayoutValidator: ADDR vtable=PlayerCharacter[0] resolved=0x7FF7921DB9C0 rva=0x18AB9C0
+LayoutValidator: LIVE PlayerCharacter vtbl=0x7FF7921DB9C0 rva=0x18AB9C0 expected=0x7FF7921DB9C0(OK)
+```
+
+Exact match — a genuine positive identity check, not a coincidence of
+matching RVAs: the live instance's primary vptr resolves to precisely the
+Address Library ID for `PlayerCharacter`'s own vtable slot 0, closing the
+item Addendum 1 could only report raw data for. `parse_layout_log.py`'s
+`LIVE_VTBL_RE` was extended (optional trailing `expected=/status` group,
+since `TESForm(0x07)`'s line shape has no verdict and `PlayerCharacter`'s
+now does) — both self-tests still pass, and a fresh parse of the real
+build-8 log confirms the new `expected`/`status` fields populate
+(`status: 'OK'`) rather than staying `None`. Zero confirmed mismatches
+against `coverage_baseline.json`, unchanged.
+
+This closes every item from the original `LAYOUT_VALIDATOR.md` TODO list.
+
 ## Housekeeping note
 
 Deploying this build required killing the previous long-running

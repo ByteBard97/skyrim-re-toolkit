@@ -211,10 +211,9 @@ real log lines.
   `coverage_baseline.json`'s static_assert-backed values. See
   `T3-3_LAYOUTVALIDATOR_REPORT.md`.
 
-Of the original five live-verify items, only the vtable-pointer identity
-check remains open — and only in its real, better-scoped form (against
-the live instance's own class's `VTABLE_*` ID, e.g.
-`VTABLE_PlayerCharacter`), since the originally planned version against
-`VTABLE_TESForm` was reclassified as an invalid check (see above). RTTI
-readback, `PlayerCharacter` checks, `ACTOR_RUNTIME_DATA` sanity, and the
-`ExtraDataList` walk are all done and passed clean on real game state.
+All items from the original live-verify TODO list are now closed. The
+real, better-scoped vtable-pointer identity check (T3-7) — against
+`RE::VTABLE_PlayerCharacter[0]`, the live instance's own class, not the
+invalid `VTABLE_TESForm` comparison reclassified above — passed clean:
+`vtbl=0x7FF7921DB9C0 expected=0x7FF7921DB9C0(OK)`, an exact match. See
+`T3-3_LAYOUTVALIDATOR_REPORT.md`'s Addendum 3.

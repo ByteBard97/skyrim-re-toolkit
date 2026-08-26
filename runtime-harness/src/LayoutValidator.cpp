@@ -269,6 +269,28 @@ namespace LayoutValidator
             // without crashing"; a non-zero count is a bonus, not required.
             const auto extraCount = player->extraList.GetCount();
             SKSE::log::info("LayoutValidator: LIVE PlayerCharacter extraList.GetCount()={}", extraCount);
+
+            // T3-7: the real version of the vtable-pointer identity check
+            // that TESForm(0x07) had to abandon (see CheckLiveForm's
+            // comment) -- this time against the live instance's OWN
+            // class's vtable, not an abstract base's. RE::VTABLE_PlayerCharacter
+            // (Offsets_VTABLE.h) is a 17-entry array, one REL::VariantID per
+            // base subobject in PlayerCharacter's inheritance chain; only
+            // slot [0] corresponds to the primary vptr at the object's own
+            // address 0 (standard MSVC layout) -- slots [1..16] belong to
+            // secondary bases at nonzero `this` offsets and are NOT
+            // comparable against *(uintptr_t*)player. Comparing the wrong
+            // slot would reproduce exactly the invalid-check mistake this
+            // is meant to fix, so only [0] is checked.
+            const auto base = REL::Module::get().base();
+            const REL::Relocation<std::uintptr_t> playerVtbl{ RE::VTABLE_PlayerCharacter[0] };
+            SKSE::log::info("LayoutValidator: ADDR vtable=PlayerCharacter[0] resolved=0x{:X} rva=0x{:X}",
+                playerVtbl.address(), playerVtbl.address() - base);
+
+            const auto  livePtr = *reinterpret_cast<const std::uintptr_t*>(player);
+            const bool  vtblOk = livePtr == playerVtbl.address();
+            SKSE::log::info("LayoutValidator: LIVE PlayerCharacter vtbl=0x{:X} rva=0x{:X} expected=0x{:X}({})",
+                livePtr, livePtr - base, playerVtbl.address(), vtblOk ? "OK" : "MISMATCH");
         }
     }
 
