@@ -58,6 +58,15 @@ LIVE_RTTI_RE = re.compile(
 LIVE_VTBL_RE = re.compile(
     r"LayoutValidator: LIVE (?P<what>.+?) vtbl=0x(?P<vtbl>[0-9A-Fa-f]+) rva=0x(?P<rva>[0-9A-Fa-f]+)"
 )
+# Game-session-only checks (kNewGame/kPostLoadGame, see RunGameSessionChecks
+# in LayoutValidator.cpp) -- not present in a kDataLoaded-only log.
+LIVE_RUNTIME_DATA_RE = re.compile(
+    r"LayoutValidator: LIVE (?P<what>.+?) ACTOR_RUNTIME_DATA currentProcess=(?P<current_process>non-null|NULL) "
+    r"race=0x(?P<race>[0-9A-Fa-f]+)\((?P<race_status>plausible|IMPLAUSIBLE-wrong-formtype|NULL)\)"
+)
+LIVE_EXTRALIST_RE = re.compile(
+    r"LayoutValidator: LIVE (?P<what>.+?) extraList\.GetCount\(\)=(?P<count>-?\d+)"
+)
 
 
 def parse_log(text):
@@ -66,6 +75,8 @@ def parse_log(text):
     live = []
     live_rtti = []
     live_vtbl = []
+    live_runtime_data = []
+    live_extralist = []
 
     for line in text.splitlines():
         m = LAYOUT_RE.search(line)
@@ -142,7 +153,29 @@ def parse_log(text):
             })
             continue
 
-    return {"layout": layout, "addr": addr, "live": live, "live_rtti": live_rtti, "live_vtbl": live_vtbl}
+        m = LIVE_RUNTIME_DATA_RE.search(line)
+        if m:
+            live_runtime_data.append({
+                "what": m.group("what"),
+                "currentProcess": m.group("current_process"),
+                "race": int(m.group("race"), 16),
+                "race_status": m.group("race_status"),
+            })
+            continue
+
+        m = LIVE_EXTRALIST_RE.search(line)
+        if m:
+            live_extralist.append({
+                "what": m.group("what"),
+                "count": int(m.group("count")),
+            })
+            continue
+
+    return {
+        "layout": layout, "addr": addr, "live": live,
+        "live_rtti": live_rtti, "live_vtbl": live_vtbl,
+        "live_runtime_data": live_runtime_data, "live_extralist": live_extralist,
+    }
 
 
 def diff_against_baseline(layout, baseline):

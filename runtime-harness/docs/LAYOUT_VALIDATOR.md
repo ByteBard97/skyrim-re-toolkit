@@ -174,16 +174,27 @@ which fires at the main menu):
   would need the live instance's *actual* class's own `VTABLE_*`
   Address Library ID, which isn't among the ones this pass resolves.
 
-Genuinely still open (need an actual game session past `kDataLoaded`,
-not just the main menu):
+Three more done since T3-3 (build 7, same session), needing an actual
+game session past `kDataLoaded` — closed by loading a save via
+`kNewGame`/`kPostLoadGame`:
 
-- `PlayerCharacter::GetSingleton()` checks at `kNewGame` /
-  `kPostLoadGame` (nullptr at `kDataLoaded` by design): formID `0x14`,
-  formType `ActorCharacter`.
-- Live `Actor::ACTOR_RUNTIME_DATA` sanity via `GetActorRuntimeData()` —
-  validates the AE `RelocateMember` path, which nothing else covers.
-- `ExtraDataList` live walk off a loaded cell's refrs — runtime ground
-  truth for the last two baseline-EMPTY hotspot classes.
+- ~~`PlayerCharacter::GetSingleton()` checks at `kNewGame` /
+  `kPostLoadGame`~~ **Done**: formID `0x14`, formType `ActorCharacter`
+  both matched raw and accessor reads exactly
+  (`formID=00000014(raw=00000014,OK) formType=0x3E(raw=0x3E,OK)`).
+- ~~Live `Actor::ACTOR_RUNTIME_DATA` sanity via `GetActorRuntimeData()`~~
+  **Done**: `currentProcess=non-null`, `race` resolves to a non-null,
+  correctly-typed (`GetFormType() == Race`) pointer — the AE
+  `RelocateMemberIfNewer<T>` path lands on real data on this build, not
+  garbage or a wrong-runtime offset.
+- ~~`ExtraDataList` live walk~~ **Done**: `player->extraList.GetCount()`
+  executed on a live instance without crashing, returned `1` — that's
+  the ground truth this check needed (a specific count was never the
+  bar).
+
+See `T3-3_LAYOUTVALIDATOR_REPORT.md`'s Addendum 2 for full detail and the
+real log lines.
+
 - ~~A small script that parses the `LayoutValidator: LAYOUT` lines into
   JSON for a mechanical three-way diff against `coverage_baseline.json`.~~
   **Done**: `runtime-harness/tools/parse_layout_log.py`. Parses all three
@@ -200,7 +211,10 @@ not just the main menu):
   `coverage_baseline.json`'s static_assert-backed values. See
   `T3-3_LAYOUTVALIDATOR_REPORT.md`.
 
-The four items above (RTTI name readback, `PlayerCharacter` checks,
-`ACTOR_RUNTIME_DATA` sanity, `ExtraDataList` walk, vtable-pointer
-identity) remain genuinely open after T3-3 — that pass only exercised
-the `TESForm(0x00000007)` live check, which was clean.
+Of the original five live-verify items, only the vtable-pointer identity
+check remains open — and only in its real, better-scoped form (against
+the live instance's own class's `VTABLE_*` ID, e.g.
+`VTABLE_PlayerCharacter`), since the originally planned version against
+`VTABLE_TESForm` was reclassified as an invalid check (see above). RTTI
+readback, `PlayerCharacter` checks, `ACTOR_RUNTIME_DATA` sanity, and the
+`ExtraDataList` walk are all done and passed clean on real game state.

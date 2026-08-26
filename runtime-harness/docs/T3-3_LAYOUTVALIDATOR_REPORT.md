@@ -170,24 +170,86 @@ them; both T3-4's original two sample-log self-tests (exit 0 clean, exit
 were verified after the change, confirming the new fields actually
 populate with real data, not just that the exit code stayed correct.
 
-## What this does NOT close
+## Addendum 2: PlayerCharacter / ACTOR_RUNTIME_DATA / ExtraDataList live checks (same session, build 7)
 
-Per `LAYOUT_VALIDATOR.md`'s own TODO list, genuinely still open — all
-three need an actual game session past `kDataLoaded`, not just the main
-menu, so none were attempted this pass:
+The three items below (previously "genuinely still open," see the
+original "What this does NOT close" text further down, now closed)
+needed an actual game session past `kDataLoaded` — the main menu alone
+doesn't instantiate `PlayerCharacter`. Closed by adding
+`LayoutValidator::RunGameSessionChecks()`, wired to both `kNewGame` and
+`kPostLoadGame` in `main.cpp` (the same single-listener pattern as
+`OnDataLoaded()` — see Bug #2 above), then loading a save via the
+`PressEnter` scheduled task's synthetic Enter at the main menu.
 
-- `PlayerCharacter::GetSingleton()` sanity at `kNewGame`/`kPostLoadGame`.
-- Live `Actor::ACTOR_RUNTIME_DATA` / `GetActorRuntimeData()` sanity (the
-  AE `RelocateMember` path — nothing in this pass touches it, since the
-  live check only covers `TESForm`).
-- `ExtraDataList` live walk.
+Real log evidence (`kPostLoadGame` firing at `18:19:30.055`, six seconds
+after `kPreLoadGame` at `18:19:26.913` — a real save load, not an instant
+no-op):
 
-A real version of the vtable-pointer identity check (against the live
-instance's *actual* class's own `VTABLE_*` ID, once one is resolved) is
-now a new, better-scoped candidate for future work, replacing the
-originally planned but invalid version.
+```
+kPreLoadGame received -- a save is about to load.
+kPostLoadGame received -- a save finished loading.
+LayoutValidator: LIVE PlayerCharacter formID=00000014(raw=00000014,OK) formType=0x3E(raw=0x3E,OK)
+LayoutValidator: LIVE PlayerCharacter vtbl=0x7FF7921DB9C0 rva=0x18AB9C0 note=not-compared-to-VTABLE_TESForm-see-comment
+LayoutValidator: LIVE PlayerCharacter ACTOR_RUNTIME_DATA currentProcess=non-null race=0x21BE1674400(plausible)
+LayoutValidator: LIVE PlayerCharacter extraList.GetCount()=1
+```
 
-These remain real, scoped future work, not silently dropped.
+All three checks passed on real data, honestly evaluated:
+
+- **PlayerCharacter sanity: OK.** `formID=0x14` (the well-known player
+  form ID) and `formType=0x3E` (`ActorCharacter`) both matched their raw
+  and accessor reads exactly — same `CheckLiveForm` path already proven
+  against `TESForm(0x07)` in the base report, now proven on a second,
+  independently-instantiated class.
+- **`ACTOR_RUNTIME_DATA` / `GetActorRuntimeData()` plausibility: OK, not
+  inconclusive.** `currentProcess` is non-null (the player has an active
+  `AIProcess`, as expected while in-game) and `race` resolves to a
+  non-null pointer whose `GetFormType() == RE::FormType::Race` — proving
+  the AE `RelocateMemberIfNewer<T>` accessor path lands on a real,
+  correctly-typed member on this exact build, not garbage or a
+  wrong-runtime offset. Per the plan going in: had `race` come back NULL
+  or wrong-formtype while `formID`/`formType` still read OK, that would
+  have needed investigating *this check's own correctness* (wrong
+  runtime branch, SE offset resolving on an AE process) before writing
+  it up as an engine finding — that branch didn't trigger here.
+- **`ExtraDataList` live walk: OK.** `extraList.GetCount()=1` — the
+  accessor-based walk executes on a live instance without crashing,
+  which is this TODO's actual ground truth. A count of 1 on a loaded
+  player save is plausible real data, not a failure signal; this check
+  was never about hitting a particular count.
+
+`parse_layout_log.py` was extended again with `LIVE_RUNTIME_DATA_RE` and
+`LIVE_EXTRALIST_RE`, producing `live_runtime_data`/`live_extralist` JSON
+keys. Verified after the change: both T3-4 self-test fixtures still pass
+(exit 0 / exit 1 as before — this log shape doesn't appear in either
+fixture, so they only confirm no regression), and a fresh parse of this
+real build-7 log populates both new keys with the data above (not empty
+lists) plus a clean `--diff-baseline` run: zero confirmed mismatches
+against static_assert-backed baseline values (the guarded classes, now
+including `Actor::ACTOR_RUNTIME_DATA` and `ExtraDataList`, again
+correctly report `NO-STATIC-ASSERT(baseline=NO_GROUND_TRUTH)` rather than
+a false mismatch).
+
+The evidence log at
+[`examples/RuntimeHarness_T3-3_layoutvalidator.log.txt`](../examples/RuntimeHarness_T3-3_layoutvalidator.log.txt)
+was overwritten with this build-7 run (main-menu `LIVE` lines *and* the
+game-session `LIVE` lines both present in the same file — one continuous
+session, no synthetic stitching).
+
+## What this closes
+
+All three items originally listed below as "genuinely still open" are
+now closed (see Addendum 2 immediately above):
+
+- `PlayerCharacter::GetSingleton()` sanity at `kNewGame`/`kPostLoadGame`. **Done.**
+- Live `Actor::ACTOR_RUNTIME_DATA` / `GetActorRuntimeData()` sanity. **Done.**
+- `ExtraDataList` live walk. **Done.**
+
+Remaining future work, not closed by this pass: a real version of the
+vtable-pointer identity check against the live instance's *actual*
+class's own `VTABLE_*` ID (e.g. `VTABLE_PlayerCharacter` instead of
+`VTABLE_TESForm`), replacing the originally planned but invalid version
+described in Addendum 1 above.
 
 ## Housekeeping note
 

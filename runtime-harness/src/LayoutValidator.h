@@ -70,4 +70,14 @@ namespace LayoutValidator
     // handler -- see the file header comment for why this isn't a
     // self-registered listener.
     void OnDataLoaded();
+
+    // Runs the checks that need an actual game session, not just
+    // kDataLoaded (main-menu data load): PlayerCharacter sanity,
+    // Actor::ACTOR_RUNTIME_DATA plausibility via GetActorRuntimeData()
+    // (the AE RelocateMember path), and a live ExtraDataList walk off
+    // the player's own extraList. Call from main.cpp's kNewGame AND
+    // kPostLoadGame handlers -- either is a valid entry point, and this
+    // guards on PlayerCharacter::GetSingleton() being non-null so it's
+    // safe to call from both without double-logging garbage.
+    void OnGameSessionReady();
 }

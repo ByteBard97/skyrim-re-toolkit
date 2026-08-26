@@ -206,27 +206,69 @@ namespace LayoutValidator
                     static_cast<std::uint8_t>(playerBase->GetFormType()));
             }
 
-            // TODO(live-verify): remaining checks that genuinely need an
-            // actual game session (not just kDataLoaded at the main menu):
-            //   - RE::PlayerCharacter::GetSingleton(): nullptr at
-            //     kDataLoaded (no game started yet) -- needs kNewGame /
-            //     kPostLoadGame timing, then check formID==0x14 and
-            //     formType==FormType::ActorCharacter (0x3E).
-            //   - Walk RE::TES::GetSingleton() to a loaded TESObjectCELL
-            //     and sanity-check its ExtraDataList at the compiled
-            //     offset -- the only in-process way to get ground truth on
-            //     ExtraDataList, the hotspot class type-importer's baseline
-            //     still marks EMPTY.
-            //   - Read a live high-process Actor's ACTOR_RUNTIME_DATA via
-            //     GetActorRuntimeData() and sanity-check currentProcess /
-            //     race pointer plausibility (valid pointer, race formType
-            //     == FormType::Race) -- validates the RelocateMember path
-            //     on AE, which compile-time offsets cannot cover.
             // RTTI decorated-name readback and the live vtable-pointer
-            // identity check (both listed here as TODOs through T3-3) are
-            // done -- see CheckLiveForm() and the rtti block above; neither
-            // needed gameplay, both run at kDataLoaded like everything else
-            // in this function.
+            // identity check are done above -- see CheckLiveForm() and the
+            // rtti block; neither needed gameplay, both run at kDataLoaded.
+            // The three checks below DO need an actual game session and
+            // run separately from RunGameSessionChecks(), called on
+            // kNewGame/kPostLoadGame (see main.cpp) -- PlayerCharacter is
+            // nullptr at kDataLoaded by design (no game started yet).
+        }
+
+        // -----------------------------------------------------------------
+        // Phase 2c: game-session-only live checks. PlayerCharacter sanity,
+        // Actor::ACTOR_RUNTIME_DATA plausibility (validates the AE
+        // RelocateMember path, which compile-time offsets cannot cover),
+        // and a live ExtraDataList walk. Adapted from the original TODO's
+        // "walk a loaded cell's refrs" to the player's own extraList --
+        // the player is guaranteed loaded the instant this fires, no cell
+        // enumeration needed, same ground-truth value (real accessor calls
+        // on a live ExtraDataList, the hotspot class type-importer's
+        // baseline still marks EMPTY).
+        // -----------------------------------------------------------------
+
+        void RunGameSessionChecks()
+        {
+            const auto* player = RE::PlayerCharacter::GetSingleton();
+            if (!player) {
+                SKSE::log::warn("LayoutValidator: LIVE PlayerCharacter instance=nullptr (skipped)");
+                return;
+            }
+
+            // formID 0x14 ("Player"), formType ActorCharacter (0x3E,
+            // FormTypes.h:202) -- same raw-vs-accessor check as TESForm(0x07).
+            CheckLiveForm(player, "PlayerCharacter");
+            if (player->GetFormID() != 0x14) {
+                SKSE::log::warn("LayoutValidator: LIVE PlayerCharacter formID=0x{:08X}, expected 0x14",
+                    player->GetFormID());
+            }
+            if (player->GetFormType() != RE::FormType::ActorCharacter) {
+                SKSE::log::warn("LayoutValidator: LIVE PlayerCharacter formType=0x{:02X}, expected ActorCharacter (0x3E)",
+                    static_cast<std::uint8_t>(player->GetFormType()));
+            }
+
+            // ACTOR_RUNTIME_DATA plausibility via the real accessor (Actor.h:710
+            // -- REL::RelocateMemberIfNewer, resolves to offset 0xE0 on SE,
+            // 0xE8 on AE 1.6.629+). Not an OK/MISMATCH check like TESForm's
+            // (no independent raw-offset ground truth to compare against --
+            // that's the whole reason this needs the accessor, not offsetof)
+            // -- pointer plausibility instead: race must be non-null and
+            // resolve to an actual TESRace (FormType::Race, 0x0E).
+            const auto& runtimeData = player->GetActorRuntimeData();
+            const bool  raceOk = runtimeData.race && runtimeData.race->GetFormType() == RE::FormType::Race;
+            SKSE::log::info(
+                "LayoutValidator: LIVE PlayerCharacter ACTOR_RUNTIME_DATA currentProcess={} race=0x{:X}({})",
+                runtimeData.currentProcess ? "non-null" : "NULL",
+                reinterpret_cast<std::uintptr_t>(runtimeData.race),
+                raceOk ? "plausible" : (runtimeData.race ? "IMPLAUSIBLE-wrong-formtype" : "NULL"));
+
+            // Live ExtraDataList walk: real accessor calls only (GetCount()),
+            // no raw offset reads -- ExtraDataList's members are private by
+            // design (ExtraDataList.h:198). Ground truth for this pass is
+            // simply "the accessor-based walk works on a live instance
+            // without crashing"; a non-zero count is a bonus, not required.
+            const auto extraCount = player->extraList.GetCount();
+            SKSE::log::info("LayoutValidator: LIVE PlayerCharacter extraList.GetCount()={}", extraCount);
         }
     }
 
@@ -239,5 +281,10 @@ namespace LayoutValidator
     void OnDataLoaded()
     {
         RunLiveChecks();
+    }
+
+    void OnGameSessionReady()
+    {
+        RunGameSessionChecks();
     }
 }

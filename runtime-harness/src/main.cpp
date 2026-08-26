@@ -71,12 +71,14 @@ void OnMessage(SKSE::MessagingInterface::Message* message)
             break;
         case SKSE::MessagingInterface::kNewGame:
             SKSE::log::info("kNewGame received -- a new game started.");
+            LayoutValidator::OnGameSessionReady();
             break;
         case SKSE::MessagingInterface::kPreLoadGame:
             SKSE::log::info("kPreLoadGame received -- a save is about to load.");
             break;
         case SKSE::MessagingInterface::kPostLoadGame:
             SKSE::log::info("kPostLoadGame received -- a save finished loading.");
+            LayoutValidator::OnGameSessionReady();
             break;
         default:
             break;

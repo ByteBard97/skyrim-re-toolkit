@@ -83,14 +83,17 @@ A further idea unlocked by the rest of this repo: a struct-layout
 validator that checks `type-importer`'s generated layouts against the
 *running* game — stronger ground truth than static_asserts. Built as
 `LayoutValidator` (no hooks — a compile-time `sizeof`/`offsetof`
-report at plugin load plus a live-instance field check on
-`kDataLoaded`); design and honest limitations in
+report at plugin load plus live-instance field checks on `kDataLoaded`
+and `kNewGame`/`kPostLoadGame`); design and honest limitations in
 [`docs/LAYOUT_VALIDATOR.md`](docs/LAYOUT_VALIDATOR.md). **Built,
 deployed, and live-verified 2026-08-26** — first real compile found and
 fixed two genuine bugs (a wrong build-config assumption in the original
 design doc, and a `SKSE::MessagingInterface` listener conflict); the
 resulting three-way diff against `coverage_baseline.json` shows 0
 confirmed mismatches on the 5 runtime-unguarded classes it can check.
+A later pass the same day loaded a real save and closed out
+`PlayerCharacter`, `Actor::ACTOR_RUNTIME_DATA`, and `ExtraDataList` live
+checks too — all clean on real game state.
 Full report: [`docs/T3-3_LAYOUTVALIDATOR_REPORT.md`](docs/T3-3_LAYOUTVALIDATOR_REPORT.md).
 
 ## Why this builds against the vendored CommonLibSSE-NG
