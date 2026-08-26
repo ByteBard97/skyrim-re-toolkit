@@ -447,7 +447,7 @@ under either toolchain).
 Raw sweep percentage across all ~2800 `RE::` classes isn't the right
 target for community value — most of the long tail (Scaleform UI
 internals, Havok physics minutiae) is rarely touched by real mods. A
-curated hotspot list (38 classes commonly referenced by mods: the
+curated hotspot list (38 classes at the time of this audit — the list later grew to 39; see the README's current status — commonly referenced by mods: the
 `TESForm` hierarchy, actors, inventory, item types, quests/packages,
 scene-graph, and character-controller physics — full list in
 this investigation's internal working notes) was checked against the current baseline
