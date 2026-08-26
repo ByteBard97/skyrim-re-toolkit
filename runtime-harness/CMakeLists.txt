@@ -49,6 +49,7 @@ set(sources
     src/main.cpp
     src/AIProcessInspector.cpp
     src/HavokStepLogger.cpp
+    src/LayoutValidator.cpp
     src/SavegameTracer.cpp)
 
 # Without the registry port's add_commonlibsse_plugin() helper, declare

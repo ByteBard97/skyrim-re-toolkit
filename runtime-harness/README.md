@@ -81,7 +81,12 @@ produced any log output — see its entry below.
 
 A further idea unlocked by the rest of this repo: a struct-layout
 validator that checks `type-importer`'s generated layouts against the
-*running* game — stronger ground truth than static_asserts.
+*running* game — stronger ground truth than static_asserts. Skeletoned
+as `LayoutValidator` (no hooks — a compile-time `sizeof`/`offsetof`
+report at plugin load plus a live-instance field check on
+`kDataLoaded`); design and honest limitations in
+[`docs/LAYOUT_VALIDATOR.md`](docs/LAYOUT_VALIDATOR.md). **Not yet built
+or run.**
 
 ## Why this builds against the vendored CommonLibSSE-NG
 
