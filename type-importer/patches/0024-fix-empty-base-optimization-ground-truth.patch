@@ -1,0 +1,73 @@
+--- a/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-26 14:06:51.192030421 -0400
++++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-26 14:01:52.421985202 -0400
+@@ -387,6 +387,7 @@
+         List<ParsedType> baseInlineTypes = new ArrayList<>(); // parallel to baseClasses; non-null when the base is a template specialization that must be inline-embedded
+         List<Long> baseSizes = new ArrayList<>(); // parallel to baseClasses; this base's own standalone clang_Type_getSizeOf(), for the empty-base-optimization check below
+         List<ParsedVtable.VtableEntry> virtualMethods = new ArrayList<>();
++        Cursor[] firstFieldCursor = {null}; // this class's own first non-anonymous FIELD_DECL, for the ground-truth empty-base-optimization check below
+ 
+         structCursor.visitChildren((cursor, parent) -> {
+             CursorKind kind = cursor.kind();
+@@ -398,6 +399,10 @@
+                     int bitWidth = isBitField ? cursor.getBitFieldWidth() : 0;
+                     boolean isAnon = cursor.isAnonymous();
+ 
++                    if (firstFieldCursor[0] == null) {
++                        firstFieldCursor[0] = cursor;
++                    }
++
+                     // For anonymous struct/union fields, recursively parse the inner type
+                     ParsedType anonType = null;
+                     boolean inlineEmbed = isAnon;
+@@ -666,6 +671,51 @@
+                 continue;
+             }
+ 
++            // Second, independent elision path: when this is the class's SOLE
++            // base (no other bases follow), it's empty, and it has no vtable
++            // of its own (the case above doesn't apply here), ask clang
++            // DIRECTLY for the real, compiler-computed offset of this class's
++            // own first data field, via clang_Cursor_getOffsetOfField --
++            // rather than guessing at the ABI rule, this reads MSVC's actual
++            // layout decision straight from the compiler. If that field sits
++            // at offset 0, the empty base contributed nothing and should be
++            // elided; if not (e.g. offset 8 bits = 1 byte), the existing
++            // 1-byte placeholder is already correct and this path doesn't
++            // fire. This is NOT reachable for ActorEquipManager (confirmed
++            // via GCPP-equivalent direct testing: its own "bool unk01" field
++            // sits at offset 8 bits = byte 1, so this check leaves the
++            // existing placeholder untouched, correctly) but IS reachable for
++            // BGSStoryEventManager (no vtable, empty sole base
++            // `BSTSingletonImplicit<T>`, own first field `registeredEvents`
++            // sits at offset 0 per the compiler) -- a case the vtable-gated
++            // condition above can't cover, since it introduces no vtable at
++            // all. Only applies to the LAST base in the list (i.e. no other
++            // base follows this one) and only when this class's own body has
++            // at least one real field to query -- if there's no field
++            // (nothing but bases, or the field list is empty), there's
++            // nothing to ask clang about and the existing placeholder logic
++            // is left as the only source of truth.
++            if (i == baseClasses.size() - 1 && baseSizes.get(i) <= 1
++                    && firstFieldCursor[0] != null) {
++                long firstFieldOffsetBytes = firstFieldCursor[0].getFieldOffset() / 8;
++                // allFields at this point contains: optional vptr (8 bytes)
++                // + any earlier (i-1) base fields already appended. Their
++                // real embedded byte size isn't tracked in a simple list
++                // here, so restrict this path to the common, cleanly-
++                // verifiable case: this is ALSO the class's ONLY base
++                // (baseClasses.size() == 1), so "preceding content" is
++                // exactly 8 bytes if this class introduces its own vtable
++                // (vptr already added to allFields above) or 0 bytes
++                // otherwise -- both computable directly from state already
++                // in scope, no need to sum allFields.
++                if (baseClasses.size() == 1) {
++                    long precedingVptrBytes = (!virtualMethods.isEmpty() && !primaryBaseIsPolymorphic) ? 8 : 0;
++                    if (firstFieldOffsetBytes == precedingVptrBytes) {
++                        continue;
++                    }
++                }
++            }
++
+             allFields.add(new ParsedStructure.FieldInfo(
+                 base[0], base[1], false, 0, inlineEmbedBase, inlineType));
+         }

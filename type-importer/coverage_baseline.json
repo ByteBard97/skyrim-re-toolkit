@@ -2610,9 +2610,9 @@
     "status": "OK"
   },
   "BGSStoryEventManager": {
-    "actual": 112,
+    "actual": 104,
     "expected": 104,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSStoryEventMember": {
     "actual": 24,
@@ -4180,9 +4180,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "BSPrecomputedNavmeshInfoPathMap": {
-    "actual": 80,
+    "actual": 72,
     "expected": 72,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSProceduralGeomEvent": {
     "actual": 1,
@@ -9675,9 +9675,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxEvent": {
-    "actual": 8,
+    "actual": 4,
     "expected": 4,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxExporterInfo": {
     "actual": 1,
@@ -9810,9 +9810,9 @@
     "status": "OK"
   },
   "GFxKeyEvent": {
-    "actual": 24,
+    "actual": 20,
     "expected": 20,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxKeyboardState": {
     "actual": 1672,
@@ -9930,9 +9930,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxMouseEvent": {
-    "actual": 28,
+    "actual": 24,
     "expected": 24,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxMovie": {
     "actual": 16,
@@ -10590,9 +10590,9 @@
     "status": "OK"
   },
   "GFxValue::ObjectInterface": {
-    "actual": 16,
+    "actual": 8,
     "expected": 8,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxValue::ObjectInterface::ArrVisitor": {
     "actual": 8,
@@ -14310,9 +14310,9 @@
     "status": "EMPTY"
   },
   "NavMeshInfoMap": {
-    "actual": 240,
+    "actual": 232,
     "expected": 240,
-    "status": "OK"
+    "status": "MISMATCH"
   },
   "NavMeshInfoMap::RecordFlags": {
     "actual": 1,
@@ -15675,9 +15675,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "PrecomputedNavmeshInfoPathMap": {
-    "actual": 80,
+    "actual": 72,
     "expected": 72,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "PreloadResponsesInitializationPolicy": {
     "actual": null,
