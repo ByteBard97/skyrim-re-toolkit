@@ -42,15 +42,27 @@ produced any log output — see its entry below.
   separate-hierarchy explanation (its header has no character-controller
   references at all, and `AIProcess::GetCharController()`'s actual
   implementation returns a plain `bhkCharacterController*` with no
-  player/NPC branching). Current best guess: Havok's character-state
-  dispatch may not go through a standard C++ virtual call on these
-  classes at all — some Havok integrations use a separate
-  reflected/manual dispatch table (populated by
-  `hkpCharacterStateManager`) rather than the compiled vtable, in which
-  case patching the vtable slot is silently inert. Unverified without
-  disassembly or Havok SDK source, both out of scope for this project.
-  **Open question, not a known-good hook — treat as unresolved rather
-  than "just needs more playtime."**
+  player/NPC branching). Checked real prior art: [ersh1/Precision](https://github.com/ersh1/Precision)
+  (GPL-3.0), the standard reference for Havok hooking in the SKSE
+  community (melee/projectile collision, hundreds of thousands of
+  downloads, built on CommonLibSSE-NG), has **zero references to
+  `bhkCharacterState`/`hkpCharacterState`/`CharacterState` anywhere** in
+  its ~2,200-line hooking code. It doesn't vtable-hook the state
+  machine's `Update` at all -- it hooks `RE::bhkWorld`'s physics-step
+  function directly, via a genuine mid-function trampoline (Xbyak-built
+  code cave, `SKSE::Trampoline::write_branch<6>` patched at a specific
+  byte offset *inside* a larger function, at a `RELOCATION_ID` +
+  disassembly-derived offset that mod's author published). No serious
+  working Havok-hook plugin uses this project's vtable-hook approach on
+  `bhkCharacterState`, which is a much sharper finding than "unverified."
+  **Scoped follow-on path, not attempted here:** rebuild
+  `HavokStepLogger` Precision-style -- hook `bhkWorld`'s step function
+  instead, which needs Xbyak enabled in this project's build (currently
+  `OFF` in `type-importer/vendor/CommonLibSSE-NG/CMakeLists.txt`, plus a
+  vcpkg dependency), and Precision's published offsets re-verified
+  against this project's exact 1.6.1170 build before trusting them. This
+  is a real, deliberate feature task, not a quick fix. **Current vtable
+  hook: open question, not a known-good hook.**
 - `SavegameTracer` — `BGSSaveLoadManager` serialization. Hooks
   `BGSSaveLoadManager::ProcessEvent(const BSSaveDataEvent*)` via vtable
   (index 1 on `RE::VTABLE_BGSSaveLoadManager[0]`) — unlike the other two

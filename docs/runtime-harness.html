@@ -70,9 +70,15 @@
       produced zero log output across 70+ minutes of real gameplay (Helgen intro through open-world
       Whiterun, including combat-adjacent NPC activity) — long enough to rule out timing. The vfunc index,
       input delivery, and a possible <code>PlayerCharacter</code>-specific hierarchy were all independently
-      checked and ruled out. Current best guess: Havok's character-state dispatch may not go through a
-      standard C++ virtual call on these classes at all — unverifiable without disassembly or Havok SDK
-      source, both out of scope for this project. An honest open question, not a known-working hook.</p>
+      checked and ruled out. Checked real prior art:
+      <a href="https://github.com/ersh1/Precision">ersh1/Precision</a> (GPL-3.0, the standard
+      SKSE-community reference for Havok hooking) has zero references to <code>bhkCharacterState</code> or
+      <code>hkpCharacterState</code> anywhere in its ~2,200-line hooking code — it hooks
+      <code>RE::bhkWorld</code>'s physics-step function directly via a mid-function Xbyak trampoline
+      instead of vtable-hooking the state machine. No serious working plugin uses this project's approach.
+      Scoped follow-on, not attempted: rebuild Precision-style, which needs Xbyak enabled in this project's
+      build (currently off) plus a vcpkg dependency and re-verified offsets — a real feature task, not a
+      quick fix.</p>
     </div>
     <div class="card">
       <h3>SavegameTracer <span class="badge badge-good">verified in-game</span></h3>
