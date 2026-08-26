@@ -1,0 +1,101 @@
+{
+  "format_version": 1,
+  "generator": "GenerateGdt --report-json (type-importer)",
+  "runtime": "ENABLE_SKYRIM_AE=1",
+  "commonlib_commit": "deadbeef",
+  "gdt_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "primitives": {
+    "uint32_t": {
+      "size": 4,
+      "align": 4,
+      "kind": "uint"
+    },
+    "uint8_t": {
+      "size": 1,
+      "align": 1,
+      "kind": "uint"
+    },
+    "void*": {
+      "size": 8,
+      "align": 8,
+      "kind": "ptr"
+    }
+  },
+  "types": [
+    {
+      "name": "TESForm",
+      "kind": "struct",
+      "size": 32,
+      "align": 8,
+      "provenance": {
+        "baseline_status": "OK",
+        "expected_size": 32,
+        "tail_padded": false
+      },
+      "members": [
+        {
+          "name": "vftable",
+          "offset": 0,
+          "type": {
+            "kind": "ptr",
+            "to": "TESForm_vtbl"
+          }
+        },
+        {
+          "name": "formFlags",
+          "offset": 16,
+          "type": "uint32_t"
+        },
+        {
+          "name": "pad_1C",
+          "offset": 28,
+          "type": {
+            "kind": "array",
+            "of": "uint8_t",
+            "count": 4
+          },
+          "synthetic_padding": true
+        }
+      ]
+    },
+    {
+      "name": "TESForm_vtbl",
+      "kind": "struct",
+      "size": 8,
+      "provenance": {
+        "baseline_status": "NO_GROUND_TRUTH",
+        "vtable_for": "TESForm"
+      },
+      "members": [
+        {
+          "name": "destructor",
+          "offset": 0,
+          "type": {
+            "kind": "ptr",
+            "to": "void"
+          }
+        }
+      ]
+    },
+    {
+      "name": "FORM_ENUM_STRING",
+      "kind": "enum",
+      "size": 4,
+      "underlying": "uint32_t",
+      "members": [
+        {
+          "name": "kNone",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "name": "FormID",
+      "kind": "typedef",
+      "to": "uint32_t"
+    }
+  ],
+  "unresolved": [
+    "SomeUnresolvedType"
+  ]
+}
