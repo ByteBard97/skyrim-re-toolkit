@@ -30,7 +30,7 @@ each resulting `.gdt` as a workflow build artifact.
   `type-importer`'s own coverage sweep (see
   `../type-importer/COVERAGE_SWEEP_PLAN.md` and
   `../type-importer/coverage_baseline.json`) tracks this precisely — as
-  of the last full sweep, 1,934 of 3,019 checkable classes (64%) resolve
+  of the last full sweep, 2,030 of 3,017 checkable classes (67%) resolve
   byte-accurate; the rest are either a wrong size or resolve empty.
   A curated **hotspot list** of 39 commonly-modded classes (`TESForm`
   hierarchy, `Actor`/`Character`/`PlayerCharacter`, inventory, item
