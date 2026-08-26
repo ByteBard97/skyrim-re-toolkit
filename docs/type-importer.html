@@ -96,10 +96,12 @@
     the actual <code>REL::RelocateMember</code> call sites in source — instead of silent 1-byte placeholders.
   </p>
   <div class="callout warn">
-    <strong>Not every class is byte-accurate.</strong> The remaining 36% is either the wrong size or resolves
-    empty — this is tracked openly, not hidden. Three known root causes account for most of the remaining gap
-    (container-template field embedding, a vtable-detection blind spot for template-specialization bases, and
-    a typedef-registration edge case) — see the repo's <a href="https://github.com/ByteBard97/skyrim-re-toolkit/tree/master/type-importer/patches">patches directory</a>
+    <strong>Not every class is byte-accurate.</strong> The remaining 32% is either the wrong size or resolves
+    empty — this is tracked openly, not hidden. The largest formerly-dominant cause (a vtable-detection blind
+    spot for template-specialization bases, ~68% of all mismatches at its peak) is now mostly fixed. What's
+    left is smaller and more varied: container-template field embedding still not fully inline-embedded, and
+    a name-collision edge case between an unrelated nested typedef and a top-level class of the same bare
+    name — see the repo's <a href="https://github.com/ByteBard97/skyrim-re-toolkit/tree/master/type-importer/patches">patches directory</a>
     for the full, precise writeups, including the ones still deferred.
   </div>
 
