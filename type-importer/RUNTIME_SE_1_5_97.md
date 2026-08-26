@@ -85,6 +85,26 @@ committed, 0 failed), full snapshot saved as `coverage_baseline_se.json`
 (same schema as `coverage_baseline.json`, not yet wired into CI — see
 "Not done" below).
 
+## AE 1.7.99 / GOG 1.6.1179: no separate layout work needed
+
+Checked whether these two remaining v0.2 targets need their own runtime
+macro/sweep, the same way SE and VR did. They don't: CommonLibSSE-NG has
+no `ENABLE_SKYRIM_AE_1799` / `SKYRIM_GOG`-style macro anywhere in
+`include/RE` or `include/REL` — grepping confirms every `AE`-guarded
+`static_assert`/`REL::VariantID` branch uses the single `ENABLE_SKYRIM_AE`
+macro already covering 1.6.1170. AE 1.7.99 and GOG 1.6.1179 share that
+same macro (and, per `REL::VariantID`'s single `a_aeOffset` argument, the
+same Address Library ID scheme) with no compile-time layout distinction
+from 1.6.1170 in this codebase. So the AE `coverage_baseline.json` already
+covers them at the layout level -- there is no new sweep to run.
+
+What *would* distinguish them is runtime addresses, not struct layout:
+confirming the Address Library ID→RVA mapping actually resolves correctly
+against a real 1.7.99/GOG binary. That's a different kind of check
+(dynamic address cross-referencing, not `static_assert` layout
+comparison) and needs real per-version Address Library data, which isn't
+sourced in this repo yet -- see "Not done" below.
+
 ## Not done (follow-up, not blocking this milestone)
 
 - No CI job for the SE runtime yet (`.github/workflows/type-importer-coverage.yml`
