@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Contributing — skyrim-re-toolkit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="How to contribute to skyrim-re-toolkit: reliable engineering on top of community RE, not novel research.">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-brand">skyrim-re-<span>toolkit</span></div>
+    <nav class="topbar-nav">
+      <a href="index.html">Home</a>
+      <a href="type-importer.html">type-importer</a>
+      <a href="symbol-archive.html">symbol-archive</a>
+      <a href="runtime-harness.html">runtime-harness</a>
+      <a href="contributing.html" class="active">Contributing</a>
+    </nav>
+    <div class="topbar-gh"><a href="https://github.com/ByteBard97/skyrim-re-toolkit">GitHub ↗</a></div>
+  </div>
+</div>
+
+<main>
+
+  <div class="eyebrow">Get involved</div>
+  <h1>Contributing</h1>
+  <p class="lede">
+    We're not looking for novel RE research. We're looking for <strong>reliable engineering</strong> on
+    top of what the community — CommonLibSSE-NG, meh321's Address Library, SKSE — has already
+    reverse-engineered.
+  </p>
+
+  <h2>Where help is most useful right now</h2>
+  <div class="card-grid">
+    <div class="card">
+      <h3>type-importer</h3>
+      <p>If you know libclang, Ghidra's Java API, or MSVC ABI quirks, we need you. See the
+      <a href="type-importer.html#accuracy">deferred patches</a> for the remaining known root causes.</p>
+    </div>
+    <div class="card">
+      <h3>symbol-archive</h3>
+      <p>If you can write GitHub Actions workflows or validate struct layouts against live binaries, we need you.</p>
+    </div>
+    <div class="card">
+      <h3>runtime-harness</h3>
+      <p>If you've built SKSE plugins and know your way around <code>AIProcess</code>,
+      <code>hkpCharacterProxy</code>, or <code>BGSSaveLoadManager</code>, we need you.</p>
+    </div>
+  </div>
+
+  <h2>Ground rules — binding, not suggestions</h2>
+  <ul class="plain">
+    <li>No console exploits, no DRM circumvention, no redistribution of game binaries, PDBs, or copyrighted assets.</li>
+    <li>Every type or offset must be derivable from public community sources (CommonLibSSE-NG, Address Library, RTTI) — not from acquiring or dumping Bethesda's own build artifacts.</li>
+    <li>Don't invent offsets, struct layouts, or version numbers. Pull them from CommonLibSSE-NG or the Address Library, or open an issue if the source isn't available to you.</li>
+    <li>Don't commit generated type archives (<code>.gdt</code>/<code>.til</code>) or built binaries — these are CI-published artifacts, not source.</li>
+  </ul>
+
+  <h2>Platform split matters</h2>
+  <p>
+    <code>type-importer</code> and <code>symbol-archive</code> are Linux-native (Ghidra, libclang,
+    GitHub Actions <code>ubuntu-latest</code> all work fine). <code>runtime-harness</code> is Windows +
+    MSVC only, no exceptions — see the repo's project notes before assuming a change there can
+    be tested on Linux.
+  </p>
+
+  <h2>Before opening a PR touching the parser</h2>
+  <p>
+    If you're touching <code>type-importer</code>'s parser (patches under
+    <code>type-importer/patches/</code>), follow the existing methodology:
+  </p>
+  <ol>
+    <li>Root-cause with a minimal reproduction before writing a fix.</li>
+    <li>Verify with a full sweep (<code>generate_gdt.sh</code> + <code>coverage_report.py</code> + <code>check_regression.py</code>) against the committed baseline.</li>
+    <li>Write up the patch following the numbering/format already established in <code>type-importer/patches/*.md</code>.</li>
+  </ol>
+  <div class="callout">
+    <strong>Zero regressions required.</strong> A fix that unmasks a pre-existing bug is fine — but
+    document it; never merge a net-negative patch.
+  </div>
+
+  <h2>Licensing</h2>
+  <p>
+    The toolkit code itself is MIT. Generated <code>.gdt</code>/<code>.til</code> archives are derived
+    from CommonLibSSE-NG headers and inherit its GPL-3.0 (+ modding exception) license — don't relicense
+    generated archives.
+  </p>
+
+  <div class="btn-row">
+    <a class="btn" href="https://github.com/ByteBard97/skyrim-re-toolkit/blob/master/CONTRIBUTING.md">Full CONTRIBUTING.md on GitHub</a>
+    <a class="btn-outline" href="https://github.com/ByteBard97/skyrim-re-toolkit/issues">Open an issue</a>
+  </div>
+
+</main>
+
+<footer>
+  <p>MIT-licensed toolkit code; generated type archives inherit CommonLibSSE-NG's GPL-3.0 (+ modding
+  exception) license.</p>
+  <p>
+    <a href="https://github.com/ByteBard97/skyrim-re-toolkit">GitHub</a> ·
+    <a href="https://github.com/ByteBard97/skyrim-re-toolkit/issues">Issues</a> ·
+    <a href="https://github.com/ByteBard97/skyrim-re-toolkit/discussions">Discussions</a>
+  </p>
+</footer>
+
+</body>
+</html>

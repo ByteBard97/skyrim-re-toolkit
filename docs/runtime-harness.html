@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>runtime-harness — skyrim-re-toolkit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="SKSE plugins for live Creation Engine state inspection — the AI scheduler, Havok physics step, and savegame serializer, instrumented while the game actually runs.">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-brand">skyrim-re-<span>toolkit</span></div>
+    <nav class="topbar-nav">
+      <a href="index.html">Home</a>
+      <a href="type-importer.html">type-importer</a>
+      <a href="symbol-archive.html">symbol-archive</a>
+      <a href="runtime-harness.html" class="active">runtime-harness</a>
+      <a href="contributing.html">Contributing</a>
+    </nav>
+    <div class="topbar-gh"><a href="https://github.com/ByteBard97/skyrim-re-toolkit">GitHub ↗</a></div>
+  </div>
+</div>
+
+<main>
+
+  <div class="eyebrow">Subproject 3 of 3</div>
+  <h1>runtime-harness</h1>
+  <p class="lede"><span class="badge badge-progress">first inspector verified in-game</span> &nbsp; SKSE plugins that hook under-instrumented engine subsystems and log their live internal state.</p>
+
+  <h2>The problem</h2>
+  <p>
+    The Skyrim RE community has excellent static tooling (IDA, Ghidra, BinDiff) and excellent animation
+    introspection (Open Animation Replacer). But the engine's <strong>AI scheduler</strong>,
+    <strong>Havok physics step</strong>, and <strong>savegame serializer</strong> have zero purpose-built
+    runtime visibility. Every finding about them today arrives as static RE embedded in patch code —
+    nobody watches them run.
+  </p>
+
+  <h2>The solution</h2>
+  <p>
+    SKSE plugins that hook into those subsystems and log their internal state live, in real gameplay —
+    not just what a disassembler can infer statically.
+  </p>
+
+  <h2>Status: builds, loads, and runs in-game</h2>
+  <p>
+    A real SKSE plugin (<code>RuntimeHarness</code>) builds against CommonLibSSE-NG, sets up file
+    logging, and logs the plugin/game version plus <code>kDataLoaded</code>/<code>kNewGame</code>/
+    <code>kPreLoadGame</code>/<code>kPostLoadGame</code> from the messaging interface — confirmed running
+    against a live Skyrim AE 1.6.1170 process (SKSE64 2.2.6).
+  </p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>AIProcessInspector <span class="badge badge-good">verified in-game</span></h3>
+      <p>Package evaluation and AI scheduler decisions. Hooks <code>Actor::Update</code> via vtable — on
+      both <code>RE::VTABLE_Actor</code> and <code>RE::VTABLE_Character</code>, since live NPCs are
+      <code>Character</code> instances with their own vtable. <code>RuntimeHarness.log</code> shows a
+      dozen-plus live NPCs' package-evaluation transitions during a fresh game's opening scene, changing
+      over time as expected.</p>
+    </div>
+    <div class="card">
+      <h3>HavokStepLogger <span class="badge badge-warn">written, not yet deployed</span></h3>
+      <p>Collision/ragdoll state per physics step. Hooks <code>bhkCharacterState::Update</code> across all
+      six concrete character-state vtables (OnGround/Jumping/InAir/Climbing/Flying/Swimming) and logs
+      physics-state transitions with velocity magnitude. Compile-verified, not yet run in-game; not yet
+      actor-attributed (keyed by <code>hkpCharacterContext</code> address, not a form ID).</p>
+    </div>
+    <div class="card">
+      <h3>SavegameTracer <span class="badge badge-warn">written, not yet deployed</span></h3>
+      <p>Hooks <code>BGSSaveLoadManager::ProcessEvent</code> via vtable — a genuine singleton, so exactly
+      one concrete vtable. Dumps <code>saveGameList</code> (filename, player name, race, location,
+      playtime) on every firing, since the actual event payload types are only ever forward-declared in
+      the vendored tree. Compile-verified, not yet run in-game.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    A further idea unlocked by the rest of this repo: a struct-layout validator that checks
+    <a href="type-importer.html"><code>type-importer</code></a>'s generated layouts against the
+    <strong>running</strong> game — stronger ground truth than <code>static_assert</code>s.
+  </div>
+
+  <h2>Why this builds against the vendored CommonLibSSE-NG</h2>
+  <p>
+    The plugin compiles against <code>type-importer/vendor/CommonLibSSE-NG</code> (v3.7.0) directly —
+    <strong>the exact headers the <code>.gdt</code> type archives are generated from</strong> — so the
+    runtime harness and the type archives can never disagree about a struct layout.
+  </p>
+
+  <h2>Platform: Windows-only, no exceptions</h2>
+  <p>
+    SKSE plugins are Windows DLLs built against Skyrim's Windows PE ABI — this piece cannot be built or
+    tested on Linux the way <a href="type-importer.html">type-importer</a> can. Builds happen on a
+    dedicated Windows machine (Visual Studio + SKSE64) driven over SSH from the rest of this project's
+    Linux-native workflow.
+  </p>
+
+  <div class="btn-row">
+    <a class="btn-outline" href="https://github.com/ByteBard97/skyrim-re-toolkit/blob/master/runtime-harness/README.md">Full README on GitHub</a>
+  </div>
+
+</main>
+
+<footer>
+  <p>MIT-licensed toolkit code; generated type archives inherit CommonLibSSE-NG's GPL-3.0 (+ modding
+  exception) license.</p>
+  <p>
+    <a href="https://github.com/ByteBard97/skyrim-re-toolkit">GitHub</a> ·
+    <a href="https://github.com/ByteBard97/skyrim-re-toolkit/issues">Issues</a> ·
+    <a href="https://github.com/ByteBard97/skyrim-re-toolkit/discussions">Discussions</a>
+  </p>
+</footer>
+
+</body>
+</html>

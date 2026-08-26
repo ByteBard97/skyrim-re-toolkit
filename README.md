@@ -4,6 +4,8 @@
 
 This is a collection of tools, type archives, and runtime instrumentation that lowers the friction of Skyrim binary reverse engineering. If you have ever opened Ghidra to a stripped `SkyrimSE.exe` and wondered why you were hand-typing struct definitions that the community already figured out five years ago, this toolkit is for you.
 
+**[→ Browse the docs site](https://bytebard97.github.io/skyrim-re-toolkit/)** for a more scannable, screenshot-driven walkthrough of what's here and how to use it (this README is the thorough version).
+
 > The Skyrim modding ecosystem has spent fifteen years mapping the Creation Engine. The accumulated knowledge lives in [CommonLibSSE-NG](https://github.com/CharmedBaryon/CommonLibSSE-NG), [meh321's Address Library](https://github.com/meh321/AddressLibraryDatabase), and a handful of pinned Discord attachments. Our goal is to turn that knowledge into versioned, reproducible, public infrastructure.
 
 ---
@@ -93,7 +95,7 @@ None of these are vendored in-repo (large and/or license-bearing — see `type-i
 
 | Requirement | Why | Notes |
 |---|---|---|
-| JDK 21+ | Panama FFI (used by the Ghidra extension) | Temurin works fine |
+| JDK 22+ recommended | Panama FFI (used by the Ghidra extension) | JDK 21's preview FFM mode gives silently wrong struct sizes at full-sweep scale (fine for the small Quick Start example below, but not for a full coverage sweep) — see `generate_gdt.sh`'s own comments and `type-importer/patches/0010-jdk22-ffm-final-api.md`. Temurin works fine either way. |
 | Ghidra 12+ | Provides the type-manager Java API this pipeline runs against headlessly | No GUI/project needed |
 | A real `libclang.so`, Clang **19+** | MSVC STL's own headers reject older Clang versions | The `libclang-14` that ships with many Linux distros is **not** sufficient — grab a recent LLVM release tarball and point `LD_LIBRARY_PATH` at a directory containing a `libclang.so` symlink to it |
 | Windows SDK + MSVC CRT/STL headers | CommonLibSSE-NG's headers need real `<cstdint>` etc. to lay out correctly | Acquire via [`xwin`](https://github.com/Jake-Shadle/xwin): `xwin --accept-license splat --output <dir>` (Microsoft's own license terms apply — don't commit or redistribute the output) |

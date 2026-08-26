@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>skyrim-re-toolkit — reverse-engineering infrastructure for Skyrim</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Type archives, distribution, and runtime instrumentation for Skyrim / Creation Engine reverse engineering — built on CommonLibSSE-NG, the Address Library, and SKSE.">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-brand">skyrim-re-<span>toolkit</span></div>
+    <nav class="topbar-nav">
+      <a href="index.html" class="active">Home</a>
+      <a href="type-importer.html">type-importer</a>
+      <a href="symbol-archive.html">symbol-archive</a>
+      <a href="runtime-harness.html">runtime-harness</a>
+      <a href="contributing.html">Contributing</a>
+    </nav>
+    <div class="topbar-gh"><a href="https://github.com/ByteBard97/skyrim-re-toolkit">GitHub ↗</a></div>
+  </div>
+</div>
+
+<main>
+
+  <section class="hero">
+    <div class="eyebrow">Skyrim &amp; Creation Engine RE infrastructure</div>
+    <h1>Stop hand-typing structs the community already reverse-engineered.</h1>
+    <p class="lede">
+      If you've opened Ghidra to a stripped <code>SkyrimSE.exe</code> and hit
+      <code>FUN_1401e1270(longlong *param_1, undefined8 param_2)</code> — this toolkit
+      turns fifteen years of community RE (<a href="https://github.com/CharmedBaryon/CommonLibSSE-NG">CommonLibSSE-NG</a>,
+      <a href="https://github.com/meh321/AddressLibraryDatabase">meh321's Address Library</a>, SKSE) into
+      versioned, reproducible, public infrastructure: real type archives, CI-built distribution, and
+      live runtime instrumentation.
+    </p>
+    <div class="btn-row">
+      <a class="btn" href="type-importer.html">Get a .gdt</a>
+      <a class="btn-outline" href="#what-is-this">What is this, exactly?</a>
+      <a class="btn-outline" href="contributing.html">Contribute</a>
+    </div>
+  </section>
+
+  <div class="shot-pair">
+    <div class="shot">
+      <img src="assets/img/ghidra_untyped_decompile.png" alt="Ghidra decompiler showing an untyped function with raw pointer-offset arithmetic like (longlong)param_1 + 0x1a">
+      <div class="shot-caption">Before — fresh import, no type archive. Raw offsets, no names.</div>
+    </div>
+    <div class="shot">
+      <img src="assets/img/ghidra_typed_decompile.png" alt="Ghidra decompiler showing the same function retyped to TESObjectREFR with self->super_TESForm.formFlags instead of raw offsets">
+      <div class="shot-caption">After — same binary, same function, this repo's <code>.gdt</code> applied.</div>
+    </div>
+  </div>
+  <p style="font-size:0.85rem;color:var(--text-dim)">
+    Both are real screenshots of a real, Steamless-unpacked <code>SkyrimSE.exe</code> (AE build 24604991) in
+    Ghidra 12.1.3 — not mockups, not the same image edited twice. See
+    <a href="type-importer.html#demo">the full before/after writeup</a> for details.
+  </p>
+
+  <h2 id="what-do-you-want-to-do">What do you want to do?</h2>
+  <div class="card-grid">
+    <div class="card">
+      <h3>🧩 Get a <code>.gdt</code> for Ghidra</h3>
+      <p>Run one script against real CommonLibSSE-NG headers and get a type archive you can load straight into your own Ghidra project.</p>
+      <a class="card-cta" href="type-importer.html#quick-start">Quick Start →</a>
+    </div>
+    <div class="card">
+      <h3>📖 Understand the project</h3>
+      <p>Three subprojects, one pipeline: parse headers, distribute archives, inspect the live game. What's done, what's honest-caveat, what's next.</p>
+      <a class="card-cta" href="#architecture">Architecture →</a>
+    </div>
+    <div class="card">
+      <h3>🛠️ Contribute</h3>
+      <p>Not looking for novel RE research — looking for reliable engineering on top of what the community already found.</p>
+      <a class="card-cta" href="contributing.html">Contributing guide →</a>
+    </div>
+    <div class="card">
+      <h3>📦 Watch for pre-built archives</h3>
+      <p>A CI pipeline builds AE/SE/VR type archives automatically. Early scaffold today — see the honest accuracy caveat before trusting a class blindly.</p>
+      <a class="card-cta" href="symbol-archive.html">symbol-archive →</a>
+    </div>
+    <div class="card">
+      <h3>🔬 See the live game's internals</h3>
+      <p>SKSE plugins that log the AI scheduler, Havok physics step, and savegame serializer while the game actually runs — not just static analysis.</p>
+      <a class="card-cta" href="runtime-harness.html">runtime-harness →</a>
+    </div>
+    <div class="card">
+      <h3>🐛 Something's wrong / missing</h3>
+      <p>File an issue with the specific class or offset. We track accuracy openly — this helps close real gaps.</p>
+      <a class="card-cta" href="https://github.com/ByteBard97/skyrim-re-toolkit/issues">GitHub Issues →</a>
+    </div>
+  </div>
+
+  <h2 id="what-is-this">What is this, exactly?</h2>
+  <p>
+    The Skyrim modding ecosystem has spent fifteen years mapping the Creation Engine. That knowledge
+    lives in CommonLibSSE-NG's headers, meh321's Address Library, and a handful of pinned Discord
+    attachments — this project's goal is to turn it into versioned, reproducible, <strong>public</strong>
+    infrastructure instead of tribal knowledge.
+  </p>
+  <div class="callout">
+    <strong>Design principle:</strong> we do not reverse-engineer the game from scratch. We
+    <strong>instrument, package, and distribute</strong> the knowledge the community has already produced.
+  </div>
+
+  <h2 id="architecture">Three subprojects, one pipeline</h2>
+  <div class="card-grid">
+    <div class="card">
+      <h3>1. type-importer <span class="badge badge-good">working MVP</span></h3>
+      <p>Parses CommonLibSSE-NG C++ headers with libclang and emits real Ghidra type archives (<code>.gdt</code>). This is the engine room — everything else builds on it.</p>
+      <a class="card-cta" href="type-importer.html">Details →</a>
+    </div>
+    <div class="card">
+      <h3>2. symbol-archive <span class="badge badge-warn">early scaffold</span></h3>
+      <p>CI-driven builds that publish pre-built <code>.gdt</code> archives per Skyrim runtime (AE/SE/VR), so you don't have to run the pipeline yourself.</p>
+      <a class="card-cta" href="symbol-archive.html">Details →</a>
+    </div>
+    <div class="card">
+      <h3>3. runtime-harness <span class="badge badge-progress">first inspector verified in-game</span></h3>
+      <p>SKSE plugins that hook the AI scheduler, Havok physics, and savegame serializer for live state inspection — the piece nobody else builds.</p>
+      <a class="card-cta" href="runtime-harness.html">Details →</a>
+    </div>
+  </div>
+
+  <h3>How they fit together</h3>
+  <pre><code>type-importer  (parse + emit)  ──┐
+symbol-archive (distribute)    ──┼──►  CommonLibSSE-NG (source of truth)
+runtime-harness (inspect live) ──┘      + meh321 Address Library + SKSE</code></pre>
+
+  <h2 id="numbers">The honest numbers</h2>
+  <div class="stat-grid">
+    <div class="stat"><span class="num">1,934 / 3,019</span><span class="label">classes byte-accurate, full-namespace sweep (64%)</span></div>
+    <div class="stat"><span class="num">37 / 39</span><span class="label">modder-relevant "hotspot" classes byte-exact (rest have real inferred sizes, not placeholders)</span></div>
+    <div class="stat"><span class="num">21</span><span class="label">accepted parser patches, each with a written root-cause investigation</span></div>
+    <div class="stat"><span class="num">3</span><span class="label">Skyrim runtimes validated: AE 1.6.1170, SE 1.5.97, VR 1.4.15</span></div>
+  </div>
+  <p style="font-size:0.9rem;color:var(--text-dim)">
+    We track accuracy in the open, gated by CI so a change can never silently regress a previously-correct
+    class. See <a href="type-importer.html#accuracy">type-importer's accuracy section</a> for exactly what
+    "byte-accurate" means and how it's measured.
+  </p>
+
+</main>
+
+<footer>
+  <p>MIT-licensed toolkit code; generated type archives inherit CommonLibSSE-NG's GPL-3.0 (+ modding
+  exception) license. No game binaries, PDBs, or copyrighted assets are shipped or required in this repo.</p>
+  <p>
+    <a href="https://github.com/ByteBard97/skyrim-re-toolkit">GitHub</a> ·
+    <a href="https://github.com/ByteBard97/skyrim-re-toolkit/issues">Issues</a> ·
+    <a href="https://github.com/ByteBard97/skyrim-re-toolkit/discussions">Discussions</a>
+  </p>
+</footer>
+
+</body>
+</html>

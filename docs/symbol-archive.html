@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>symbol-archive — skyrim-re-toolkit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="CI-driven builds of pre-built Ghidra .gdt type archives per Skyrim runtime — AE, SE, VR.">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-brand">skyrim-re-<span>toolkit</span></div>
+    <nav class="topbar-nav">
+      <a href="index.html">Home</a>
+      <a href="type-importer.html">type-importer</a>
+      <a href="symbol-archive.html" class="active">symbol-archive</a>
+      <a href="runtime-harness.html">runtime-harness</a>
+      <a href="contributing.html">Contributing</a>
+    </nav>
+    <div class="topbar-gh"><a href="https://github.com/ByteBard97/skyrim-re-toolkit">GitHub ↗</a></div>
+  </div>
+</div>
+
+<main>
+
+  <div class="eyebrow">Subproject 2 of 3</div>
+  <h1>symbol-archive</h1>
+  <p class="lede"><span class="badge badge-warn">early scaffold</span> &nbsp; CI-driven builds of <code>.gdt</code> type archives for every supported Skyrim runtime, so you don't have to run the pipeline yourself.</p>
+
+  <h2>The problem</h2>
+  <p>
+    Every time Bethesda ships a patch, class layouts shift, the Address Library format changes (ask
+    anyone who hit <code>Unsupported address library format: 5</code> on 1.7.99), and the community's
+    accumulated Ghidra databases go stale. There is no canonical, versioned archive of pre-built type
+    files you can just download.
+  </p>
+
+  <h2>The solution</h2>
+  <p>
+    A GitHub Actions workflow that wraps <a href="type-importer.html"><code>type-importer</code></a>'s
+    pipeline, runs a full-namespace sweep of <code>CommonLibSSE-NG/include/RE/</code> per runtime, and
+    publishes each resulting <code>.gdt</code> as a build artifact — with opt-in publishing to a versioned
+    GitHub Release.
+  </p>
+
+  <h2>Status: matrix wired, not yet live-verified</h2>
+  <div class="stat-grid">
+    <div class="stat"><span class="num">3</span><span class="label">runtimes matrix-built: AE, SE, VR</span></div>
+    <div class="stat"><span class="num">2</span><span class="label">distribution paths: workflow artifact, or opt-in versioned GitHub Release</span></div>
+  </div>
+  <p>
+    Runtime coverage mirrors <code>type-importer</code>'s own CI matrix now that AE, SE 1.5.97, and VR
+    1.4.15 layouts are validated. AE 1.7.99/GOG need no separate build entry — they share AE 1.6.1170's
+    macro and Address Library ID scheme.
+  </p>
+  <div class="callout warn">
+    <strong>Not yet live-verified end to end.</strong> The SE/VR matrix legs were YAML-validated
+    (<code>python3 yaml.safe_load</code>) but haven't been run for real yet, since the shared parser
+    submodule was mid-use by other work at the time — needs a follow-up manual-dispatch run to confirm
+    the SE/VR legs actually build clean.
+  </div>
+
+  <h2>Accuracy: read this before trusting a class blindly</h2>
+  <p>
+    <strong>Not every class in this archive is byte-accurate.</strong> <code>type-importer</code>'s own
+    coverage sweep tracks this precisely — as of the last full sweep,
+    <strong>1,934 of 3,019 checkable classes (64%)</strong> resolve byte-accurate; the rest are either a
+    wrong size or resolve empty.
+  </p>
+  <p>
+    A curated <strong>hotspot list</strong> of 39 commonly-modded classes (<code>TESForm</code> hierarchy,
+    <code>Actor</code>/<code>Character</code>/<code>PlayerCharacter</code>, inventory, item types,
+    quests/packages, Havok, etc.) is a much stronger accuracy signal than the archive's raw class count —
+    that list is fully closed: <strong>37/39 are exact</strong>, and the remaining 2 have real inferred
+    sizes rather than silent 1-byte placeholders.
+  </p>
+  <div class="callout">
+    Still don't treat every struct in this archive as trustworthy without cross-checking against a real
+    <code>static_assert</code> or independent verification outside the hotspot list — that remains true
+    until <code>type-importer</code>'s overall pass rate is much higher. See
+    <a href="type-importer.html#accuracy">type-importer's accuracy section</a> for what's tracked and how.
+  </div>
+
+  <h2>How the build works</h2>
+  <ol>
+    <li><code>list_re_headers.sh</code> enumerates every <code>RE/*.h</code> header (minus CommonLibSSE-NG's own umbrella header, which pulls in a real SKSE PCH that collides with the layout-only stub used for parsing).</li>
+    <li><code>generate_gdt.sh</code> patches the vendored parser extension (21 accepted fixes, see <a href="type-importer.html">type-importer</a>), builds it, and runs the patched parser against the full header list once per matrix runtime.</li>
+    <li>Each resulting <code>.gdt</code> is uploaded as a build artifact, named per runtime.</li>
+  </ol>
+
+  <h2>What this buys you, visually</h2>
+  <p>
+    See <a href="type-importer.html#demo">type-importer's before/after screenshots</a> — a real
+    <code>.gdt</code> from this same pipeline applied to a real <code>SkyrimSE.exe</code> in Ghidra,
+    showing typed field access instead of raw offsets.
+  </p>
+
+  <div class="btn-row">
+    <a class="btn-outline" href="https://github.com/ByteBard97/skyrim-re-toolkit/blob/master/symbol-archive/README.md">Full README on GitHub</a>
+  </div>
+
+</main>
+
+<footer>
+  <p>MIT-licensed toolkit code; generated type archives inherit CommonLibSSE-NG's GPL-3.0 (+ modding
+  exception) license.</p>
+  <p>
+    <a href="https://github.com/ByteBard97/skyrim-re-toolkit">GitHub</a> ·
+    <a href="https://github.com/ByteBard97/skyrim-re-toolkit/issues">Issues</a> ·
+    <a href="https://github.com/ByteBard97/skyrim-re-toolkit/discussions">Discussions</a>
+  </p>
+</footer>
+
+</body>
+</html>

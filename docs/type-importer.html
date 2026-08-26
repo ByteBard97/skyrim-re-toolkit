@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>type-importer — skyrim-re-toolkit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Parses CommonLibSSE-NG C++ headers into real Ghidra type archives (.gdt) — libclang-based, CI-verified against the headers' own static_asserts.">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-brand">skyrim-re-<span>toolkit</span></div>
+    <nav class="topbar-nav">
+      <a href="index.html">Home</a>
+      <a href="type-importer.html" class="active">type-importer</a>
+      <a href="symbol-archive.html">symbol-archive</a>
+      <a href="runtime-harness.html">runtime-harness</a>
+      <a href="contributing.html">Contributing</a>
+    </nav>
+    <div class="topbar-gh"><a href="https://github.com/ByteBard97/skyrim-re-toolkit">GitHub ↗</a></div>
+  </div>
+</div>
+
+<main>
+
+  <div class="eyebrow">Subproject 1 of 3</div>
+  <h1>type-importer</h1>
+  <p class="lede"><span class="badge badge-good">working v0.1 MVP</span> &nbsp; C++ headers → Ghidra <code>.gdt</code> type archives, verified against the headers' own <code>static_assert</code>s.</p>
+
+  <h2>The problem</h2>
+  <p>
+    CommonLibSSE-NG contains thousands of reverse-engineered C++ class definitions — struct layouts,
+    vtables, bitfields. Getting them into Ghidra currently means either (a) hunting for a floating
+    <code>types.h</code> file on a Discord server, or (b) manually recreating every struct by hand,
+    field by field, from source.
+  </p>
+
+  <h2>The solution</h2>
+  <p>
+    A parser pipeline that reads CommonLibSSE-NG headers through libclang and emits Ghidra Data Type
+    Archives (<code>.gdt</code>) and, eventually, IDA Type Libraries (<code>.til</code>). It's built on
+    <a href="https://github.com/playday3008/GhidraClangPoweredParse">playday3008/GhidraClangPoweredParse</a>
+    (a libclang-based Ghidra extension), vendored as a submodule and patched with real, root-caused fixes
+    for the C++-template-heavy shapes this codebase actually uses.
+  </p>
+  <ul class="plain">
+    <li><strong>Primary approach:</strong> libclang preprocessing → flattened C-compatible structs → Ghidra's Java type-manager API</li>
+    <li><strong>Handles:</strong> <code>BSTArray&lt;T&gt;</code>, <code>REL::Relocation</code>, <code>stl::enumeration</code>, multiple inheritance (including template-specialization base classes), MSVC bitfield packing, <code>std::</code>-qualified builtin types</li>
+  </ul>
+
+  <h2 id="demo">Before / after, in Ghidra itself</h2>
+  <p>
+    Both screenshots below are the <strong>same real <code>SkyrimSE.exe</code></strong> (Steamless-unpacked,
+    AE build 24604991), the <strong>same function</strong> (<code>FUN_1401e1270</code>), the
+    <strong>same address</strong> — in Ghidra 12.1.3. The "before" shot is a completely separate,
+    freshly-imported Ghidra project with no archive ever applied; not an undo of the "after" one.
+  </p>
+  <div class="shot">
+    <img src="assets/img/ghidra_untyped_decompile.png" alt="Ghidra decompiler window showing FUN_1401e1270 with untyped param_1/param_2 parameters and raw pointer-offset arithmetic like (longlong)param_1 + 0x1a">
+    <div class="shot-caption">Before — no type archive. <code>FUN_1401e1270(longlong *param_1, undefined8 param_2)</code>, <code>*(uint *)(param_1 + 2)</code>-style raw offset arithmetic.</div>
+  </div>
+  <div class="shot">
+    <img src="assets/img/ghidra_typed_decompile.png" alt="Ghidra decompiler window showing the same function retyped to TESObjectREFR, with self->super_TESForm.formFlags and formType._impl instead of raw offsets">
+    <div class="shot-caption">After — this repo's <code>.gdt</code> applied. <code>FUN_1401e1270(TESObjectREFR *self)</code>, <code>self->super_TESForm.formFlags</code> and <code>.formType._impl</code>.</div>
+  </div>
+  <p style="font-size:0.9rem;color:var(--text-dim)">
+    The crash-triage angle: a crash log or disassembly hands you a raw address and an offset —
+    <code>[rcx+0x10]</code>, <code>[rcx+0x1a]</code> — of <em>some</em> struct. The type archive tells you
+    what those offsets <em>mean</em>. (To be clear: this makes the binary readable, it does not prevent
+    crashes.) See the repo's <a href="https://github.com/ByteBard97/skyrim-re-toolkit/tree/master/demo">full demo writeup</a>
+    for the SteamStub-unpacking step and a plain-text diff of the same before/after.
+  </p>
+
+  <h2 id="accuracy">The honest accuracy numbers</h2>
+  <p>
+    The <code>TESForm → TESObject → TESBoundObject → TESObjectREFR</code> hierarchy (AE 1.6.1170) resolves
+    to byte-accurate layouts, cross-checked three independent ways: the headers' own <code>static_assert</code>s,
+    hand-derived offset math, and real <code>clang-cl</code> compilation.
+  </p>
+  <p>
+    Beyond that hierarchy, a full-namespace coverage sweep checks every class in <code>RE/</code> against
+    its own <code>static_assert</code>, gated in CI so a change can never silently regress a previously-correct
+    class:
+  </p>
+  <div class="stat-grid">
+    <div class="stat"><span class="num">1,934 / 3,019</span><span class="label">classes byte-accurate (64%)</span></div>
+    <div class="stat"><span class="num">37 / 39</span><span class="label">"hotspot" (modder-relevant) classes byte-exact</span></div>
+    <div class="stat"><span class="num">3</span><span class="label">runtimes validated: AE 1.6.1170, SE 1.5.97, VR 1.4.15</span></div>
+    <div class="stat"><span class="num">100%</span><span class="label">of CommonLibSSE-NG's declared Address Library IDs resolve in real DBs</span></div>
+  </div>
+  <p>
+    The last 2 hotspot classes (<code>BaseExtraList</code>/<code>ExtraDataList</code>, which the AE headers
+    themselves compile empty via a runtime-relocated-member pattern) have real inferred sizes — mined from
+    the actual <code>REL::RelocateMember</code> call sites in source — instead of silent 1-byte placeholders.
+  </p>
+  <div class="callout warn">
+    <strong>Not every class is byte-accurate.</strong> The remaining 36% is either the wrong size or resolves
+    empty — this is tracked openly, not hidden. Three known root causes account for most of the remaining gap
+    (container-template field embedding, a vtable-detection blind spot for template-specialization bases, and
+    a typedef-registration edge case) — see the repo's <a href="https://github.com/ByteBard97/skyrim-re-toolkit/tree/master/type-importer/patches">patches directory</a>
+    for the full, precise writeups, including the ones still deferred.
+  </div>
+
+  <h2 id="quick-start">Quick Start</h2>
+
+  <h3>1. Clone (this repo uses git submodules)</h3>
+  <pre><code>git clone --recurse-submodules https://github.com/ByteBard97/skyrim-re-toolkit.git
+# Already cloned without --recurse-submodules? Run:
+#   git submodule update --init --recursive</code></pre>
+
+  <h3>2. Prerequisites</h3>
+  <p>None of these are vendored in-repo (large and/or license-bearing):</p>
+  <table>
+    <tr><th>Requirement</th><th>Why</th></tr>
+    <tr>
+      <td>JDK 22+ recommended</td>
+      <td>Panama FFI. JDK 21's preview FFM mode gives silently wrong struct sizes at full-sweep scale (fine for the small example below). Temurin works fine either way.</td>
+    </tr>
+    <tr><td>Ghidra 12+</td><td>Provides the type-manager Java API this pipeline runs against headlessly — no GUI/project needed.</td></tr>
+    <tr>
+      <td>A real <code>libclang.so</code>, Clang 19+</td>
+      <td>MSVC STL's own headers reject older Clang versions — the <code>libclang-14</code> many Linux distros ship is <strong>not</strong> sufficient.</td>
+    </tr>
+    <tr>
+      <td>Windows SDK + MSVC CRT/STL headers</td>
+      <td>Via <a href="https://github.com/Jake-Shadle/xwin">xwin</a>: <code>xwin --accept-license splat --output &lt;dir&gt;</code> (Microsoft's license terms apply — don't commit or redistribute the output).</td>
+    </tr>
+  </table>
+
+  <h3>3. Generate a <code>.gdt</code> yourself</h3>
+  <pre><code>cd type-importer/scripts
+JAVA_HOME=/path/to/jdk-22 \
+GHIDRA_INSTALL_DIR=/path/to/ghidra_12 \
+LD_LIBRARY_PATH=/path/to/dir-containing-libclang.so \
+  ./generate_gdt.sh /path/to/xwin-splat-dir /tmp/CommonLibSSE_AE.gdt \
+  RE/T/TESForm.h RE/T/TESObject.h RE/T/TESBoundObject.h RE/T/TESObjectREFR.h</code></pre>
+  <p>
+    This patches the vendored parser submodule, builds it, runs it against the requested headers, writes a
+    real <code>.gdt</code>, and reverts the submodule back to pristine when it's done.
+  </p>
+
+  <h3>4. Load it into Ghidra</h3>
+  <p>
+    <strong>File → Import File</strong> (select <code>SkyrimSE.exe</code>) →
+    <strong>Window → Data Type Manager → File → Add Archive</strong> → select your generated <code>.gdt</code> →
+    right-click → <strong>Apply Function Data Types</strong>.
+  </p>
+
+  <div class="btn-row">
+    <a class="btn" href="https://github.com/ByteBard97/skyrim-re-toolkit#quick-start">Full Quick Start on GitHub</a>
+    <a class="btn-outline" href="https://github.com/ByteBard97/skyrim-re-toolkit/tree/master/type-importer/DESIGN.md">Full investigation log (DESIGN.md)</a>
+  </div>
+
+</main>
+
+<footer>
+  <p>MIT-licensed toolkit code; generated type archives inherit CommonLibSSE-NG's GPL-3.0 (+ modding
+  exception) license.</p>
+  <p>
+    <a href="https://github.com/ByteBard97/skyrim-re-toolkit">GitHub</a> ·
+    <a href="https://github.com/ByteBard97/skyrim-re-toolkit/issues">Issues</a> ·
+    <a href="https://github.com/ByteBard97/skyrim-re-toolkit/discussions">Discussions</a>
+  </p>
+</footer>
+
+</body>
+</html>
