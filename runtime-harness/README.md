@@ -3,7 +3,7 @@
 **SKSE plugins for live Creation Engine state inspection — the toolkit's
 third pillar.**
 
-## Status: first inspector working, verified in-game
+## Status: two of three inspectors verified in-game
 
 The directory contains a real SKSE plugin (`RuntimeHarness`) that builds
 against CommonLibSSE-NG, sets up file logging, logs the plugin + running
@@ -11,11 +11,9 @@ game version at load, and logs `kDataLoaded`/`kNewGame`/`kPreLoadGame`/
 `kPostLoadGame` from the messaging interface. Confirmed running against a
 live Skyrim AE 1.6.1170 process (SKSE64 2.2.6).
 
-`AIProcessInspector` (below) is confirmed working against real gameplay:
-`RuntimeHarness.log` shows a dozen-plus live NPCs' package-evaluation
-transitions during a fresh game's opening scene, changing over time as
-expected. `HavokStepLogger` and `SavegameTracer` are both written and
-compile-verified but not yet deployed/verified in-game:
+`AIProcessInspector` and `SavegameTracer` are both confirmed working
+against real gameplay. `HavokStepLogger` is deployed but has not yet
+produced any log output — see its entry below.
 
 - `AIProcessInspector` — package evaluation and AI scheduler decisions.
   Hooks `Actor::Update` via vtable (on both `RE::VTABLE_Actor` and
@@ -32,8 +30,17 @@ compile-verified but not yet deployed/verified in-game:
   transitions with velocity magnitude. Not yet actor-attributed: this
   hook's signature carries no direct pointer back to the owning `Actor`
   or `bhkCharacterController`, so log lines are keyed by the
-  `hkpCharacterContext` instance address rather than a form ID. Written
-  and compile-verified, **not yet deployed or run in-game**.
+  `hkpCharacterContext` instance address rather than a form ID. The
+  vfunc index (6) was verified by hand-walking the full inheritance
+  chain (`hkBaseObject`→`hkReferencedObject`→`hkpCharacterState`→
+  `bhkCharacterState`→the six concrete classes), so it's very unlikely
+  to be an indexing bug. Deployed and installed cleanly in-game, but
+  **produced zero log lines in ~7 minutes of gameplay** including
+  attempted movement/jump input — most likely because that window was
+  still the pre-control opening sequence (bound hands / cart ride),
+  where the player has no physics controller instantiated yet, rather
+  than a genuine hook failure. **Not yet confirmed working; needs a
+  retest once the player actually has movement control.**
 - `SavegameTracer` — `BGSSaveLoadManager` serialization. Hooks
   `BGSSaveLoadManager::ProcessEvent(const BSSaveDataEvent*)` via vtable
   (index 1 on `RE::VTABLE_BGSSaveLoadManager[0]`) — unlike the other two
@@ -45,8 +52,10 @@ compile-verified but not yet deployed/verified in-game:
   inspector instead dumps `BGSSaveLoadManager::saveGameList`
   (`BSTArray<BGSSaveLoadFileEntry*>`, which IS fully defined) on every
   `ProcessEvent` firing — filename, player name, race, location, and
-  playtime for every known save. Written and compile-verified, **not yet
-  deployed or run in-game**.
+  playtime for every known save. Deployed and confirmed firing live
+  in-game: `ProcessEvent` fired for real with a real `saveGameList`
+  query (list was empty at that moment since no save existed yet in
+  that session — itself correct live data, not a bug).
 
 A further idea unlocked by the rest of this repo: a struct-layout
 validator that checks `type-importer`'s generated layouts against the
@@ -119,14 +128,20 @@ one ("address library needs to be updated" in `skse64.log`).
 
 Confirmed working end to end against a live Skyrim AE 1.6.1170 install
 with SKSE64 2.2.6: `AIProcessInspector` logged real, changing
-package-evaluation data for a dozen-plus NPCs during a fresh game's
-opening cart scene. Getting there required starting a **new game**, not
-loading one of the pre-existing saves on that box — those are several
-years old and reference mod plugins not present on this vanilla-plus-SKSE
-install, and crash on load with missing masters.
+package-evaluation data for a dozen-plus NPCs, and `SavegameTracer`
+logged a real `ProcessEvent(BSSaveDataEvent)` firing with a live
+`saveGameList` query. Getting there required starting a **new game**,
+not loading one of the pre-existing saves on that box — those are
+several years old and reference mod plugins not present on this
+vanilla-plus-SKSE install, and crash on load with missing masters.
 
-Also note: this box has no monitor/keyboard/mouse attached by default, so
-the game window doesn't render or accept input until real display/input
-hardware is physically connected — synthetic input (SendInput/keybd_event)
-into the game window over SSH does not work and was abandoned as both
-ineffective and risky to attempt on a box in active use.
+This box has no monitor/keyboard/mouse attached by default, so the game
+window doesn't render or accept input at all until real display/input
+hardware is physically connected — confirmed both ways: with nothing
+attached, the game window stays solid black and doesn't respond to any
+synthetic input (`SendInput`/`keybd_event`) sent over SSH regardless of
+window-focus state; once real hardware was physically connected, the
+exact same synthetic-input approach started working correctly (focus
+verified before/after each keystroke, menu navigation succeeded). If
+retesting on this box, confirm a display/keyboard/mouse are physically
+attached first.
