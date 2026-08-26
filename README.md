@@ -27,7 +27,7 @@ skyrim-re-toolkit/
 
 **The problem:** CommonLibSSE-NG contains thousands of reverse-engineered C++ class definitions, struct layouts, vtables, and bitfields. Getting them into Ghidra currently means either (a) hunting for a floating `types.h` file in a Discord server, or (b) manually recreating every struct by hand.
 
-**The solution:** A parser pipeline that reads CommonLibSSE-NG headers and emits Ghidra Data Type Archives (`.gdt`) and IDA Type Libraries (`.til`), built on [`playday3008/GhidraClangPoweredParse`](https://github.com/playday3008/GhidraClangPoweredParse) (a libclang-based Ghidra extension), vendored as a submodule and patched with **fifteen accepted fixes** (patches 0001–0006, 0009–0018; 0007 template base-class inlining and 0008 `isPolymorphic` template-blindness remain deferred — see `type-importer/patches/`) developed and verified against real CommonLibSSE-NG headers. A full-namespace coverage sweep now reports **1,934 classes byte-accurate** against the headers' own `static_assert`s (up from ~1,000), gated in CI so no change can silently regress a previously-correct class. A prioritized 39-class "hotspot" list of the most modder-relevant classes is 37/39 exact.
+**The solution:** A parser pipeline that reads CommonLibSSE-NG headers and emits Ghidra Data Type Archives (`.gdt`) and IDA Type Libraries (`.til`), built on [`playday3008/GhidraClangPoweredParse`](https://github.com/playday3008/GhidraClangPoweredParse) (a libclang-based Ghidra extension), vendored as a submodule and patched with **sixteen accepted fixes** (patches 0001–0006, 0009–0018; 0007 template base-class inlining and 0008 `isPolymorphic` template-blindness remain deferred — see `type-importer/patches/`) developed and verified against real CommonLibSSE-NG headers. A full-namespace coverage sweep now reports **1,934 classes byte-accurate** against the headers' own `static_assert`s (up from ~1,000), gated in CI so no change can silently regress a previously-correct class. A prioritized 39-class "hotspot" list of the most modder-relevant classes is 37/39 exact.
 
 - **Primary approach:** libclang preprocessing → flattened C-compatible structs → Ghidra's Java type-manager API
 - **Handles:** `BSTArray<T>`, `REL::Relocation`, `stl::enumeration`, multiple inheritance (including template-specialization base classes), MSVC bitfield packing, `std::`-qualified builtin types
@@ -138,7 +138,9 @@ See their sections above for status. `runtime-harness` requires Windows + Visual
 
 ## Contributing
 
-We are not looking for novel research. We are looking for **reliable engineering**:
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full guide (issue templates,
+PR expectations, patch methodology). Short version: we are not looking for
+novel research. We are looking for **reliable engineering**:
 
 - **Type importer:** If you know libclang, Ghidra's Java API, or MSVC ABI quirks, we need you.
 - **Symbol archive:** If you can write GitHub Actions workflows or validate struct layouts against live binaries, we need you.
