@@ -24,10 +24,23 @@ updates:
   # needed, following the coordination note in
   # type-importer/TRACK1_TYPE_IMPORTER.md (check with the user first --
   # runtime-harness's build depends on the vendored tree staying stable).
+  #
+  # `directory: "/"` + gitsubmodule tracks EVERY submodule listed in the
+  # repo's single root .gitmodules file -- there is no per-submodule
+  # `directory` scoping for this ecosystem (confirmed against
+  # dependabot-core's git_submodules/file_fetcher.rb: it always reads
+  # the root .gitmodules and fetches a ref for every entry, regardless
+  # of `directory`). `exclude-paths` is NOT a real option for this
+  # (verified against GitHub's own dependabot.yml config reference --
+  # earlier research claiming it existed was wrong and has been
+  # corrected here). The real, documented mechanism is `ignore` with
+  # `dependency-name` matching the submodule's path (its "dependency
+  # name", per file_fetcher.rb's `DependencyFile.new(name:
+  # submodule_path, ...)`).
   - package-ecosystem: "gitsubmodule"
     directory: "/"
-    exclude-paths:
-      - "type-importer/vendor/GhidraClangPoweredParse"
+    ignore:
+      - dependency-name: "type-importer/vendor/GhidraClangPoweredParse"
     schedule:
       interval: "weekly"
       day: "monday"
