@@ -5,22 +5,37 @@ name: symbol-archive build (AE)
 #
 # This is NOT a quality gate (unlike type-importer-coverage.yml, which
 # fails the build on regression). type-importer's own coverage sweep
-# currently shows ~45% of checkable classes as byte-accurate (see
-# type-importer/COVERAGE_SWEEP_PLAN.md) -- this workflow exists to
+# currently shows 1,934/3,019 (64%) of checkable classes as byte-accurate
+# (see type-importer/COVERAGE_SWEEP_PLAN.md) -- this workflow exists to
 # produce a real, traceable build artifact for testing/dogfooding, not to
 # assert the archive is fully trustworthy. Don't gate this on the
 # coverage sweep passing; that would block every build indefinitely
 # until type-importer's pass rate is much higher.
 #
 # Manual dispatch only for now -- see symbol-archive/README.md's roadmap
-# for why this isn't push-triggered yet.
+# for why this isn't push-triggered yet. Set the publish_release input to
+# also cut a public, versioned GitHub Release (off by default).
 #
 # Toolchain versions match type-importer-coverage.yml (keep them in sync
 # if either is bumped): Ghidra 12.1.3, LLVM/libclang 19.1.0, JDK 25
 # (Temurin), xwin 0.10.0. Fully Linux-native.
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      publish_release:
+        description: >-
+          Publish this build as a public, versioned GitHub Release (in
+          addition to the usual workflow artifact). Leave unchecked for a
+          normal test/dogfooding build.
+        type: boolean
+        default: false
+      release_tag:
+        description: >-
+          Release tag to use when publish_release is checked, e.g.
+          "ae-1.6.1170-v1". Required only when publishing.
+        type: string
+        default: ""
 
 env:
   GHIDRA_VERSION: "12.1.3"
@@ -122,3 +137,29 @@ jobs:
           name: CommonLibSSE_AE_${{ steps.commonlib-rev.outputs.sha }}
           path: ${{ runner.temp }}/CommonLibSSE_AE_${{ steps.commonlib-rev.outputs.sha }}.gdt
           retention-days: 90
+
+      # Opt-in, manual-only: publishes a public, versioned GitHub Release
+      # with the .gdt attached, so a modder can download a release asset
+      # directly instead of cloning the repo and running the pipeline (or
+      # digging through workflow-artifact history, which requires a
+      # logged-in GitHub account and expires after 90 days). Off by
+      # default -- a normal workflow_dispatch run only produces the
+      # artifact above, same as before this step existed.
+      - name: Publish GitHub Release
+        if: ${{ inputs.publish_release == true }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          COMMONLIB_SHA: ${{ steps.commonlib-rev.outputs.sha }}
+          GDT_PATH: ${{ runner.temp }}/CommonLibSSE_AE_${{ steps.commonlib-rev.outputs.sha }}.gdt
+        run: |
+          set -euo pipefail
+          if [ -z "$RELEASE_TAG" ]; then
+            echo "publish_release was checked but release_tag is empty -- refusing to publish an untagged release." >&2
+            exit 1
+          fi
+          gh release create "$RELEASE_TAG" \
+            "$GDT_PATH" \
+            --repo "${{ github.repository }}" \
+            --title "AE type archive ($RELEASE_TAG)" \
+            --notes "Full-namespace CommonLibSSE-NG AE .gdt, built from CommonLibSSE-NG @ $COMMONLIB_SHA. See symbol-archive/README.md for the accuracy caveat -- not every class in this archive is byte-accurate yet; check type-importer/coverage_baseline.json and the hotspot list in type-importer/COVERAGE_SWEEP_PLAN.md before trusting a specific struct."
