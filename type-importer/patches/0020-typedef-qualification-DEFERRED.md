@@ -156,3 +156,67 @@ underlying template/lookup machinery. Further blind cluster-sampling is
 low-yield at this point; the highest-value next step for whoever picks
 this back up is a focused attempt at one of these three (0008 has the
 largest confirmed blast radius) rather than searching for a fourth.
+
+## Second attempt (registration-guard, no qualification): also fails, much worse
+
+A different, narrower candidate was tried in a later session: instead of
+qualifying typedef registration (this document's original candidate),
+leave registration untouched but add a guard to `TypePool.addParsedType`
+refusing to let an incoming `ParsedTypedef` overwrite an existing
+`ParsedStructure`/`ParsedUnion`/`ParsedEnum` entry of the same bare name --
+reasoning that a typedef is "just an alias" and should never legitimately
+clobber a concrete type.
+
+This was motivated by a fresh coverage-sweep finding: `SkyObject` (the
+real, top-level `RE::SkyObject` class, base of `Sun`/`Moon`/`Stars`/
+`Atmosphere`/`Clouds`) was resolving as a 4-byte `TypedefDB` entry instead
+of the real 16-byte struct -- confirmed via direct `.gdt` inspection. Root
+cause: `TESClimate::SkyObject` is `using SkyObject = SkyObjects::SkyObject;`,
+an alias for a *different*, unrelated nested enum
+(`TESClimate::SkyObjects::SkyObject`, itself correctly qualified by patch
+0014's enum handling) -- this specific typedef, at `TESClimate`'s own
+scope, registers under the bare name `SkyObject` and clobbers the
+unrelated top-level class of the same name, purely by parse order.
+
+**Full 1630-header AE sweep result: 8 improvements, 238 regressions.**
+Far worse than this document's original candidate (25 regressions). The
+guard is *semantically* narrower than blanket qualification (it doesn't
+touch resolution or the vast majority of typedef registrations at all),
+but its **practical** blast radius is enormous: the overwhelming majority
+of typedef-vs-concrete-type bare-name collisions in this codebase are NOT
+bugs -- they're the intended, load-bearing mechanism by which a
+`using Alias = RealType;` declaration makes `Alias` resolvable by name for
+every field/base/return-type that references it as `Alias` rather than
+`RealType`. Refusing that overwrite breaks every one of those (`TESClass`,
+`TESNPC`, `TESObjectARMO`, `bhkCollisionFilter`, and ~230 more), while
+fixing only the one genuine collision this session was looking for
+(`SkyObject` and its 4 direct beneficiaries, `Sun`/`Moon`/`Stars`/
+`Atmosphere`/`Clouds`).
+
+This confirms, independently and more strongly, this document's original
+conclusion: there is no registration-only fix here, narrow or broad. Any
+real fix needs to distinguish a **genuine name collision between two
+unrelated entities** (rare -- `SkyObject` may be close to the only instance
+in this codebase) from **an intentional alias relationship** (the common
+case, load-bearing) -- and that distinction cannot be made from the
+registration side alone, since both look identical there (an incoming
+typedef with the same bare name as an existing entry). It requires either:
+
+- Detecting the collision by comparing what the two entries' *canonical/
+  underlying types* actually resolve to (if the typedef's target is NOT
+  the existing entry itself or a wrapper around it, it's a genuine
+  collision, not an intentional alias) -- expensive and not yet attempted,
+  or
+- The full two-part registration+resolution fix this document already
+  recommends, scoped much more narrowly than "qualify every typedef" --
+  e.g., detect the SPECIFIC collision (canonical-type mismatch, as above)
+  and qualify *only* that one typedef's registration, plus verify no
+  in-scope bare self-reference to it exists in the same translation unit
+  before doing so.
+
+Given the scale of this second attempt's own failure (238 regressions from
+a supposedly "safe, narrow" change), this bug is confirmed to be
+substantially harder than patches 0022/0023 (both genuine one-line gating
+bugs) -- not a shallow fix waiting to be found. Submodule reverted to
+pristine; no code from this attempt is applied. `coverage_baseline.json`
+untouched.
