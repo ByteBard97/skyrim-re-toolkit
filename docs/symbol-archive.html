@@ -45,9 +45,9 @@
     GitHub Release.
   </p>
 
-  <h2>Status: matrix wired, not yet live-verified</h2>
+  <h2>Status: AE/SE/VR matrix live-verified</h2>
   <div class="stat-grid">
-    <div class="stat"><span class="num">3</span><span class="label">runtimes matrix-built: AE, SE, VR</span></div>
+    <div class="stat"><span class="num">3</span><span class="label">runtimes matrix-built and confirmed: AE, SE, VR</span></div>
     <div class="stat"><span class="num">2</span><span class="label">distribution paths: workflow artifact, or opt-in versioned GitHub Release</span></div>
   </div>
   <p>
@@ -55,11 +55,10 @@
     1.4.15 layouts are validated. AE 1.7.99/GOG need no separate build entry — they share AE 1.6.1170's
     macro and Address Library ID scheme.
   </p>
-  <div class="callout warn">
-    <strong>Not yet live-verified end to end.</strong> The SE/VR matrix legs were YAML-validated
-    (<code>python3 yaml.safe_load</code>) but haven't been run for real yet, since the shared parser
-    submodule was mid-use by other work at the time — needs a follow-up manual-dispatch run to confirm
-    the SE/VR legs actually build clean.
+  <div class="callout">
+    <strong>Confirmed with a real run.</strong> All three matrix legs (AE, SE, VR) completed a real
+    <code>workflow_dispatch</code> run successfully — real <code>.gdt</code> artifacts, ~3.7MB each,
+    traceable to a specific CommonLibSSE-NG commit. No opt-in public Release has been published yet.
   </div>
 
   <h2>Accuracy: read this before trusting a class blindly</h2>

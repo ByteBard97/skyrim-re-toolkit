@@ -3,23 +3,22 @@
 **CI-driven builds of `.gdt` type archives for Skyrim runtimes, generated
 from `type-importer`'s pipeline.**
 
-## Status: early scaffold, AE/SE/VR matrix wired (not yet live-verified)
+## Status: early scaffold, AE/SE/VR matrix live-verified
 
 This subproject wraps `type-importer/scripts/generate_gdt.sh` in a GitHub
 Actions workflow (`.github/workflows/symbol-archive-build.yml`) that runs
 a full sweep of `CommonLibSSE-NG/include/RE/` per runtime and publishes
 each resulting `.gdt` as a workflow build artifact.
 
-- **Runtime coverage**: the workflow now matrix-builds **AE, SE, and VR**
+- **Runtime coverage**: the workflow matrix-builds **AE, SE, and VR**
   (`ENABLE_SKYRIM_AE`/`ENABLE_SKYRIM_SE`/`ENABLE_SKYRIM_VR`), mirroring
   `type-importer-coverage.yml`'s own runtime matrix now that Track 1 has
   validated SE 1.5.97 and VR 1.4.15 layouts. AE 1.7.99/GOG need no
   separate build entry — they share AE 1.6.1170's macro and Address
-  Library ID scheme. **Not yet live-verified end to end**: the matrix
-  change was YAML-validated (`python3 yaml.safe_load`) but not run for
-  real, since the shared `GhidraClangPoweredParse` submodule was mid-use
-  by another track's work at the time — needs a follow-up
-  `workflow_dispatch` run to confirm the SE/VR legs actually build clean.
+  Library ID scheme. **Confirmed with a real `workflow_dispatch` run**
+  (all three matrix legs completed successfully, real `.gdt` artifacts
+  produced — ~3.7MB each, traceable to CommonLibSSE-NG commit `b93280e`)
+  — no longer just YAML-validated.
 - **Distribution**: a workflow artifact attached to each run by default;
   the workflow now also supports opt-in publishing to a versioned GitHub
   Release per runtime (see `.github/workflows/symbol-archive-build.yml`'s
@@ -85,8 +84,8 @@ File → Add Archive** and select the downloaded `.gdt`, then right-click →
 
 | Milestone | Status |
 |---|---|
-| AE `.gdt` build artifact via manual CI dispatch | Wired, not yet exercised for a real run (0 workflow runs to date — see Status above) |
+| AE `.gdt` build artifact via manual CI dispatch | Done — real run confirmed (see Status above) |
 | Hotspot-list accuracy verified | Fully closed — 37/39 exact, last 2 given real inferred sizes via patch 0019 — see `type-importer/COVERAGE_SWEEP_PLAN.md` |
 | Versioned GitHub Release publishing | Wired (opt-in `publish_release` + `release_tag_prefix` inputs, per-runtime tags); not yet exercised for a real release |
-| SE / VR / GOG runtime coverage | Layouts validated in `type-importer` (SE, VR) and confirmed unnecessary (AE 1.7.99, GOG); SE/VR now wired into this workflow's build matrix, but not yet live-verified (YAML-validated only — see Status above) |
+| SE / VR / GOG runtime coverage | Layouts validated in `type-importer` (SE, VR) and confirmed unnecessary (AE 1.7.99, GOG); SE/VR wired into this workflow's build matrix and confirmed with a real run — see Status above |
 | Automatic *validation* on CommonLibSSE-NG submodule bump | Done — `.github/dependabot.yml` watches CommonLibSSE-NG weekly and opens a PR on a new upstream commit, which `type-importer`'s existing coverage gate then regression-checks automatically. This subproject's own `.gdt` rebuild is still manual-dispatch only (see Triggers below) — Dependabot doesn't push a new `.gdt` build artifact, only a reviewed, regression-checked PR bumping the pin |
