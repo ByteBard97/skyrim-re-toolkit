@@ -230,14 +230,31 @@ public class GenerateGdt {
      */
     private static void writeCoverageReport(String path, List<DataType> dataTypes,
             java.util.Set<String> unresolved) throws Exception {
-        // Only structs/unions have a meaningful "size" to check against a
-        // static_assert(sizeof(...)) -- the resolved set also contains
-        // function-signature DataTypes (FunctionDefinition), which report
-        // getLength() == -1 and would otherwise flood the EMPTY bucket in
-        // coverage_report.py with irrelevant "actual=0x-1" noise.
+        // Only structs/unions (and typedefs of them) have a meaningful "size"
+        // to check against a static_assert(sizeof(...)) -- the resolved set
+        // also contains function-signature DataTypes (FunctionDefinition),
+        // which report getLength() == -1 and would otherwise flood the EMPTY
+        // bucket in coverage_report.py with irrelevant "actual=0x-1" noise.
+        //
+        // TypeDef is deliberately included alongside Composite: a using-alias
+        // to a class-template specialization (e.g. `using BSString =
+        // BSStringT<char, N, DynamicMemoryManagementPol>;`) is committed as a
+        // TypedefDataType wrapping an inline-embedded struct -- see
+        // SourceParser.parseTypedef and ParsedTypedef's inlineType
+        // constructor. Before this fix, such typedefs resolved correctly
+        // into the .gdt (confirmed: 0 commit failures, present in
+        // fileDtMgr.getAllDataTypes()) but were invisible to this report --
+        // silently absent from BOTH the CSV and unresolved.txt, which
+        // coverage_report.py could only read as UNRESOLVED (a class that
+        // "never appears in the resolved set"). This was a pure reporting
+        // gap, not a parser bug: confirmed via a real build with temporary
+        // tracing that BSString/AnimHandler/GPointD/etc. were fully resolved
+        // (present=true, stillOutstanding=false, inDtmAlready=true) at both
+        // small-header and full-1630-header scale -- committing to fileDtMgr
+        // with 0 failures every time. See patches/0026-*.md.
         List<DataType> sorted = new ArrayList<>();
         for (DataType t : dataTypes) {
-            if (t instanceof Composite) {
+            if (t instanceof Composite || t instanceof TypeDef) {
                 sorted.add(t);
             }
         }

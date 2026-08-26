@@ -14,10 +14,20 @@
     "expected": 24,
     "status": "OK"
   },
+  "ACTOR_MOVEMENT_TYPE": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "ACTOR_MOVEMENT_TYPES": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "ACTOR_VALUE_MODIFIER": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "ACTOR_VALUE_MODIFIERS": {
     "actual": 1,
@@ -224,10 +234,15 @@
     "expected": 2,
     "status": "OK"
   },
+  "ActorHandle": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "ActorHandlePtr": {
-    "actual": null,
+    "actual": 8,
     "expected": 8,
-    "status": "UNRESOLVED"
+    "status": "OK"
   },
   "ActorInventoryEvent": {
     "actual": 8,
@@ -293,6 +308,11 @@
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "ActorPtr": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "ActorState": {
     "actual": 16,
@@ -450,14 +470,14 @@
     "status": "NO_GROUND_TRUTH"
   },
   "AnimHandler": {
-    "actual": null,
+    "actual": 16,
     "expected": 16,
-    "status": "UNRESOLVED"
+    "status": "OK"
   },
   "AnimResponse": {
-    "actual": null,
+    "actual": 72,
     "expected": 72,
-    "status": "UNRESOLVED"
+    "status": "OK"
   },
   "AnimVariableCacheInfo": {
     "actual": 16,
@@ -509,6 +529,11 @@
     "expected": 28,
     "status": "OK"
   },
+  "Archetype": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "Archive": {
     "actual": 568,
     "expected": 560,
@@ -559,10 +584,20 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "ArmorType": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "Array": {
     "actual": 32,
     "expected": 32,
     "status": "OK"
+  },
+  "ArrayVisitor": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "ArrowProjectile": {
     "actual": 144,
@@ -859,7 +894,17 @@
     "expected": 72,
     "status": "OK"
   },
+  "BGSAttackDataMapPtr": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "BGSAttackDataMap_vtable": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "BGSAttackDataPtr": {
     "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -2819,6 +2864,11 @@
     "expected": 8,
     "status": "OK"
   },
+  "BIPED_OBJECT": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "BIPED_OBJECTS": {
     "actual": 1,
     "expected": null,
@@ -2828,6 +2878,11 @@
     "actual": 120,
     "expected": 120,
     "status": "OK"
+  },
+  "BOOL": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "BSAnimNote": {
     "actual": 16,
@@ -2886,6 +2941,11 @@
   },
   "BSAnimationGraphManager::RUNTIME_DATA": {
     "actual": 24,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "BSAnimationGraphManagerPtr": {
+    "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -3196,6 +3256,21 @@
   },
   "BSFile_vtable": {
     "actual": 128,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "BSFixedString": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "BSFixedStringCI": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "BSFixedStringW": {
+    "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -4525,9 +4600,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "BSString": {
-    "actual": null,
+    "actual": 16,
     "expected": 16,
-    "status": "UNRESOLVED"
+    "status": "OK"
   },
   "BSStringPool": {
     "actual": 1,
@@ -5014,6 +5089,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "BShkbAnimationGraphPtr": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "BShkbAnimationGraph_vtable": {
     "actual": 112,
     "expected": null,
@@ -5134,10 +5214,20 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "BindTaskData": {
+    "actual": 248,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "BipedAnim": {
     "actual": 10104,
     "expected": 10104,
     "status": "OK"
+  },
+  "BipedObjectSlot": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "BleedoutCameraState": {
     "actual": 312,
@@ -5146,6 +5236,11 @@
   },
   "BleedoutCameraState_vtable": {
     "actual": 32,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "BlendType": {
+    "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -5206,6 +5301,11 @@
   },
   "BoundItemEffect_vtable": {
     "actual": 88,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "BpInt": {
+    "actual": 2,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -5274,6 +5374,11 @@
     "expected": 1,
     "status": "OK"
   },
+  "CRIME_TYPE": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "CRIME_TYPES": {
     "actual": 1,
     "expected": null,
@@ -5309,6 +5414,11 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "CallbackHash": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "CallbackProcessor": {
     "actual": 1,
     "expected": null,
@@ -5321,6 +5431,11 @@
   },
   "CalmEffect_vtable": {
     "actual": 24,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "CameraState": {
+    "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -5384,6 +5499,11 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "ChildListType": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "ClassHierarchyDescriptor": {
     "actual": 16,
     "expected": 16,
@@ -5433,6 +5553,11 @@
     "actual": 4,
     "expected": 4,
     "status": "OK"
+  },
+  "ColorTime": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "CombatAimController": {
     "actual": 1,
@@ -5989,6 +6114,11 @@
     "expected": 24,
     "status": "OK"
   },
+  "Context": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "ControlMap": {
     "actual": 296,
     "expected": 296,
@@ -6016,6 +6146,11 @@
   },
   "ConvertTypeFunctor_vtable": {
     "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "Count": {
+    "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -6254,6 +6389,16 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "D3D11_PRIMITIVE": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "D3D11_PRIMITIVE_TOPOLOGY": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "D3D11_QUERY_DATA_PIPELINE_STATISTICS": {
     "actual": 88,
     "expected": null,
@@ -6294,6 +6439,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "D3D11_RECT": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "D3D11_RENDER_TARGET_BLEND_DESC": {
     "actual": 32,
     "expected": null,
@@ -6331,6 +6481,11 @@
   },
   "D3D11_SO_DECLARATION_ENTRY": {
     "actual": 24,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "D3D11_SRV_DIMENSION": {
+    "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -6699,6 +6854,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "D3DCOLOR": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "D3DCOLORVALUE": {
     "actual": 16,
     "expected": null,
@@ -6739,6 +6899,11 @@
     "expected": 36,
     "status": "OK"
   },
+  "DEFAULT_OBJECT": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "DEFAULT_OBJECTS": {
     "actual": 1,
     "expected": null,
@@ -6763,6 +6928,11 @@
     "actual": 4,
     "expected": 4,
     "status": "OK"
+  },
+  "DIALOGUE_TYPE": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "DIALOGUE_TYPES": {
     "actual": 1,
@@ -6854,6 +7024,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "DT": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "DXGI_ADAPTER_DESC": {
     "actual": 304,
     "expected": null,
@@ -6909,6 +7084,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "DXGI_RGBA": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "DXGI_SAMPLE_DESC": {
     "actual": 8,
     "expected": null,
@@ -6929,6 +7109,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "DXGI_USAGE": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "DarknessEffect": {
     "actual": 152,
     "expected": 152,
@@ -6939,10 +7124,25 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "Day": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "DeactivationClass": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "DecalData": {
     "actual": 36,
     "expected": 36,
     "status": "OK"
+  },
+  "DefaultObject": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "DefaultObjectsReadyEvent": {
     "actual": 1,
@@ -7199,6 +7399,11 @@
     "expected": 16,
     "status": "OK"
   },
+  "ENTRY_POINT": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "EXTERIOR_DATA": {
     "actual": 40,
     "expected": 40,
@@ -7213,6 +7418,11 @@
     "actual": 12,
     "expected": 12,
     "status": "OK"
+  },
+  "EffectArchetype": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "EffectArchetypes": {
     "actual": 1,
@@ -9144,6 +9354,11 @@
     "expected": 12,
     "status": "OK"
   },
+  "FILE": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "FILETIME": {
     "actual": 8,
     "expected": null,
@@ -9259,6 +9474,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "FirstPersonFlag": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "FirstPersonState": {
     "actual": 144,
     "expected": 144,
@@ -9273,6 +9493,16 @@
     "actual": 1520,
     "expected": 1520,
     "status": "OK"
+  },
+  "Flag": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "FlagConstant": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "FlameProjectile": {
     "actual": 144,
@@ -9291,6 +9521,11 @@
   },
   "FlameProjectile_vtable": {
     "actual": 104,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "FormID": {
+    "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -10850,14 +11085,14 @@
     "status": "EMPTY"
   },
   "GPointD": {
-    "actual": null,
+    "actual": 16,
     "expected": 16,
-    "status": "UNRESOLVED"
+    "status": "OK"
   },
   "GPointF": {
-    "actual": null,
+    "actual": 8,
     "expected": 8,
-    "status": "UNRESOLVED"
+    "status": "OK"
   },
   "GROUP_REACTION": {
     "actual": 16,
@@ -10865,14 +11100,14 @@
     "status": "OK"
   },
   "GRectD": {
-    "actual": null,
+    "actual": 32,
     "expected": 32,
-    "status": "UNRESOLVED"
+    "status": "OK"
   },
   "GRectF": {
-    "actual": null,
+    "actual": 16,
     "expected": 16,
-    "status": "UNRESOLVED"
+    "status": "OK"
   },
   "GRefCountImpl": {
     "actual": 16,
@@ -11009,10 +11244,20 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "GStatGroup": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "GStatGroups": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "GStatRenderer": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "GStatRenderers": {
     "actual": 1,
@@ -11209,6 +11454,16 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "GlobalStringHandle": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "GlobalStringHandleW": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "GrabActorEffect": {
     "actual": 176,
     "expected": 176,
@@ -11274,65 +11529,150 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "HANDLE": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "HBITMAP": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "HBITMAP__": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "HBRUSH": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "HBRUSH__": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
   },
+  "HCURSOR": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "HCURSOR__": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "HDC": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "HDC__": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
   },
+  "HEAD_TRACK_TYPE": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "HFONT": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "HFONT__": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "HICON": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "HICON__": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
   },
+  "HINSTANCE": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "HINSTANCE__": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "HKEY": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "HKEY__": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
   },
+  "HMENU": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "HMENU__": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "HMODULE": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "HMONITOR": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "HMONITOR__": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
   },
+  "HPALETTE": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "HPALETTE__": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
   },
+  "HPEN": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "HPEN__": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "HRESULT": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "HSTRING": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "HSTRING__": {
     "actual": 1,
@@ -11414,10 +11754,25 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "HWND": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "HWND__": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "Hand": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "Handle": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "HandleManager": {
     "actual": 1,
@@ -11431,6 +11786,11 @@
   },
   "HandlePolicy_vtable": {
     "actual": 96,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "HandlerArrayType": {
+    "actual": 24,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -11461,6 +11821,11 @@
   },
   "Hazard_vtable": {
     "actual": 96,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "HeadPartType": {
+    "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -11551,6 +11916,11 @@
   },
   "HorseCameraState_vtable": {
     "actual": 96,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "HudComponent": {
+    "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -12529,6 +12899,11 @@
     "expected": 16,
     "status": "UNRESOLVED"
   },
+  "IID": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "ILoader": {
     "actual": 8,
     "expected": 8,
@@ -12751,6 +13126,16 @@
   },
   "INISettingCollection_vtable": {
     "actual": 40,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "INPUT_CONTEXT_ID": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "INPUT_DEVICE": {
+    "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -13164,6 +13549,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "InputContextID": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "InputEvent": {
     "actual": 24,
     "expected": 24,
@@ -13171,6 +13561,11 @@
   },
   "InputEvent_vtable": {
     "actual": 24,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "InputType": {
+    "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -13229,10 +13624,25 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "InventoryCountMap": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "InventoryDropMap": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "InventoryEntryData": {
     "actual": 24,
     "expected": 24,
     "status": "OK"
+  },
+  "InventoryItemMap": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
   },
   "InventoryMenu": {
     "actual": 136,
@@ -13374,6 +13784,26 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "Key": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "KeyContent": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "KeyHandle": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "KeyType": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "KinectEvent": {
     "actual": 48,
     "expected": 48,
@@ -13399,6 +13829,11 @@
     "expected": 24,
     "status": "OK"
   },
+  "LIMB_ENUM": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "LIMB_ENUMS": {
     "actual": 1,
     "expected": null,
@@ -13413,6 +13848,41 @@
     "actual": 120,
     "expected": 120,
     "status": "OK"
+  },
+  "LPDICONFIGUREDEVICESCALLBACK": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "LPDIENUMCREATEDEFFECTOBJECTSCALLBACK": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "LPDIENUMDEVICEOBJECTSCALLBACKA": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "LPDIENUMDEVICESBYSEMANTICSCBA": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "LPDIENUMDEVICESCALLBACKA": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "LPDIENUMEFFECTSCALLBACKA": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "LPDIENUMEFFECTSINFILECALLBACK": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "LUID": {
     "actual": 8,
@@ -13491,6 +13961,11 @@
   },
   "LoadStorageWrapper_vtable": {
     "actual": 48,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "LoadTaskData": {
+    "actual": 488,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -13954,6 +14429,11 @@
     "expected": 12,
     "status": "OK"
   },
+  "Matrix": {
+    "actual": 24,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "MaxSpeeds": {
     "actual": 44,
     "expected": 44,
@@ -14154,6 +14634,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "Mode": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "ModelReferenceEffect": {
     "actual": 216,
     "expected": 216,
@@ -14174,6 +14659,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "Month": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "Moon": {
     "actual": 208,
     "expected": 216,
@@ -14186,6 +14676,11 @@
   },
   "Moon_vtable": {
     "actual": 24,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "MorphIndex": {
+    "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -14534,6 +15029,11 @@
     "expected": 32,
     "status": "OK"
   },
+  "NiControllerSequencePtr": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "NiControllerSequence_vtable": {
     "actual": 88,
     "expected": null,
@@ -14799,6 +15299,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "NiObjectPtr": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "NiObject_vtable": {
     "actual": 288,
     "expected": null,
@@ -14994,6 +15499,11 @@
     "expected": 88,
     "status": "OK"
   },
+  "NiSourceTexturePtr": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "NiSourceTexture_vtable": {
     "actual": 64,
     "expected": null,
@@ -15059,6 +15569,11 @@
     "expected": 40,
     "status": "OK"
   },
+  "NiTexturePtr": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "NiTexture_vtable": {
     "actual": 64,
     "expected": null,
@@ -15068,6 +15583,11 @@
     "actual": 72,
     "expected": 72,
     "status": "OK"
+  },
+  "NiTimeControllerPtr": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "NiTimeController_vtable": {
     "actual": 144,
@@ -15219,6 +15739,11 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "ObjectRefHandle": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "ObjectTypeInfo": {
     "actual": 56,
     "expected": 56,
@@ -15268,6 +15793,16 @@
     "actual": 16,
     "expected": 16,
     "status": "OK"
+  },
+  "ObjectVisitFn": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "ObjectVisitor": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "ObjectiveState": {
     "actual": 1,
@@ -15333,6 +15868,21 @@
     "actual": 1,
     "expected": 1,
     "status": "OK"
+  },
+  "PFN_D3D11_CREATE_DEVICE": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "PFN_D3D11_CREATE_DEVICE_AND_SWAP_CHAIN": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "PFN_DESTRUCTION_CALLBACK": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "PLAYER_TARGET_LOC": {
     "actual": 72,
@@ -15489,6 +16039,16 @@
     "expected": 24,
     "status": "OK"
   },
+  "Phase": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "PinHashSet": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "PixelShader": {
     "actual": 128,
     "expected": 128,
@@ -15634,6 +16194,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "Point": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "PoisonedWeapon": {
     "actual": 1,
     "expected": null,
@@ -15749,6 +16314,11 @@
     "expected": 44,
     "status": "OK"
   },
+  "ProjectileHandle": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "Projectile_vtable": {
     "actual": 424,
     "expected": null,
@@ -15859,6 +16429,11 @@
     "expected": 8,
     "status": "OK"
   },
+  "RENDER_TARGET": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "RENDER_TARGETS": {
     "actual": 1,
     "expected": null,
@@ -15878,6 +16453,21 @@
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "RENDER_TARGET_3D": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "RENDER_TARGET_CUBEMAP": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "RENDER_TARGET_DEPTHSTENCIL": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "RUNTIME_DATA2": {
     "actual": null,
@@ -15979,6 +16569,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "Rect": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "RefAttachTechniqueInput": {
     "actual": 72,
     "expected": 72,
@@ -15986,6 +16581,11 @@
   },
   "RefAttachTechniqueInput_vtable": {
     "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "RefHandle": {
+    "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -16054,6 +16654,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "RenderCapBits": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "RenderTargetData": {
     "actual": 48,
     "expected": 48,
@@ -16098,6 +16703,16 @@
     "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
+  },
+  "ResourceHash": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "ResourceSlot": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
   },
   "ResponseDefinitionMissPolicy": {
     "actual": null,
@@ -16209,10 +16824,20 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "SETJMP_FLOAT128": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "SETTING_VALUE": {
     "actual": 4,
     "expected": 4,
     "status": "OK"
+  },
+  "SEX": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "SEXES": {
     "actual": 1,
@@ -16224,10 +16849,20 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "SPEED_DIRECTION": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "SPEED_DIRECTIONS": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "SPInt": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "STARTUPINFOA": {
     "actual": 104,
@@ -16288,6 +16923,11 @@
     "actual": 16,
     "expected": 16,
     "status": "OK"
+  },
+  "ScaleModeType": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "SceneGraph": {
     "actual": 336,
@@ -16504,6 +17144,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "Severity": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "ShaderReferenceEffect": {
     "actual": 312,
     "expected": 312,
@@ -16599,6 +17244,16 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "SizePolicyType": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "Skill": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "SkillIncrease": {
     "actual": 1,
     "expected": null,
@@ -16630,9 +17285,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "SkyObject": {
-    "actual": null,
+    "actual": 4,
     "expected": 16,
-    "status": "UNRESOLVED"
+    "status": "MISMATCH"
   },
   "SkyObject_vtable": {
     "actual": 32,
@@ -18184,6 +18839,11 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "TESObjectREFRPtr": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "TESObjectREFRTranslationEvent": {
     "actual": 1,
     "expected": null,
@@ -19044,6 +19704,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "Texture": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "Texture3DTargetData": {
     "actual": 32,
     "expected": 32,
@@ -19199,10 +19864,20 @@
     "expected": 64,
     "status": "OK"
   },
+  "TypeDescriptor": {
+    "actual": 24,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "TypeInfo": {
     "actual": 8,
     "expected": 8,
     "status": "OK"
+  },
+  "UEFlag": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "UI": {
     "actual": 456,
@@ -19264,10 +19939,30 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "UPInt": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "UUID": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "UniqueNPCData": {
     "actual": 24,
     "expected": 24,
     "status": "OK"
+  },
+  "UnkKey": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "UnkValue": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "UnloadedRefData": {
     "actual": 12,
@@ -19319,10 +20014,25 @@
     "expected": 16,
     "status": "OK"
   },
+  "VMHandle": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "VMStackID": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "VMState": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "VMTypeID": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "VMTypeResolveFunctor": {
     "actual": 16,
@@ -19404,6 +20114,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "VariationID": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "Version": {
     "actual": 8,
     "expected": null,
@@ -19418,6 +20133,11 @@
     "actual": 8,
     "expected": 8,
     "status": "OK"
+  },
+  "VertexFormat": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "VertexShader": {
     "actual": 104,
@@ -19449,6 +20169,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "WEAPON_TYPE": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "WIN32_FIND_DATAA": {
     "actual": 320,
     "expected": null,
@@ -19456,6 +20181,11 @@
   },
   "WIN32_FIND_DATAW": {
     "actual": 592,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "WNDPROC": {
+    "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -19483,6 +20213,11 @@
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "WaitHandler": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "WaterShaderData": {
     "actual": 232,
@@ -19538,6 +20273,11 @@
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "WordWrappingType": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "World": {
     "actual": 112,
@@ -19654,6 +20394,16 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "_Atomic_counter_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_Atomic_wait_indirect_equal_callback_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "_Auto_id_tag": {
     "actual": 1,
     "expected": null,
@@ -19678,6 +20428,31 @@
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "_CRT_ALLOC_HOOK": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_CRT_DUMP_CLIENT": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_CRT_REPORT_HOOK": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_CRT_REPORT_HOOKW": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_Callback_fn": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "_Cbegin_fn": {
     "actual": 1,
@@ -19709,12 +20484,27 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "_Cnd_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "_Combined_type": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
   },
+  "_Compare_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "_Construct_at_fn": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "_Container_base": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
@@ -19854,6 +20644,11 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "_Elem": {
+    "actual": 2,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "_Empty_array_element": {
     "actual": 1,
     "expected": null,
@@ -19979,6 +20774,16 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "_Fmt_it": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_Fmt_wit": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "_For_each_fn": {
     "actual": 1,
     "expected": null,
@@ -20031,6 +20836,16 @@
   },
   "_Generic_error_category_vtable": {
     "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_HEAPINFO": {
+    "actual": 24,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_HFILE": {
+    "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -20199,12 +21014,22 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "_Iterator_base": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "_Iterator_base0": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
   },
   "_Iterator_base12": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_JBTYPE": {
     "actual": 16,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -20223,6 +21048,11 @@
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "_ListType": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "_Literal_zero": {
     "actual": 1,
@@ -20399,8 +21229,18 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "_Mtx_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "_Mutex_base": {
     "actual": 12,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_Mybase": {
+    "actual": 40,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -20468,6 +21308,21 @@
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "_PIFV": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_PVFI": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_PVFV": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "_Partial_sort_copy_fn": {
     "actual": 1,
@@ -20684,6 +21539,11 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "_Smtx_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "_Sort_fn": {
     "actual": 1,
     "expected": null,
@@ -20734,6 +21594,11 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "_SubsecondType": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "_Swap_ranges_fn": {
     "actual": 1,
     "expected": null,
@@ -20764,6 +21629,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "_Thrd_id_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "_Thrd_t": {
     "actual": 16,
     "expected": null,
@@ -20779,6 +21649,11 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "_Type": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "_Tzdb_deleter": {
     "actual": 1,
     "expected": null,
@@ -20788,6 +21663,11 @@
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "_Uint_type": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "_Unforced": {
     "actual": 1,
@@ -20854,6 +21734,16 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "_Unnameable_argument": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "_Unnameable_result": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "_Unpack_tuple_t": {
     "actual": 1,
     "expected": null,
@@ -20894,6 +21784,11 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "_Vbase": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "_Visit_strategy": {
     "actual": 1,
     "expected": null,
@@ -20904,7 +21799,22 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "_Wint_t": {
+    "actual": 2,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "_Zero_then_variadic_args_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "__bfloat16": {
+    "actual": 2,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__crt_bool": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
@@ -20944,10 +21854,110 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "__m128": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__m128bh": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__m128d": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__m128h": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__m128i": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__m256": {
+    "actual": 32,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__m256bh": {
+    "actual": 32,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__m256d": {
+    "actual": 32,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__m256h": {
+    "actual": 32,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__m256i": {
+    "actual": 32,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__m512": {
+    "actual": 64,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__m512bh": {
+    "actual": 64,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__m512d": {
+    "actual": 64,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__m512h": {
+    "actual": 64,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__m512i": {
+    "actual": 64,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__mmask16": {
+    "actual": 2,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__mmask32": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__mmask64": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__mmask8": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "__non_rtti_object": {
     "actual": 24,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
+  },
+  "__static_assert_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
   },
   "__std_exception_data": {
     "actual": 16,
@@ -21009,6 +22019,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "__std_tzdb_epoch_milli": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "__std_tzdb_leap_info": {
     "actual": 12,
     "expected": null,
@@ -21034,13 +22049,48 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "__tile": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__time32_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "__time64_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "__type_info_node": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
   },
+  "__vcrt_bool": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "_beginthread_proc_type": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_beginthreadex_proc_type": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "_complex": {
     "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_dev_t": {
+    "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -21049,13 +22099,33 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "_dummy_bsthashmap": {
+    "actual": 48,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "_exception": {
     "actual": 40,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "_fsize_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "_heapinfo": {
     "actual": 24,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_ino_t": {
+    "actual": 2,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_invalid_parameter_handler": {
+    "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -21084,6 +22154,31 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "_locale_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_off_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_onexit_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_purecall_handler": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_se_translator_function": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "_timespec32": {
     "actual": 8,
     "expected": null,
@@ -21091,6 +22186,11 @@
   },
   "_timespec64": {
     "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "_tls_callback_type": {
+    "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -21154,10 +22254,255 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "atomic_bool": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_char": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_char16_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_char32_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_char8_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "atomic_flag": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
+  },
+  "atomic_int": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_int16_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_int32_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_int64_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_int8_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_int_fast16_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_int_fast32_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_int_fast64_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_int_fast8_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_int_least16_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_int_least32_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_int_least64_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_int_least8_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_intmax_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_intptr_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_llong": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_long": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "atomic_ptrdiff_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_schar": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_short": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_signed_lock_free": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_size_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "atomic_uchar": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_uint": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "atomic_uint16_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_uint32_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "atomic_uint64_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "atomic_uint8_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_uint_fast16_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "atomic_uint_fast32_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "atomic_uint_fast64_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "atomic_uint_fast8_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_uint_least16_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_uint_least32_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "atomic_uint_least64_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "atomic_uint_least8_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_uintmax_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "atomic_uintptr_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "atomic_ullong": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "atomic_ulong": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_unsigned_lock_free": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "atomic_ushort": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atomic_wchar_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "atto": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
   },
   "bad_alloc": {
     "actual": 24,
@@ -21654,10 +22999,35 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "catalog": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "category": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "centi": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "char_traits": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "char_type": {
+    "actual": 2,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "clock_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "clock_time_conversion": {
     "actual": 1,
@@ -21719,6 +23089,16 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "const_pointer": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "container_type": {
+    "actual": 24,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "contiguous_iterator_tag": {
     "actual": 1,
     "expected": null,
@@ -21754,6 +23134,21 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "days": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "deca": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "deci": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "default_sentinel_t": {
     "actual": 1,
     "expected": null,
@@ -21769,6 +23164,16 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "dev_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "difference_type": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "directory_entry": {
     "actual": 32,
     "expected": null,
@@ -21776,6 +23181,11 @@
   },
   "directory_iterator": {
     "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "div_t": {
+    "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -21789,10 +23199,25 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "double_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "duration": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "equal_to": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "errno_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "error_category": {
     "actual": 16,
@@ -21819,6 +23244,16 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "event_callback": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "exa": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "exception": {
     "actual": 24,
     "expected": null,
@@ -21834,10 +23269,40 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "extern_type": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "false_type": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "femto": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "file_clock": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "file_status": {
     "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
+  },
+  "file_time_type": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "filebuf": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
   },
   "filesystem_error": {
     "actual": 40,
@@ -21849,10 +23314,35 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "float_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "fmtflags": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "format_args": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "format_context": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "format_error": {
     "actual": 24,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
+  },
+  "format_parse_context": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
   },
   "formatter": {
     "actual": 28,
@@ -21864,12 +23354,32 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "fpos_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "from_chars_result": {
     "actual": 16,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "fstream": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "giga": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "gps_clock": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "gps_seconds": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
@@ -21885,6 +23395,16 @@
     "status": "EMPTY"
   },
   "hash": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "hecto": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "high_resolution_clock": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
@@ -22014,15 +23534,20 @@
     "expected": 12,
     "status": "OK"
   },
+  "hkObjectIndex": {
+    "actual": 2,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "hkQsTransform": {
     "actual": 48,
     "expected": 48,
     "status": "OK"
   },
   "hkQuadReal": {
-    "actual": null,
+    "actual": 16,
     "expected": 16,
-    "status": "UNRESOLVED"
+    "status": "OK"
   },
   "hkQuaternion": {
     "actual": 16,
@@ -22078,6 +23603,11 @@
     "actual": 80,
     "expected": 80,
     "status": "OK"
+  },
+  "hkTime": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "hkTransform": {
     "actual": 64,
@@ -22649,6 +24179,11 @@
     "expected": 48,
     "status": "OK"
   },
+  "hkpBroadPhaseAabbCache": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "hkpBroadPhaseBorder": {
     "actual": 1,
     "expected": null,
@@ -22824,6 +24359,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "hkpCharacterStateType": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "hkpCharacterStateTypes": {
     "actual": 1,
     "expected": null,
@@ -22873,6 +24413,11 @@
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "hkpCollisionDetail": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "hkpCollisionDispatcher": {
     "actual": 1,
@@ -23459,6 +25004,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "hkpShapeKey": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "hkpShapeModifier": {
     "actual": 1,
     "expected": null,
@@ -23639,6 +25189,11 @@
     "expected": 48,
     "status": "OK"
   },
+  "hkpVertexID": {
+    "actual": 2,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "hkpViolatedConstraintArray": {
     "actual": 1,
     "expected": null,
@@ -23749,7 +25304,22 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "hours": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "id": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "identity": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "ifstream": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
@@ -23759,15 +25329,105 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "ino_t": {
+    "actual": 2,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "input_iterator_tag": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
   },
+  "int16_t": {
+    "actual": 2,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "int32_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "int64_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "int8_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "int_fast16_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "int_fast32_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "int_fast64_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "int_fast8_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "int_least16_t": {
+    "actual": 2,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "int_least32_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "int_least64_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "int_least8_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "int_type": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "intern_type": {
+    "actual": 2,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "intmax_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "intptr_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "invalid_argument": {
     "actual": 24,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
+  },
+  "ios": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
   },
   "ios_base": {
     "actual": 72,
@@ -23799,6 +25459,16 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "iostate": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "iostream": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "is_error_code_enum": {
     "actual": 1,
     "expected": null,
@@ -23809,10 +25479,45 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "is_transparent": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "istream": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "istringstream": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "iterator": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "iterator_category": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "jmp_buf": {
+    "actual": 256,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "jthread": {
     "actual": 24,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
+  },
+  "kilo": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
   },
   "last_spec": {
     "actual": 1,
@@ -23821,6 +25526,11 @@
   },
   "lconv": {
     "actual": 152,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "ldiv_t": {
+    "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -23849,10 +25559,25 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "lldiv_t": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "local_days": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "local_info": {
     "actual": 72,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
+  },
+  "local_seconds": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
   },
   "local_t": {
     "actual": 1,
@@ -23919,6 +25644,21 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "mask": {
+    "actual": 2,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "max_align_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "mega": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "memory_map": {
     "actual": 16,
     "expected": null,
@@ -23939,10 +25679,35 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "micro": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "microseconds": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "milli": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "milliseconds": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "minus": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "minutes": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "modulus": {
     "actual": 1,
@@ -23989,6 +25754,11 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "months": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "multiplies": {
     "actual": 1,
     "expected": null,
@@ -23996,6 +25766,16 @@
   },
   "mutex": {
     "actual": 12,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "nano": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "nanoseconds": {
+    "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -24010,6 +25790,11 @@
     "status": "NO_GROUND_TRUTH"
   },
   "nested_exception_vtable": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "new_handler": {
     "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -24049,10 +25834,45 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "off_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "off_type": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "ofstream": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "once_flag": {
     "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
+  },
+  "openmode": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "ostream": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "ostringstream": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "osyncstream": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
   },
   "out_of_range": {
     "actual": 24,
@@ -24074,12 +25894,27 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "part": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "partial_ordering": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
   },
   "path": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "peta": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "pico": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
@@ -24093,6 +25928,21 @@
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "pointer": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "pos_type": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "ptrdiff_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "random_access_iterator_tag": {
     "actual": 1,
@@ -24119,6 +25969,26 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "rep": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "result": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "reverse_iterator": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "rsize_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "runtime_error": {
     "actual": 24,
     "expected": null,
@@ -24128,6 +25998,21 @@
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "seconds": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "seekdir": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "size_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "source_location": {
     "actual": 24,
@@ -24154,13 +26039,78 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "stream_type": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "streambuf": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "streamoff": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "streampos": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "streamsize": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "string": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "string_type": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "string_view": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "stringbuf": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "stringstream": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "strong_ordering": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
   },
+  "syncbuf": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "sys_days": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "sys_info": {
     "actual": 32,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "sys_seconds": {
+    "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -24179,6 +26129,26 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "tai_seconds": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "tera": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "terminate_function": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "terminate_handler": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "thread": {
     "actual": 16,
     "expected": null,
@@ -24195,6 +26165,16 @@
     "status": "NO_GROUND_TRUTH"
   },
   "time_base_vtable": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "time_point": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "time_t": {
     "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -24229,12 +26209,22 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "true_type": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "try_to_lock_t": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
   },
   "tuple": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "type": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
@@ -24269,8 +26259,128 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "u16streampos": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "u16string": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "u16string_view": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "u32streampos": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "u32string": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "u32string_view": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "u8streampos": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "u8string": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "u8string_view": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "uint16_t": {
+    "actual": 2,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "uint32_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "uint64_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "uint8_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "uint_fast16_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "uint_fast32_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "uint_fast64_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "uint_fast8_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "uint_least16_t": {
+    "actual": 2,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "uint_least32_t": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "uint_least64_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "uint_least8_t": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "uintmax_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "uintptr_t": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "underflow_error": {
     "actual": 24,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "unexpected_handler": {
+    "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -24284,10 +26394,35 @@
     "expected": null,
     "status": "EMPTY"
   },
+  "utc_seconds": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "va_list": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "value_type": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
   "view_base": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "wctrans_t": {
+    "actual": 2,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "wctype_t": {
+    "actual": 2,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   },
   "weak_ordering": {
     "actual": 1,
@@ -24305,6 +26440,121 @@
     "status": "NO_GROUND_TRUTH"
   },
   "weekday_last": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "weeks": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "wfilebuf": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "wformat_args": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "wformat_context": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "wformat_parse_context": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "wfstream": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "wifstream": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "wint_t": {
+    "actual": 2,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "wios": {
+    "actual": 96,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "wiostream": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "wistream": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "wistringstream": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "wofstream": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "wostream": {
+    "actual": 112,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "wostringstream": {
+    "actual": 128,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "wosyncstream": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "wstreambuf": {
+    "actual": 104,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "wstreampos": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "wstring": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "wstring_view": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "wstringbuf": {
+    "actual": 120,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "wstringstream": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
+  "wsyncbuf": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
@@ -24339,9 +26589,29 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
+  "years": {
+    "actual": 4,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "zoned_seconds": {
+    "actual": 1,
+    "expected": null,
+    "status": "EMPTY"
+  },
   "zoned_traits": {
     "actual": 1,
     "expected": null,
     "status": "EMPTY"
+  },
+  "zstring": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "zwstring": {
+    "actual": 16,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
   }
 }
