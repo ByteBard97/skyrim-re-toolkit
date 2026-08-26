@@ -3710,7 +3710,7 @@
     "status": "NO_GROUND_TRUTH"
   },
   "BSModelProcessor": {
-    "actual": 16,
+    "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -3825,9 +3825,9 @@
     "status": "OK"
   },
   "BSMusicManager": {
-    "actual": 64,
+    "actual": 56,
     "expected": 56,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSMusicManager_vtable": {
     "actual": 16,
@@ -3865,9 +3865,9 @@
     "status": "EMPTY"
   },
   "BSNavmeshInfoMap": {
-    "actual": 16,
+    "actual": 8,
     "expected": 8,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSNavmeshInfoMap::IVisitor": {
     "actual": 8,
@@ -9600,9 +9600,9 @@
     "status": "OK"
   },
   "GFxButtonCharacterDef": {
-    "actual": 104,
+    "actual": 96,
     "expected": 96,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxButtonCharacterDef_vtable": {
     "actual": 32,
@@ -9615,9 +9615,9 @@
     "status": "OK"
   },
   "GFxCharacterDef": {
-    "actual": 40,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxCharacterDef_vtable": {
     "actual": 48,
@@ -9630,9 +9630,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxConstShapeCharacterDef": {
-    "actual": 168,
+    "actual": 152,
     "expected": 152,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxConstShapeCharacterDef_vtable": {
     "actual": 136,
@@ -9640,9 +9640,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxConstShapeNoStyles": {
-    "actual": 80,
+    "actual": 72,
     "expected": 72,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxConstShapeNoStyles_vtable": {
     "actual": 88,
@@ -9650,9 +9650,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxConstShapeWithStyles": {
-    "actual": 128,
+    "actual": 120,
     "expected": 120,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxConstShapeWithStyles_vtable": {
     "actual": 80,
@@ -9665,9 +9665,9 @@
     "status": "EMPTY"
   },
   "GFxEditTextCharacterDef": {
-    "actual": 128,
+    "actual": 120,
     "expected": 120,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxEditTextCharacterDef_vtable": {
     "actual": 24,
@@ -9765,9 +9765,9 @@
     "status": "EMPTY"
   },
   "GFxImageResource": {
-    "actual": 64,
+    "actual": 56,
     "expected": 56,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxImageResource_vtable": {
     "actual": 8,
@@ -9920,9 +9920,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxMorphCharacterDef": {
-    "actual": 392,
+    "actual": 376,
     "expected": 376,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxMorphCharacterDef_vtable": {
     "actual": 56,
@@ -9955,9 +9955,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxMovieDataDef": {
-    "actual": 80,
+    "actual": 72,
     "expected": 72,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxMovieDataDef::Allocator": {
     "actual": 32,
@@ -9985,9 +9985,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxMovieDef": {
-    "actual": 40,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxMovieDef::ImportVisitor": {
     "actual": 8,
@@ -10050,9 +10050,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxMovieDefImpl": {
-    "actual": 72,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxMovieDefImpl::BindTaskData": {
     "actual": 248,
@@ -10245,9 +10245,9 @@
     "status": "OK"
   },
   "GFxResource": {
-    "actual": 32,
+    "actual": 24,
     "expected": 24,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxResourceID": {
     "actual": 4,
@@ -10375,14 +10375,14 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxShapeBase": {
-    "actual": 72,
+    "actual": 64,
     "expected": 64,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxShapeBaseCharacterDef": {
-    "actual": 40,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxShapeBaseCharacterDef_vtable": {
     "actual": 104,
@@ -10395,9 +10395,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxShapeCharacterDef": {
-    "actual": 256,
+    "actual": 240,
     "expected": 240,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxShapeCharacterDef_vtable": {
     "actual": 136,
@@ -10405,9 +10405,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxShapeNoStyles": {
-    "actual": 120,
+    "actual": 112,
     "expected": 112,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxShapeNoStyles_vtable": {
     "actual": 88,
@@ -10415,9 +10415,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxShapeWithStyles": {
-    "actual": 216,
+    "actual": 208,
     "expected": 208,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxShapeWithStyles_vtable": {
     "actual": 80,
@@ -10435,9 +10435,9 @@
     "status": "OK"
   },
   "GFxSpriteDef": {
-    "actual": 104,
+    "actual": 96,
     "expected": 96,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxSpriteDef_vtable": {
     "actual": 160,
@@ -10495,9 +10495,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxStaticTextCharacterDef": {
-    "actual": 112,
+    "actual": 104,
     "expected": 104,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxStaticTextCharacterDef_vtable": {
     "actual": 40,
@@ -10530,9 +10530,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxTimelineDef": {
-    "actual": 40,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxTimelineDef::ExecuteTagList": {
     "actual": 16,
@@ -10545,9 +10545,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "GFxTimelineIODef": {
-    "actual": 40,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "GFxTimelineIODef_vtable": {
     "actual": 16,
@@ -11610,9 +11610,9 @@
     "status": "EMPTY"
   },
   "ICellAttachDetachEventSource": {
-    "actual": 104,
+    "actual": 96,
     "expected": 96,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "ICellAttachDetachEventSource_vtable": {
     "actual": 8,
@@ -13195,7 +13195,7 @@
     "status": "EMPTY"
   },
   "Inventory3DManager": {
-    "actual": 112,
+    "actual": 104,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -14045,9 +14045,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "MenuTopicManager": {
-    "actual": 224,
+    "actual": 216,
     "expected": 216,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "MenuTopicManager::Dialogue": {
     "actual": 88,
@@ -14310,9 +14310,9 @@
     "status": "EMPTY"
   },
   "NavMeshInfoMap": {
-    "actual": 248,
+    "actual": 240,
     "expected": 240,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "NavMeshInfoMap::RecordFlags": {
     "actual": 1,
@@ -16650,7 +16650,7 @@
     "status": "NO_GROUND_TRUTH"
   },
   "SkyrimVM": {
-    "actual": 2056,
+    "actual": 2048,
     "expected": 35192,
     "status": "MISMATCH"
   },
@@ -17025,9 +17025,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "TES": {
-    "actual": 704,
+    "actual": 696,
     "expected": 696,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "TES::SystemEventAdapter": {
     "actual": 16,
@@ -18320,7 +18320,7 @@
     "status": "OK"
   },
   "TESProcessor": {
-    "actual": 16,
+    "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -19250,9 +19250,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "UISaveLoadManager": {
-    "actual": 112,
+    "actual": 104,
     "expected": 104,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "UISaveLoadManager_vtable": {
     "actual": 24,
@@ -23770,7 +23770,7 @@
     "status": "NO_GROUND_TRUTH"
   },
   "ios_base": {
-    "actual": 80,
+    "actual": 72,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },

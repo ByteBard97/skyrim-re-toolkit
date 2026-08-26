@@ -1,0 +1,68 @@
+--- a/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-26 12:17:57.216558442 -0400
++++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-26 12:35:06.533873511 -0400
+@@ -385,6 +385,7 @@
+         List<String[]> baseClasses = new ArrayList<>(); // [fieldName, typeName]
+         List<Cursor> baseDeclCursors = new ArrayList<>(); // parallel to baseClasses, for polymorphism checks
+         List<ParsedType> baseInlineTypes = new ArrayList<>(); // parallel to baseClasses; non-null when the base is a template specialization that must be inline-embedded
++        List<Long> baseSizes = new ArrayList<>(); // parallel to baseClasses; this base's own standalone clang_Type_getSizeOf(), for the empty-base-optimization check below
+         List<ParsedVtable.VtableEntry> virtualMethods = new ArrayList<>();
+ 
+         structCursor.visitChildren((cursor, parent) -> {
+@@ -521,6 +522,7 @@
+                             ? "super_" + baseDeclName : "super_" + baseTypeName;
+                         baseClasses.add(new String[]{fieldName, baseTypeName});
+                         baseDeclCursors.add(baseType.declaration());
++                        baseSizes.add(baseType.unwrap().sizeOf());
+ 
+                         // A base class that is itself a template specialization (e.g.
+                         // BSTEventSink<BSAnimationGraphEvent>) hits the exact same
+@@ -621,6 +623,49 @@
+             String[] base = baseClasses.get(i);
+             ParsedType inlineType = baseInlineTypes.get(i);
+             boolean inlineEmbedBase = inlineType != null;
++
++            // C++ Empty Base Optimization -- MSVC only elides an empty
++            // (non-polymorphic, no-data-member) base to zero bytes when it is
++            // the FIRST base (i == 0) AND this derived class introduces its
++            // OWN new vptr (!primaryBaseIsPolymorphic && !virtualMethods.isEmpty(),
++            // the exact same condition already used above to decide whether to
++            // emit the synthetic "vptr" field) -- the vptr occupies offset 0
++            // and already establishes a real, distinguishable identity there,
++            // so the empty base underneath it needs no separate space.
++            //
++            // Two prior, narrower conditions were tried and found insufficient:
++            //   1. Unconditionally eliding ANY empty base (any i) regressed 9
++            //      already-OK classes (UI, ControlMap, GASEnvironment,
++            //      FOCollisionListener, etc.) -- every one has its empty base
++            //      as the SECOND base after another non-empty one, at a
++            //      header-annotated non-zero offset (e.g. GASEnvironment's
++            //      "public GNewOverrideBase<...> // 008"), which still needs
++            //      real (minimum 1-byte) space, exactly like a plain data
++            //      member would.
++            //   2. Narrowing to i == 0 only still regressed 3 classes
++            //      (ActorEquipManager, ControlMap, UI) -- all NON-polymorphic
++            //      (no virtual methods anywhere in their own declaration or
++            //      base chain), where the "empty" base
++            //      (BSTSingletonSDM<T>) is the class's ONLY content at offset
++            //      0 -- with no vptr to anchor identity there, the compiler
++            //      still reserves the standalone 1-byte minimum (confirmed via
++            //      ActorEquipManager's own static_assert(sizeof(...) == 0x2):
++            //      base(1) + its own "bool unk01" field(1) = 2, not base(0) +
++            //      unk01(1) = 1).
++            // GFxResource (fixed by this check) DOES introduce its own new
++            // vptr (three virtual methods + destructor, no polymorphic base),
++            // which is what makes eliding GNewOverrideBase<Stat> underneath it
++            // correct -- fixing GFxResource and its ~20 descendants
++            // (GFxCharacterDef, GFxMovieDef, GFxShapeBase, etc.), each
++            // oversized by +8 from a phantom 1-byte field (parseFieldsFromType's
++            // opaque-padding fallback, correct for a vtable-carrying base like
++            // BSTEventSink<T> but wrong for a genuinely empty one) misaligning
++            // every subsequent field.
++            if (i == 0 && baseSizes.get(i) <= 1
++                    && !primaryBaseIsPolymorphic && !virtualMethods.isEmpty()) {
++                continue;
++            }
++
+             allFields.add(new ParsedStructure.FieldInfo(
+                 base[0], base[1], false, 0, inlineEmbedBase, inlineType));
+         }
