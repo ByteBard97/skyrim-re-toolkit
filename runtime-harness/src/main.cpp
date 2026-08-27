@@ -26,6 +26,7 @@
 //     SKSE::stl::report_and_fail (SKSE/Impl/PCH.h:660).
 
 #include "AIProcessInspector.h"
+#include "DevBenchIntegration.h"
 #include "HavokStepLogger.h"
 #include "LayoutValidator.h"
 #include "SavegameTracer.h"
@@ -65,6 +66,13 @@ void SetupLog()
 void OnMessage(SKSE::MessagingInterface::Message* message)
 {
     switch (message->type) {
+        case SKSE::MessagingInterface::kPostLoad:
+            // devbench's own contract (DevBenchAPI.h): its cross-plugin
+            // interface is only fetchable after SKSE has finished
+            // dispatching kPostLoad to every plugin (so devbench itself,
+            // if present, has already registered its message listener).
+            DevBenchIntegration::Install();
+            break;
         case SKSE::MessagingInterface::kDataLoaded:
             SKSE::log::info("kDataLoaded received -- game data is fully loaded.");
             LayoutValidator::OnDataLoaded();

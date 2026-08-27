@@ -96,6 +96,26 @@ A later pass the same day loaded a real save and closed out
 checks too — all clean on real game state.
 Full report: [`docs/T3-3_LAYOUTVALIDATOR_REPORT.md`](docs/T3-3_LAYOUTVALIDATOR_REPORT.md).
 
+## DevBench integration
+
+Instead of building a competing live-control server from scratch (v0.1/v0.2 of
+`docs/MCP_SERVER_DESIGN.md`), `RuntimeHarness` exposes its inspector data as
+tools on [`alandtse/devbench`](https://github.com/alandtse/devbench) — a
+real, actively-maintained SKSE plugin that already hosts an MCP+REST server
+with live state reads, save/load, console execution, and a scenario runner.
+See `docs/MCP_SERVER_DESIGN.md` v0.3 for the full design decision.
+
+Integration is via devbench's separately MIT-licensed cross-plugin API
+(`vendor/devbench/DevBenchAPI.h`/`.cpp`, `DevBenchAPI.LICENSE.txt`) —
+devbench's own plugin code is GPL-3.0, never linked; only the MIT glue is
+vendored. `src/DevBenchIntegration.cpp` calls `DevBenchAPI::GetDevBenchInterface001()`
+on `kPostLoad` (no-ops cleanly if devbench isn't installed) and registers
+`runtimeharness.ai_package`, a read-only tool that returns
+`AIProcessInspector`'s live formID→package-formID map. **Written
+compile-plausibly, matching `LayoutValidator`'s own T3-1 precedent** — every
+symbol checked against the vendored headers, not yet run through MSVC (that's
+a separate, still-gated step).
+
 ## Why this builds against the vendored CommonLibSSE-NG
 
 The plugin compiles against `type-importer/vendor/CommonLibSSE-NG`

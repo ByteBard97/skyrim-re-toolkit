@@ -1,5 +1,9 @@
 #pragma once
 
+#include <RE/Skyrim.h>
+
+#include <unordered_map>
+
 // AIProcessInspector -- hooks Actor::Update via its vtable to observe
 // package-evaluation state live, for the AI scheduler inspector described
 // in README.md.
@@ -30,4 +34,12 @@ namespace AIProcessInspector
     // SKSE::Init() (write_vfunc needs the module base REL::Relocation
     // resolves against).
     void Install();
+
+    // Thread-safe copy of the current formID -> last-logged-package-formID
+    // map. The hook itself only ever runs on the game's Update thread, but
+    // this accessor is meant for a caller on a DIFFERENT thread (e.g. a
+    // DevBench tool handler, which runs on devbench's own listener thread
+    // per its ABI doc) -- guarded by g_lastPackageMutex in the .cpp so a
+    // reader never observes a torn unordered_map write mid-rehash.
+    std::unordered_map<RE::FormID, RE::FormID> GetLastPackageSnapshot();
 }

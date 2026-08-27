@@ -3,6 +3,7 @@
 #include <RE/Skyrim.h>
 #include <SKSE/SKSE.h>
 
+#include <mutex>
 #include <unordered_map>
 
 namespace AIProcessInspector
@@ -20,6 +21,16 @@ namespace AIProcessInspector
 
         // formID -> last-logged package formID, so the log only records
         // package transitions instead of one line per actor per frame.
+        // Guards: writes only ever happen on the game's own Update thread
+        // (single-threaded from this hook's point of view), but T3-8's
+        // DevBench tool handler reads this from devbench's own listener
+        // thread -- g_lastPackageMutex makes that cross-thread read safe.
+        // A mutex was chosen over marshaling the read through
+        // SKSE::TaskInterface::AddTask because the map holds only plain
+        // formID integers already extracted from game objects, not raw
+        // pointers into live game memory -- there's no game-state access
+        // to marshal onto the main thread, just a small map to copy.
+        std::mutex                                 g_lastPackageMutex;
         std::unordered_map<RE::FormID, RE::FormID> g_lastPackage;
 
         void LogPackageIfChanged(RE::Actor* a_this)
@@ -32,11 +43,14 @@ namespace AIProcessInspector
             auto* package = process->GetRunningPackage();
             const RE::FormID packageID = package ? package->GetFormID() : 0;
 
-            auto [it, inserted] = g_lastPackage.try_emplace(a_this->GetFormID(), packageID);
-            if (!inserted && it->second == packageID) {
-                return;
+            {
+                std::lock_guard lock{ g_lastPackageMutex };
+                auto [it, inserted] = g_lastPackage.try_emplace(a_this->GetFormID(), packageID);
+                if (!inserted && it->second == packageID) {
+                    return;
+                }
+                it->second = packageID;
             }
-            it->second = packageID;
 
             if (package) {
                 SKSE::log::info("actor {:08X} -> package {:08X} ({}) [{}]",
@@ -69,5 +83,11 @@ namespace AIProcessInspector
         _CharacterUpdate = characterVtbl.write_vfunc(0xAD, CharacterUpdate_Hook);
 
         SKSE::log::info("AIProcessInspector: Actor::Update hook installed (Actor + Character vtables).");
+    }
+
+    std::unordered_map<RE::FormID, RE::FormID> GetLastPackageSnapshot()
+    {
+        std::lock_guard lock{ g_lastPackageMutex };
+        return g_lastPackage;
     }
 }
