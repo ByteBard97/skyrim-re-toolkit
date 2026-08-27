@@ -1,0 +1,119 @@
+--- a/src/main/java/playday3008/gcpp/processing/ParsedStructure.java
++++ b/src/main/java/playday3008/gcpp/processing/ParsedStructure.java
+@@ -32,13 +32,26 @@
+     private final List<FieldInfo> fields;
+     private final boolean isPacked;
+     private final int explicitPackValue;
++    private final int explicitMinAlignment;
+ 
+     public ParsedStructure(String name, List<FieldInfo> fields, boolean isPacked,
+                            int explicitPackValue, CategoryPath categoryPath) {
++        this(name, fields, isPacked, explicitPackValue, categoryPath, 0);
++    }
++
++    // explicitMinAlignment (0 = unset): forces this struct's own alignment via
++    // Ghidra's Composite.setExplicitMinimumAlignment, overriding whatever
++    // auto-packing would otherwise derive from the field list alone. See
++    // SourceParser.parseFieldsFromType's opaque-fallback doc for why this is
++    // needed and the two conditions that guard when it's actually applied.
++    public ParsedStructure(String name, List<FieldInfo> fields, boolean isPacked,
++                           int explicitPackValue, CategoryPath categoryPath,
++                           int explicitMinAlignment) {
+         super(name, categoryPath);
+         this.fields = List.copyOf(fields);
+         this.isPacked = isPacked;
+         this.explicitPackValue = explicitPackValue;
++        this.explicitMinAlignment = explicitMinAlignment;
+     }
+ 
+     @Override
+@@ -50,6 +63,9 @@
+         } else if (explicitPackValue > 0) {
+             struct.setExplicitPackingValue(explicitPackValue);
+         }
++        if (explicitMinAlignment > 0) {
++            struct.setExplicitMinimumAlignment(explicitMinAlignment);
++        }
+ 
+         for (var field : fields) {
+             if (field.isBitField()) {
+--- a/src/main/java/playday3008/gcpp/processing/SourceParser.java
++++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java
+@@ -543,7 +543,7 @@
+                         // with no explicit data members; the padding covers its vptr).
+                         ParsedType inlineBaseType = null;
+                         if (baseTypeName.contains("<")) {
+-                            inlineBaseType = parseFieldsFromType(baseType.unwrap(), category);
++                            inlineBaseType = parseFieldsFromType(baseType.unwrap(), category, true);
+                         }
+                         baseInlineTypes.add(inlineBaseType);
+                     }
+@@ -1134,6 +1134,26 @@
+      * the fields correctly in the exact same case.
+      */
+     private ParsedStructure parseFieldsFromType(Type type, CategoryPath category) {
++        return parseFieldsFromType(type, category, false);
++    }
++
++    // isBaseClass: true only when this specialization is being inlined as a
++    // C++ base class (see the C_X_X_BASE_SPECIFIER call site below), never for
++    // a field-typed specialization. Needed because the opaque-fallback
++    // alignment fix (see the opaqueSize>1 branch near the end of this method)
++    // is only safe for FIELD embedding: a base-class opaque interface (e.g.
++    // BSTEventSink<T>, just a vptr) sitting next to an unrelated EMPTY base
++    // (e.g. BSTSingletonSDM<T>) that current EBO logic does NOT collapse for
++    // non-first bases in a 3+-way multiple-inheritance chain relies on that
++    // empty base's own lack of alignment to pack tightly against its
++    // neighbors -- forcing correct alignment on the INTERFACE base alone then
++    // exposes the pre-existing EBO gap as extra, wrong padding (confirmed via
++    // a full-sweep regression: MenuControls/PlayerControls/StatsNode, each a
++    // 3-base BSTEventSink<A>+BSTSingletonSDM<T>+BSTEventSink<B> chain, grew by
++    // exactly 8 bytes when the fix applied to base-class embedding too). Fixing
++    // that properly needs EBO to handle non-first empty bases, which is a
++    // separate, not-yet-attempted piece of work -- see patches/0029's own doc.
++    private ParsedStructure parseFieldsFromType(Type type, CategoryPath category, boolean isBaseClass) {
+         List<ParsedStructure.FieldInfo> fields = new ArrayList<>();
+ 
+         type.visitFields(fieldCursor -> {
+@@ -1275,16 +1295,37 @@
+         // (already confirmed accurate for fully-instantiated specializations) so the
+         // ENCLOSING struct's overall layout size still comes out correct, even
+         // though we don't model this base's vtable contents in detail.
++        long opaqueSize = 0;
+         if (fields.isEmpty()) {
+-            long size = type.sizeOf();
+-            if (size > 0) {
++            opaqueSize = type.sizeOf();
++            if (opaqueSize > 0) {
+                 fields.add(new ParsedStructure.FieldInfo(
+-                    "opaque", "char[" + size + "]", false, 0, false, null));
++                    "opaque", "char[" + opaqueSize + "]", false, 0, false, null));
+             }
+         }
+ 
++        // Preserve the real ABI alignment (see ParsedStructure's explicitMinAlignment
++        // doc) -- without this, a struct built from just an opaque char[N] field
++        // auto-packs to align=1, and any enclosing struct embedding it BY VALUE AS
++        // A FIELD silently loses tail-padding bytes it actually needs (confirmed via
++        // CombatEquipment: a BSTArray<NiPointer<T>> field opaque-padded to align=1
++        // made the whole struct 4 bytes short of its real tail-padded size).
++        //
++        // Two conditions guard this to avoid regressions found via a full-sweep
++        // check (see this method's isBaseClass doc for the base-class one):
++        //   - opaqueSize > 1: skip the trivial empty-class placeholder
++        //     (char[1], C++'s own "empty class still has sizeof >= 1" rule) --
++        //     forcing e.g. align=8 onto a 1-byte struct makes Ghidra round ITS
++        //     OWN length up to 8 to satisfy that alignment, turning a
++        //     genuinely-near-empty type into a real 8-byte one.
++        //   - !isBaseClass: base-class embedding relies on a separate, pre-existing
++        //     EBO gap (empty non-first bases in 3+-way multiple inheritance aren't
++        //     collapsed) that happens to compensate via exactly this alignment loss;
++        //     fixing alignment there alone exposes that gap as wrong extra padding.
++        int alignment = (opaqueSize > 1 && !isBaseClass) ? (int) type.alignOf() : 0;
++
+         String anonName = "anon_tmpl_" + Integer.toHexString(type.spelling().hashCode());
+-        return new ParsedStructure(anonName, fields, false, 0, category);
++        return new ParsedStructure(anonName, fields, false, 0, category, alignment);
+     }
+ 
+     private ParsedStructure parseAnonymousStruct(TypePool pool, Cursor structCursor, CategoryPath category) {

@@ -1475,9 +1475,9 @@
     "status": "OK"
   },
   "BGSDecalNode::RUNTIME_DATA": {
-    "actual": 25,
+    "actual": 32,
     "expected": 32,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BGSDecalNode_vtable": {
     "actual": 56,
@@ -5480,9 +5480,9 @@
     "status": "OK"
   },
   "BSShaderPropertyLightData": {
-    "actual": 36,
+    "actual": 40,
     "expected": 40,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "BSShaderProperty_vtable": {
     "actual": 256,
@@ -6785,9 +6785,9 @@
     "status": "OK"
   },
   "CombatEquipment": {
-    "actual": 44,
+    "actual": 48,
     "expected": 48,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "CombatEquippedItem": {
     "actual": 16,
@@ -6810,9 +6810,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "CombatInventory": {
-    "actual": 448,
+    "actual": 456,
     "expected": 456,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "CombatInventoryItem": {
     "actual": 48,
@@ -19285,7 +19285,7 @@
     "status": "NO_GROUND_TRUTH"
   },
   "Projectile::Manager": {
-    "actual": 108,
+    "actual": 112,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
@@ -20890,9 +20890,9 @@
     "status": "OK"
   },
   "SubtitleManager": {
-    "actual": 44,
+    "actual": 48,
     "expected": 48,
-    "status": "MISMATCH"
+    "status": "OK"
   },
   "SummonCreatureEffect": {
     "actual": 192,
@@ -25690,7 +25690,7 @@
     "status": "NO_GROUND_TRUTH"
   },
   "_Stop_state": {
-    "actual": 28,
+    "actual": 32,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },

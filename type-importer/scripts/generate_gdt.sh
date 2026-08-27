@@ -113,7 +113,8 @@ for patch in "$TYPE_IMPORTER_DIR"/patches/000{1,2,3,4,5,6,9}-*.patch \
              "$TYPE_IMPORTER_DIR"/patches/0023-*.patch \
              "$TYPE_IMPORTER_DIR"/patches/0024-*.patch \
              "$TYPE_IMPORTER_DIR"/patches/0025-*.patch \
-             "$TYPE_IMPORTER_DIR"/patches/0028-*.patch; do
+             "$TYPE_IMPORTER_DIR"/patches/0028-*.patch \
+             "$TYPE_IMPORTER_DIR"/patches/0029-*.patch; do
     patch -p1 < "$patch"
 done
 if [ "$JAVA_MAJOR" -ge 22 ]; then
