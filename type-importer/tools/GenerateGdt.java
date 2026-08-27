@@ -252,9 +252,19 @@ public class GenerateGdt {
         // (present=true, stillOutstanding=false, inDtmAlready=true) at both
         // small-header and full-1630-header scale -- committing to fileDtMgr
         // with 0 failures every time. See patches/0026-*.md.
+        // Enum is deliberately included too, for the same reason TypeDef was
+        // added above: a resolved, real ghidra.program.model.data.Enum (e.g.
+        // a nested `enum class Type` inside a non-template struct, like
+        // ByteCode::Argument::Type or INPUT_DEVICES::INPUT_DEVICE) is neither
+        // a Composite nor a TypeDef, so it was silently invisible to this
+        // report -- present in fileDtMgr, absent from both the CSV and
+        // unresolved.txt, misread by coverage_report.py as UNRESOLVED. The
+        // newer --report-json writer below (enumToJson) already handles
+        // Enum correctly; this CSV writer had fallen out of sync with it.
+        // See patches/0028-*.md.
         List<DataType> sorted = new ArrayList<>();
         for (DataType t : dataTypes) {
-            if (t instanceof Composite || t instanceof TypeDef) {
+            if (t instanceof Composite || t instanceof TypeDef || t instanceof ghidra.program.model.data.Enum) {
                 sorted.add(t);
             }
         }

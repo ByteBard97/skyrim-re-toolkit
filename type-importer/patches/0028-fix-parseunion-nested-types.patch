@@ -1,0 +1,35 @@
+diff --git a/src/main/java/playday3008/gcpp/processing/SourceParser.java b/src/main/java/playday3008/gcpp/processing/SourceParser.java
+index cc5ce52..90950c6 100644
+--- a/src/main/java/playday3008/gcpp/processing/SourceParser.java
++++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java
+@@ -377,7 +377,8 @@ public class SourceParser {
+         List<ParsedStructure.FieldInfo> fields = new ArrayList<>();
+ 
+         unionCursor.visitChildren((cursor, parent) -> {
+-            if (cursor.kind() == CursorKind.FIELD_DECL) {
++            CursorKind kind = cursor.kind();
++            if (kind == CursorKind.FIELD_DECL) {
+                 boolean isBitField = cursor.isBitField();
+                 int bitWidth = isBitField ? cursor.getBitFieldWidth() : 0;
+                 boolean isAnon = cursor.isAnonymous();
+@@ -405,6 +406,20 @@ public class SourceParser {
+                     isAnon,
+                     anonType
+                 ));
++            } else if (kind == CursorKind.STRUCT_DECL || kind == CursorKind.CLASS_DECL) {
++                // Named nested type declarations directly inside a union body
++                // (e.g. BGSRefAlias::GenericFillData::Padding, a struct
++                // declared inside union GenericFillData) -- unlike
++                // parseStruct, this visitor previously had no case for these
++                // at all, so they were silently never registered as
++                // standalone types. See patches/0028-*.md.
++                parseStruct(pool, cursor, category);
++            } else if (kind == CursorKind.UNION_DECL) {
++                parseUnion(pool, cursor, category);
++            } else if (kind == CursorKind.ENUM_DECL) {
++                parseEnum(pool, cursor, category);
++            } else if (kind == CursorKind.TYPEDEF_DECL || kind == CursorKind.TYPE_ALIAS_DECL) {
++                parseTypedef(pool, cursor, category);
+             }
+             return Cursor.ChildVisitResult.CONTINUE;
+         });

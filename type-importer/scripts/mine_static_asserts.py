@@ -137,6 +137,14 @@ def scan_file(path: Path, results: dict, ambiguous: dict, unevaluated: dict):
             return name
         if any(f["template"] for f in record_stack):
             return name  # old behavior for template scopes
+        # A static_assert(sizeof(SelfClassName) == N) written INSIDE its own
+        # class body (valid C++ via the injected-class-name rule) refers to
+        # the enclosing record itself, not a nested member -- qualifying it
+        # against its own innermost frame would double it up as
+        # "SelfClassName::SelfClassName" instead of just "SelfClassName".
+        # Real example: AutoRegisterFactory (patches/0028-*.md).
+        if name == record_stack[-1]["name"]:
+            return "::".join(f["name"] for f in record_stack)
         return "::".join(f["name"] for f in record_stack) + "::" + name
 
     def currently_active():
