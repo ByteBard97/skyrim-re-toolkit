@@ -1,0 +1,84 @@
+--- a/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-27 12:08:24.148479697 -0400
++++ b/src/main/java/playday3008/gcpp/processing/SourceParser.java	2026-08-27 12:08:24.106081445 -0400
+@@ -1227,13 +1227,41 @@
+             // clang_getTypeDeclaration on the RAW (non-canonical) field type
+             // returns a valid StructDecl cursor, exactly the precondition that
+             // code path already checks for.
+-            Type rawFieldType = fieldCursor.type().unwrap();
++            // A field whose type is a C-style array of a template-specialization
++            // element (e.g. BSTStaticFreeList<T,SIZE>'s own "BSTFreeListElem<T>
++            // elems[SIZE]") reports CONSTANT_ARRAY here, not RECORD/UNEXPOSED, so
++            // neither STRUCT_DECL/CLASS_DECL check below ever matched -- the same
++            // gap patch 0016 already closed for parseStruct's own top-level
++            // FIELD_DECL case, but never mirrored here in this recursive inline-
++            // embedding loop. Confirmed via T1-11: SkyrimVM/VirtualMachine's real
++            // ~33KB MISMATCH deltas trace to exactly this -- each has one or more
++            // BSTStaticFreeList<T,N> fields (4x in SkyrimVM, 1x in VirtualMachine),
++            // and BSTStaticFreeList's only own field is this SIZE-element array,
++            // which fell all the way through to the plain string-typeName path
++            // below and could never resolve (Ghidra's parser can't parse a raw
++            // template-syntax array-element type string), silently dropping the
++            // entire array -- confirmed via GCPP_DEBUG_DROPPED tracing: the field
++            // was never reported as dropped at the ENCLOSING struct's own level at
++            // all, because the loss happens one level deeper, inside this inlined
++            // BSTStaticFreeList sub-structure's own createDataType() call. Peel the
++            // array off first, exactly like patch 0016, so the same inline-embed
++            // logic applies to its element type, then re-wrap via arrayCount in
++            // ParsedStructure.createDataType (already supported since patch 0016,
++            // just never fed a nonzero value from this call site before).
++            int fieldArrayCount = 0;
++            Type unwrappedFieldType = fieldCursor.type().unwrap();
++            if (unwrappedFieldType.kind() == TypeKind.CONSTANT_ARRAY) {
++                fieldArrayCount = (int) unwrappedFieldType.arraySize();
++                unwrappedFieldType = unwrappedFieldType.arrayElementType().unwrap();
++            }
++
++            Type rawFieldType = unwrappedFieldType;
+             Cursor rawFieldDecl = rawFieldType.declaration();
+             CursorKind rawFieldDeclKind = (rawFieldDecl != null) ? rawFieldDecl.kind() : null;
+             if (rawFieldDeclKind == CursorKind.STRUCT_DECL || rawFieldDeclKind == CursorKind.CLASS_DECL) {
+                 ParsedStructure inlineType = parseFieldsFromType(rawFieldType, category);
+                 fields.add(new ParsedStructure.FieldInfo(
+-                    fieldCursor.spelling(), null, isBitField, bitWidth, true, inlineType));
++                    fieldCursor.spelling(), null, isBitField, bitWidth, true, inlineType, fieldArrayCount));
+                 return Type.FieldVisitResult.CONTINUE;
+             }
+ 
+@@ -1263,14 +1291,18 @@
+             // ObjectRefHandle members) by the same 4 bytes each. Recurse
+             // through the same inline-embedding mechanism, this time keyed
+             // off the CANONICAL type's own declaration cursor.
+-            Type canonicalFieldType = fieldCursor.type().canonicalType();
++            // Peeled (post-array-unwrap) element type used for the canonical check
++            // too, so an array-of-template-parameter field (e.g. some future
++            // "Handle slots[N]" shape) gets the same array-aware treatment as the
++            // raw check above, not just a plain array-of-templated-alias field.
++            Type canonicalFieldType = unwrappedFieldType.canonicalType();
+             Cursor canonicalFieldDecl = canonicalFieldType.declaration();
+             CursorKind canonicalFieldDeclKind = (canonicalFieldDecl != null) ? canonicalFieldDecl.kind() : null;
+             if (canonicalFieldType.spelling() != null && canonicalFieldType.spelling().contains("<")
+                 && (canonicalFieldDeclKind == CursorKind.STRUCT_DECL || canonicalFieldDeclKind == CursorKind.CLASS_DECL)) {
+                 ParsedStructure inlineType = parseFieldsFromType(canonicalFieldType, category);
+                 fields.add(new ParsedStructure.FieldInfo(
+-                    fieldCursor.spelling(), null, isBitField, bitWidth, true, inlineType));
++                    fieldCursor.spelling(), null, isBitField, bitWidth, true, inlineType, fieldArrayCount));
+                 return Type.FieldVisitResult.CONTINUE;
+             }
+ 
+@@ -1280,9 +1312,14 @@
+             // which is never independently registered as a resolvable type
+             // anywhere -- clang_getCanonicalType resolves through it to the
+             // real underlying type (e.g. "unsigned short"), which Ghidra's
+-            // DataTypeParser can actually find.
++            // DataTypeParser can actually find. Deliberately uses the
++            // ORIGINAL (unpeeled) field type here, not unwrappedFieldType --
++            // an array of a plain (non-template) element type is already
++            // handled correctly by TypePool's own ARRAY_SUFFIX regex on the
++            // full "Type [N]" spelling, so peeling it here would only lose
++            // the bracket TypePool depends on.
+             fields.add(new ParsedStructure.FieldInfo(
+-                fieldCursor.spelling(), canonicalFieldType.spelling(),
++                fieldCursor.spelling(), fieldCursor.type().canonicalType().spelling(),
+                 isBitField, bitWidth, false, null));
+             return Type.FieldVisitResult.CONTINUE;
+         });

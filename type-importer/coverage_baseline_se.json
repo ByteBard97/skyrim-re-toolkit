@@ -20495,7 +20495,7 @@
     "status": "NO_GROUND_TRUTH"
   },
   "SkyrimVM": {
-    "actual": 2208,
+    "actual": 34976,
     "expected": 35192,
     "status": "MISMATCH"
   },
@@ -24105,7 +24105,7 @@
     "status": "OK"
   },
   "VirtualMachine": {
-    "actual": 5392,
+    "actual": 38160,
     "expected": 38168,
     "status": "MISMATCH"
   },
