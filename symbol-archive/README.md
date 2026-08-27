@@ -49,7 +49,7 @@ each resulting `.gdt` as a workflow build artifact.
   `type-importer`'s own coverage sweep (see
   `../type-importer/COVERAGE_SWEEP_PLAN.md` and
   `../type-importer/coverage_baseline.json`) tracks this precisely — as
-  of the last full sweep, 2,092 of 3,146 checkable classes (66%) resolve
+  of the last full sweep, 2,097 of 3,183 checkable classes (66%) resolve
   byte-accurate; the rest are either a wrong size or resolve empty.
   A curated **hotspot list** of 39 commonly-modded classes (`TESForm`
   hierarchy, `Actor`/`Character`/`PlayerCharacter`, inventory, item
@@ -72,7 +72,9 @@ each resulting `.gdt` as a workflow build artifact.
    header, which pulls a real SKSE PCH that collides with
    `type-importer`'s layout-only stub — see `type-importer/DESIGN.md`).
 2. `type-importer/scripts/generate_gdt.sh` patches the vendored
-   `GhidraClangPoweredParse` extension (patches 0001-0019, 0021-0027, see
+   `GhidraClangPoweredParse` extension (patches 0001-0019, 0021-0025,
+   0028, plus tooling-only fixes 0026-0027 that don't touch the
+   submodule — see
    `type-importer/patches/`), builds it, and runs the patched parser
    against that full header list once per matrix runtime (currently
    `ENABLE_SKYRIM_AE`, `ENABLE_SKYRIM_SE`, `ENABLE_SKYRIM_VR`).
