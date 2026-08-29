@@ -60,7 +60,9 @@
   </div>
   <p style="font-size:0.85rem;color:var(--text-dim)">
     Both are real screenshots of a real, Steamless-unpacked <code>SkyrimSE.exe</code> (AE build 24604991) in
-    Ghidra 12.1.3 -- not mockups, not the same image edited twice. See
+    Ghidra 12.1.3 -- not mockups, not the same image edited twice. One visible artifact in the "after" shot:
+    <code>__RTDynamicCast()</code> on line 16 lost its call arguments -- a side effect of retyping this call in
+    isolation rather than a full RTTI-analysis pass, not a sign the applied types are wrong. See
     <a href="type-importer.html#demo">the full before/after writeup</a> for details.
   </p>
 
@@ -82,9 +84,9 @@
       <a class="card-cta" href="contributing.html">Contributing guide →</a>
     </div>
     <div class="card">
-      <h3>Watch for pre-built archives</h3>
-      <p>A CI pipeline builds AE/SE/VR type archives automatically. Early scaffold today -- see the accuracy caveat before trusting a class blindly.</p>
-      <a class="card-cta" href="symbol-archive.html">symbol-archive →</a>
+      <h3>Get the pre-built archives</h3>
+      <p>CI builds real AE/SE/VR type archives, published to a real release -- see the accuracy caveat before trusting a class blindly.</p>
+      <a class="card-cta" href="https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-2026-08-29">Download gdt-2026-08-29 →</a>
     </div>
     <div class="card">
       <h3>See the live game's internals</h3>
@@ -118,12 +120,12 @@
       <a class="card-cta" href="type-importer.html">Details →</a>
     </div>
     <div class="card">
-      <h3>2. symbol-archive <span class="badge badge-warn">early scaffold</span></h3>
+      <h3>2. symbol-archive <span class="badge badge-good">release published</span></h3>
       <p>CI-driven builds that publish pre-built <code>.gdt</code> archives per Skyrim runtime (AE/SE/VR), so you don't have to run the pipeline yourself.</p>
       <a class="card-cta" href="symbol-archive.html">Details →</a>
     </div>
     <div class="card">
-      <h3>3. runtime-harness <span class="badge badge-progress">three verified live, one open investigation</span></h3>
+      <h3>3. runtime-harness <span class="badge badge-progress">three verified live, one known non-working (off by default)</span></h3>
       <p>SKSE plugins that hook the AI scheduler, Havok physics, and savegame serializer for live state inspection -- RE-internals visibility, not gameplay-object tooling (see e.g. SkyLink AI/SkyrimNet for the latter).</p>
       <a class="card-cta" href="runtime-harness.html">Details →</a>
     </div>
