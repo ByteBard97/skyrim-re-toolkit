@@ -3,7 +3,7 @@
 **SKSE plugins for live Creation Engine state inspection — the toolkit's
 third pillar.**
 
-## Status: two of three inspectors verified in-game
+## Status: three verified live inspectors, one open investigation
 
 The directory contains a real SKSE plugin (`RuntimeHarness`) that builds
 against CommonLibSSE-NG, sets up file logging, logs the plugin + running

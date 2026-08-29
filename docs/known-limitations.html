@@ -42,6 +42,28 @@
     <a href="type-importer.html">type-importer</a> for the current OK/checkable counts.
   </div>
 
+  <div class="callout warn">
+    <strong>About the ~1,041 classes reported as "EMPTY" (resolved but 1 byte, 0 fields):</strong>
+    this is not the same as "wrong." A large share of them are C++ types that genuinely compile
+    to 1 byte by design — enum-only namespacing structs (e.g. <code>struct ACTOR_AGGRO_RADIUS { enum
+    { kWarn, kWarnAndAttack, kAttack }; };</code>, which really is <code>sizeof==1</code>), RAII lock
+    guards and utility classes with no data members. Of the full EMPTY bucket, only <strong>6 classes
+    have a header-provided <code>static_assert</code> proving the placeholder is actually wrong</strong>
+    — down from 9, after patch 0031 fixed the shared root cause behind 3 of them
+    (<code>BSReadLockGuard</code>/<code>BSWriteLockGuard</code>/<code>BSSpinLockGuard</code> each hold a
+    single reference-type (<code>T&amp;</code>) member; the parser had a branch to resolve a pointer-typed
+    field but none for a reference-typed one, so the field silently dropped). The remaining 6
+    (<code>AttachedScript</code>, <code>BGSNumericIDIndex</code>, <code>BSScrapArrayAllocator</code>,
+    <code>GFxFunctionHandler::Params</code>, <code>GFxResourceLib::ResourceSlot</code>, <code>LogEvent</code>)
+    were checked and are a different, unrelated mechanism (or several) — not chased further this pass,
+    per this project's own "two focused attempts, then defer" discipline. The other ~1,035 EMPTY entries
+    have no static_assert to check against either way — genuinely unverified, not confirmed either correct
+    or wrong. <code>coverage_report.py</code>'s sweep output now prints these as two separate sections
+    (<code>EMPTY, CONFIRMED WRONG</code> vs. <code>EMPTY, UNVERIFIED</code>) instead of one undifferentiated
+    bucket, so this distinction is checkable in every future sweep, not just asserted here. See
+    <a href="https://github.com/ByteBard97/skyrim-re-toolkit/blob/master/type-importer/patches/0031-fix-reference-type-fields.md">patches/0031</a>.
+  </div>
+
   <ul class="plain">
     <li>
       <strong>The patch-0008 cluster (deferred; reopening needs a fresh lead, not a retry).</strong>
