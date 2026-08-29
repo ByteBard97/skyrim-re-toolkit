@@ -54,10 +54,9 @@ each resulting `.gdt` as a workflow build artifact.
   Confirmed-wrong (MISMATCH) structs are additionally relocated into a
   `/NEEDS_VERIFICATION_MISMATCH` category — unmissable in the tree, not
   just a description tooltip you have to go looking for.
-  [`gdt-v2`](https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-v2)
-  and [`gdt-v1`](https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-v1)
-  remain available for anyone with an existing link to them, but v3 is the
-  one to download now.
+  (v1/v2, published and superseded within the same 90-minute window while
+  fixing early bugs before any real usage, were deleted rather than left
+  stacked up as confusing dead ends.)
 - **Accuracy**: **not every class in this archive is byte-accurate.**
   `type-importer`'s own coverage sweep (see
   `../type-importer/COVERAGE_SWEEP_PLAN.md` and
