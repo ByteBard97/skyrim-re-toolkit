@@ -64,8 +64,8 @@
   <p>
     <code>type-importer</code> and <code>symbol-archive</code> are Linux-native (Ghidra, libclang,
     GitHub Actions <code>ubuntu-latest</code> all work fine). <code>runtime-harness</code> is Windows +
-    MSVC only, no exceptions — see the repo's project notes before assuming a change there can
-    be tested on Linux.
+    MSVC only, no exceptions — SKSE plugins are Windows DLLs built against Skyrim's PE ABI and cannot
+    be built or tested on Linux.
   </p>
 
   <h2>Before opening a PR touching the parser</h2>
@@ -86,8 +86,8 @@
   <h2>Licensing</h2>
   <p>
     The toolkit code itself is MIT. Generated <code>.gdt</code>/<code>.til</code> archives are derived
-    from CommonLibSSE-NG headers and inherit its GPL-3.0 (+ modding exception) license — don't relicense
-    generated archives.
+    from CommonLibSSE-NG's headers, which are MIT-licensed — keep the attribution intact. The vendored
+    parser extension (GhidraClangPoweredParse) is Apache-2.0; patches to it stay Apache-2.0-compatible.
   </p>
 
   <div class="btn-row">
@@ -98,8 +98,8 @@
 </main>
 
 <footer>
-  <p>MIT-licensed toolkit code; generated type archives inherit CommonLibSSE-NG's GPL-3.0 (+ modding
-  exception) license.</p>
+  <p>MIT-licensed toolkit code; generated type archives are derived from CommonLibSSE-NG's MIT-licensed
+  headers (attribution preserved).</p>
   <p>
     <a href="https://github.com/ByteBard97/skyrim-re-toolkit">GitHub</a> ·
     <a href="https://github.com/ByteBard97/skyrim-re-toolkit/issues">Issues</a> ·

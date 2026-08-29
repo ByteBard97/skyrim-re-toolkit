@@ -12,7 +12,7 @@ and no server: open `index.html` in a browser (or host it on GitHub Pages).
 
 `index.html` is generated and self-contained (data inlined); it is safe to
 commit and to serve statically. It carries no game code or assets — only
-field names, offsets, and sizes derived from CommonLibSSE-NG (GPL-3.0).
+field names, offsets, and sizes derived from CommonLibSSE-NG (MIT).
 
 ## Regenerate
 
@@ -27,8 +27,15 @@ python3 ../../type-importer/scripts/mine_static_asserts.py \
   ../../type-importer/vendor/CommonLibSSE-NG/include --json /tmp/ae_sizes.json
 
 # 3. build the page (filters out stdlib/Windows-SDK noise, adds verification badges)
-python3 build.py /tmp/types.json /tmp/ae_sizes.json --patchset 0001-0015
+python3 build.py /tmp/types.json /tmp/ae_sizes.json --patchset 0001-0030
 ```
+
+Note: the page's "verified" count is computed by name-matching the *dumped
+archive* against the mined `static_assert`s, and reads slightly lower than the
+coverage sweep's OK count for the same patchset — the sweep also counts
+typedef-of-template aliases (`BSString` etc.) and enum entries that the dump
+renders as different kinds. The sweep numbers in the READMEs are authoritative;
+this page is a browser, not the scoreboard.
 
 ## Files
 

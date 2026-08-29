@@ -85,8 +85,18 @@
     its own <code>static_assert</code>, gated in CI so a change can never silently regress a previously-correct
     class:
   </p>
+  <div class="callout">
+    <strong>What "byte-accurate" means, precisely:</strong> the generated struct's total
+    <code>sizeof</code> exactly matches the size the header's own <code>static_assert</code> demands for
+    that runtime. It is a size check, not a per-field diff — two different field layouts can share a total
+    size, so this can't catch a wrong layout that happens to add up. Field offsets are additionally
+    hand-verified for the core <code>TESForm</code>→<code>TESObjectREFR</code> chain and cross-checked
+    against the <em>running game</em> for 11 hotspot classes by runtime-harness's LayoutValidator, but are
+    not independently verified for every class. Classes with no <code>static_assert</code> in the headers
+    are reported as unverifiable, never counted as accurate.
+  </div>
   <div class="stat-grid">
-    <div class="stat"><span class="num">2,097 / 3,183</span><span class="label">classes byte-accurate (66%)</span></div>
+    <div class="stat"><span class="num">2,102 / 3,183</span><span class="label">classes byte-accurate (66%)</span></div>
     <div class="stat"><span class="num">37 / 39</span><span class="label">"hotspot" (modder-relevant) classes byte-exact</span></div>
     <div class="stat"><span class="num">3</span><span class="label">runtimes validated: AE 1.6.1170, SE 1.5.97, VR 1.4.15</span></div>
     <div class="stat"><span class="num">100%</span><span class="label">of CommonLibSSE-NG's declared Address Library IDs resolve in real DBs</span></div>
@@ -97,7 +107,7 @@
     the actual <code>REL::RelocateMember</code> call sites in source — instead of silent 1-byte placeholders.
   </p>
   <div class="callout warn">
-    <strong>Not every class is byte-accurate.</strong> The remaining 32% is either the wrong size or resolves
+    <strong>Not every class is byte-accurate.</strong> The remaining 34% is either the wrong size or resolves
     empty — this is tracked openly, not hidden. The largest formerly-dominant cause (a vtable-detection blind
     spot for template-specialization bases, ~68% of all mismatches at its peak) is now mostly fixed. What's
     left is smaller and more varied: container-template field embedding still not fully inline-embedded, and
@@ -159,8 +169,8 @@ LD_LIBRARY_PATH=/path/to/dir-containing-libclang.so \
 </main>
 
 <footer>
-  <p>MIT-licensed toolkit code; generated type archives inherit CommonLibSSE-NG's GPL-3.0 (+ modding
-  exception) license.</p>
+  <p>MIT-licensed toolkit code; generated type archives are derived from CommonLibSSE-NG's MIT-licensed
+  headers (attribution preserved).</p>
   <p>
     <a href="https://github.com/ByteBard97/skyrim-re-toolkit">GitHub</a> ·
     <a href="https://github.com/ByteBard97/skyrim-re-toolkit/issues">Issues</a> ·

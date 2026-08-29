@@ -122,7 +122,7 @@ classes under `ENABLE_SKYRIM_AE` — an artifact of C++ struct-alignment
 padding rules for a trailing empty member that this tool doesn't
 currently replicate (Ghidra computes `0x70`, ending exactly where
 `extraList`'s own zero-length contribution leaves it, rather than the
-`0x78` a real compiler pads out to). This is not a new bug from tonight's
+`0x78` a real compiler pads out to). This is not a new bug from this patch's
 work — it's the same "invisible relocated member" pattern already
 extensively documented in `DESIGN.md`'s TESObjectREFR field-map section
 (the true game object size is larger than any of these numbers, due to

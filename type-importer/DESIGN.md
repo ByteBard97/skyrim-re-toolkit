@@ -259,20 +259,23 @@ output.
 
 ## Licensing note
 
-Unchanged from v0.1: generated `.gdt` files are treated as GPL-3.0 (inherited from
-CommonLibSSE-NG), attributed to the source commit hash. `type-importer/` tooling
-itself is MIT.
+Generated `.gdt` files are derived from CommonLibSSE-NG's headers, which are
+MIT-licensed (CharmedBaryon/CommonLibSSE-NG — check the vendored `LICENSE` file,
+not folklore: some *other* CommonLib forks are GPL-3.0, this one is not).
+Archives are attributed to the source commit hash and keep the MIT attribution.
+`type-importer/` tooling itself is MIT. The vendored `GhidraClangPoweredParse`
+extension is Apache-2.0; the patches applied to it remain Apache-2.0-compatible.
 
 ## Toolchain note (Linux-native validation)
 
-Confirmed no system `clang` binary, only `libclang-14` shared libs (Ubuntu jammy).
-No passwordless `sudo` available in this environment, so system package
-installation isn't an option — using user-local prebuilt LLVM releases instead
-(no root required): `clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04` first
-(failed to run — linked against `libtinfo.so.5`, which doesn't exist on this
-system and isn't ABI-compatible with the `libtinfo.so.6` that is installed), now
-retrying with `LLVM-19.1.0-Linux-X64.tar.xz` (a more recent, more portable
-build). Both installed under `~/.local/tools/`, not the system.
+Distro-packaged libclang is typically too old (e.g. Ubuntu jammy ships
+`libclang-14`, which MSVC's STL headers reject). A user-local prebuilt LLVM
+release works without root. Note that older release tarballs can have their own
+portability problems: `clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04` links
+against `libtinfo.so.5`, absent on current distros and not ABI-compatible with
+the installed `libtinfo.so.6`. `LLVM-19.1.0-Linux-X64.tar.xz` (the newer, more
+portable build) works out of the box — install under `~/.local/tools/` or
+similar, no system packages needed.
 
 **CONFIRMED (2026-08-24):** `clang-cl` from `LLVM-19.1.0-Linux-X64` (user-local
 install under `~/.local/tools/`, defaults its target to
@@ -389,7 +392,7 @@ STL surface actually used in class layouts (`<cstdint>`, `<utility>` for
   writeup for the precise explanation, which ties directly back to the
   "invisible relocated member" pattern already documented above).
 - Third-party tool bugs found and fixed in `GhidraClangPoweredParse`
-  tonight, beyond the redundant-vptr one below: **forward-declaration
+  during bring-up, beyond the redundant-vptr one below: **forward-declaration
   overwrite** — `TypePool.addParsedType` let a later, empty forward
   declaration of an already-fully-parsed class silently clobber the real
   definition with no diagnostic (extremely common pattern; CommonLibSSE-NG

@@ -3,7 +3,7 @@
 # builds it, compiles tools/GenerateGdt.java against it, runs it, and reverts
 # the submodule back to pristine afterward.
 #
-# This is the reusable form of the ad hoc test harnesses used tonight to
+# This is the reusable form of the ad hoc test harnesses originally used to
 # develop and verify patches/0001 through 0005 -- see type-importer/DESIGN.md
 # and type-importer/patches/*.md for the full investigation behind why each
 # of these pieces is needed.

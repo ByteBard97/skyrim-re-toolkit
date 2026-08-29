@@ -1,7 +1,7 @@
 # Patch 0007: inline base classes of class-template-specialization fields/bases
 
-**SUPERSEDED (2026-08-26, patch 0025).** Reopened per the user's direct
-go-ahead. First finding: the architecture this doc describes no longer
+**SUPERSEDED (2026-08-26, patch 0025).** Deliberately reopened with a
+fresh angle. First finding: the architecture this doc describes no longer
 exists -- patches 0011-0018 reworked template-field/base handling into a
 purely recursive inline-embed-by-value scheme, and `anon_tmpl_*` is now
 just a cosmetic debug name, never a `TypePool` lookup key -- so the

@@ -21,9 +21,8 @@ updates:
   # could also silently apply cleanly while no longer doing what the
   # patch intended -- not something to risk auto-PRing without a human
   # first checking upstream's changelog). Bump it manually if/when
-  # needed, following the coordination note in
-  # type-importer/TRACK1_TYPE_IMPORTER.md (check with the user first --
-  # runtime-harness's build depends on the vendored tree staying stable).
+  # needed (runtime-harness's build depends on the vendored tree staying
+  # stable, so review both subprojects before bumping).
   #
   # `directory: "/"` + gitsubmodule tracks EVERY submodule listed in the
   # repo's single root .gitmodules file -- there is no per-submodule

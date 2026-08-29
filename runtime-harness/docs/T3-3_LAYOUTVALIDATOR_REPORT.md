@@ -11,7 +11,7 @@ three-way diff, 2026-08-26. Real log evidence:
    two real bugs (see below), not cosmetic ones.
 2. Deployed the built DLL to the Windows box's live Skyrim AE 1.6.1170 +
    SKSE64 install, replacing the long-running three-inspector build from
-   earlier tonight.
+   earlier the same day.
 3. Got a full compile-time `LAYOUT` report (11/11 classes) and, after
    fixing a second real bug (a message-listener conflict), a full live
    `ADDR`/`LIVE` report too.
@@ -253,7 +253,7 @@ described in Addendum 1 above.
 
 ## Addendum 3: the real vtable-pointer identity check (T3-7, build 8, same session)
 
-Closed the one item left open by Addendum 1's reclassification, following
+Closed the one item left open by Addendum 1's reclassification.
 `RE::VTABLE_PlayerCharacter`
 (`Offsets_VTABLE.h`) is a 17-entry array — one `REL::VariantID` per base
 subobject in `PlayerCharacter`'s inheritance chain. Only slot `[0]`
@@ -287,7 +287,7 @@ This closes every item from the original `LAYOUT_VALIDATOR.md` TODO list.
 ## Housekeeping note
 
 Deploying this build required killing the previous long-running
-`SkyrimSE.exe` process (the one from earlier tonight's `AIProcessInspector`/
+`SkyrimSE.exe` process (the one from the earlier `AIProcessInspector`/
 `SavegameTracer`/`HavokStepLogger` session, ~26,800s+ accumulated CPU) to
 overwrite the loaded DLL. That process's 70+-minute `HavokStepLogger`
 silence run was already concluded and documented in `README.md` before

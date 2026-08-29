@@ -76,7 +76,7 @@
       SKSE-community reference for Havok hooking) has zero references to <code>bhkCharacterState</code> or
       <code>hkpCharacterState</code> anywhere in its ~2,200-line hooking code — it hooks
       <code>RE::bhkWorld</code>'s physics-step function directly via a mid-function Xbyak trampoline
-      instead of vtable-hooking the state machine. No serious working plugin uses this project's approach.
+      instead of vtable-hooking the state machine — the standard community reference doesn't use this project's approach, which is likely why it's silent.
       Scoped follow-on, not attempted: rebuild Precision-style, which needs Xbyak enabled in this project's
       build (currently off) plus a vcpkg dependency and re-verified offsets — a real feature task, not a
       quick fix.</p>
@@ -120,8 +120,8 @@
 </main>
 
 <footer>
-  <p>MIT-licensed toolkit code; generated type archives inherit CommonLibSSE-NG's GPL-3.0 (+ modding
-  exception) license.</p>
+  <p>MIT-licensed toolkit code; generated type archives are derived from CommonLibSSE-NG's MIT-licensed
+  headers (attribution preserved).</p>
   <p>
     <a href="https://github.com/ByteBard97/skyrim-re-toolkit">GitHub</a> ·
     <a href="https://github.com/ByteBard97/skyrim-re-toolkit/issues">Issues</a> ·

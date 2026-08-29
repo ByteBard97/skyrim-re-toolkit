@@ -1,9 +1,6 @@
 # Contributing
 
-Thanks for considering it. This project's design principle, ground rules, and
-working conventions are documented in the project notes — read that
-first; it's the actual source of truth (kept up to date as the project's
-internal engineering guide, not written as marketing copy).
+Thanks for considering it.
 
 ## Short version
 
@@ -14,24 +11,25 @@ internal engineering guide, not written as marketing copy).
   (`type-importer`, `symbol-archive`, `runtime-harness`).
 - **Ground rules are binding, not suggestions**: no console exploits, no DRM
   circumvention, no redistribution of game binaries/PDBs/copyrighted assets.
-  Every type or offset must be derivable from public community sources, not
-  from acquiring or dumping Bethesda's own build artifacts. See the project notes'
-  "Ground rules" section for the full list.
+  Every type or offset must be derivable from public community sources
+  (CommonLibSSE-NG, the Address Library, RTTI), not from acquiring or dumping
+  Bethesda's own build artifacts.
 - **Platform split matters**: `type-importer` and `symbol-archive` are
-  Linux-native (Ghidra, libclang, CastXML, GitHub Actions `ubuntu-latest` all
-  work fine); `runtime-harness` is Windows + MSVC only, no exceptions — see
-  the project notes' "Platform constraints" section before assuming a change can
-  be tested on Linux.
+  Linux-native (Ghidra, libclang, and GitHub Actions `ubuntu-latest` all
+  work fine); `runtime-harness` is Windows + MSVC only, no exceptions —
+  SKSE plugins are Windows DLLs built against Skyrim's PE ABI and cannot
+  be built or tested on Linux/Proton.
 - **Don't invent offsets, struct layouts, or version numbers.** Pull them
   from CommonLibSSE-NG or the Address Library, or open an issue if the
   source isn't available to you.
 - **Don't commit generated type archives** (`.gdt`/`.til`) or built
   binaries — see `.gitignore`. These are CI-published artifacts (GitHub
   Releases), not source.
-- Licensing: the toolkit code itself is MIT (see `LICENSE`), but generated
-  `.gdt`/`.til` archives are derived from CommonLibSSE-NG headers and
-  inherit its GPL-3.0 (+ modding exception) license. Don't relicense
-  generated archives.
+- Licensing: the toolkit code is MIT (see `LICENSE`). Generated `.gdt`/`.til`
+  archives are derived from [CommonLibSSE-NG](https://github.com/CharmedBaryon/CommonLibSSE-NG)
+  headers, which are themselves MIT-licensed — keep the attribution intact.
+  The vendored parser extension (`GhidraClangPoweredParse`) is Apache-2.0;
+  patches to it under `type-importer/patches/` stay Apache-2.0-compatible.
 
 ## Before opening a PR
 

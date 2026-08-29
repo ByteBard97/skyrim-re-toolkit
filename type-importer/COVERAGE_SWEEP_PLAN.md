@@ -14,7 +14,7 @@ a wrong size, and which don't resolve at all — so the next round of fixes
 (or the next round of manual header curation) has a concrete, prioritized
 list instead of guessing.
 
-This is the natural next step after tonight's work got
+This is the natural next step after the initial bring-up got
 `TESForm`/`TESObject`/`TESBoundObject`/`TESObjectREFR` to byte-accurate
 layouts: the same machinery should now work broadly, but "should" isn't
 "does" until it's actually run against the other ~1000+ classes in the
@@ -28,7 +28,7 @@ into a new script, `scripts/mine_static_asserts.py`:
 - Scan every `.h` file under `CommonLibSSE-NG/include/RE/`.
 - Match `static_assert(sizeof(ClassName) == 0xNN);` (and the `sizeof(X) ==
   N` decimal form) — but **respect the `#ifndef ENABLE_SKYRIM_AE` /
-  `#ifdef` guards** we learned about the hard way tonight (`TESObjectREFR`
+  `#ifdef` guards** learned about the hard way during initial bring-up (`TESObjectREFR`
   and `BaseExtraList` both have version-gated asserts). The script should
   record, per class, a list of `(expected_size, guard_condition)` pairs
   rather than a single number, and mark which guard corresponds to our
@@ -44,7 +44,7 @@ into a new script, `scripts/mine_static_asserts.py`:
 against the real headers:** 2024 classes have an AE-applicable
 `static_assert(sizeof(...))` — good coverage, not a small sample. 21 have
 sizeof asserts only for other runtimes (`TESObjectREFR` and
-`BaseExtraList` among them, matching tonight's manual finding). 0 sit
+`BaseExtraList` among them, matching the initial manual finding). 0 sit
 behind an unrecognized preprocessor guard.
 
 **Real finding, not a script bug:** 23 short, generic names (`Data`,
@@ -71,7 +71,7 @@ set at all* (fully-forward-declared-only, or blocked on something
 upstream).
 
 Keep the existing named-struct debug printing behind a flag for
-backwards compatibility with tonight's manual testing.
+backwards compatibility with the initial manual testing.
 
 ## Step 3 — Batch headers, don't do one-clang-TU-per-header
 
@@ -82,14 +82,14 @@ only make sense with their dependencies already visited). Instead:
 - Build the umbrella file the same way `SourceParser.parseFiles` already
   does internally — but from **all** headers in `RE/`, in one pass.
   **Do NOT use `RE/Skyrim.h`** — its first line is `#include
-  "SKSE/Impl/PCH.h"`, the exact header tonight's work spent hours
+  "SKSE/Impl/PCH.h"`, the exact header the initial bring-up spent hours
   routing around (it pulls spdlog → real `<windows.h>` → trips
   `REX/W32/BASE.h`'s own "Windows API detected" guard; `stubs/layout_pch.h`
   exists specifically to replace it). Enumerate headers ourselves instead
   — `find include/RE -name '*.h'` — and force-include our own stub as
   usual. Headers are `#pragma once`-guarded and self-including, so
   enumeration order shouldn't matter.
-- **Risk:** pulling in far more than our four-header slice did tonight
+- **Risk:** pulling in far more than the initial four-header slice did
   (thousands of declarations) — expect new stub gaps in
   `stubs/layout_pch.h` to surface (new SIMD intrinsics, new STL surface,
   possibly new REX::W32 pieces). Budget time for iterating on the stub,
@@ -112,7 +112,7 @@ New script, `scripts/coverage_report.py` (or fold into
 - For each class requested but never resolved: ⚠️ unresolved
 - **🔴 resolved-but-empty** (added per advisor review): size ≤ 1 with an
   expected size > 1. This is the actual failure signature hit five times
-  tonight — `TESForm` came back *resolved, present, and size `0x1`* before
+  during bring-up — `TESForm` came back *resolved, present, and size `0x1`* before
   each fix, which is neither "mismatch" (not subtly wrong, it's a
   placeholder) nor "unresolved" (it's in the pool). Sort this bucket
   first; it's the highest-signal list. Classes with no AE `static_assert`
@@ -173,7 +173,7 @@ structs/unions):
   to `Composite` (struct/union) types only.
 - **Major finding**: on this subset, **928 of 1502 composites (62%)
   resolve EMPTY** (size ≤ 1) — far worse than the four hand-picked,
-  hand-verified classes from tonight's earlier work suggested. This is
+  hand-verified classes from the earlier manual work suggested. This is
   the actionable, prioritized output the sweep exists to produce; root-
   causing it is explicitly out of scope for this plan (see below) and is
   patch-0006+ work.
@@ -192,7 +192,7 @@ structs/unions):
     **311 (11%)** come back byte-accurate. 1113 resolve to a *wrong*
     non-trivial size (not a placeholder — genuinely miscounted fields or
     inheritance) and 1390 resolve empty. This is a much starker picture
-    than tonight's four hand-verified classes suggested, and is exactly
+    than the initial four hand-verified classes suggested, and is exactly
     the prioritized punch list this plan set out to produce.
   - Full report: `scripts/coverage_report.py` output cross-referencing
     `mine_static_asserts.py`'s ground truth against

@@ -199,10 +199,9 @@ Two viable deployments, not mutually exclusive:
 
 **A. On the Windows build machine, alongside the game.** Simplest data
 path (local file read, no transfer lag), but ties the MCP server's
-lifecycle to a box this project already treats as a scarce, gated resource
-(BACKLOG.md: "Do NOT touch the Windows box unless... acting on the user's
-direct word"). Fine for the person actually at the keyboard there; not
-reachable from the Linux-side agent workflow this project mostly runs.
+lifecycle to a box this project already treats as a scarce, gated resource.
+Fine for the person actually at the keyboard there; not reachable from the
+Linux-side workflow this project mostly runs.
 
 **B. On the Linux dev box, reading the log over the existing SSH channel.**
 Matches how every other Windows-box interaction in this project already
@@ -297,7 +296,7 @@ purely a log reader, matching the read-only non-goal above.
 Status: pre-implementation, no code written. This section supersedes v0.1's
 "Not a control interface" non-goal for a narrow, explicitly-scoped reason:
 **real session friction, not a feature wishlist.** Tonight's work needed
-Geoff to physically press Continue at the main menu and be present at the
+a human to physically press Continue at the main menu and be present at the
 Windows box for anything past that — a load-a-save action that has nothing
 to do with reverse-engineering and everything to do with this box being
 remote. v0.2 exists to remove that specific friction, not to build a
@@ -312,7 +311,7 @@ which already cites both). Not adopted here because:
 
 - **Scope mismatch.** Both target *gameplay*-object control for AI-NPC
   systems (dialogue, quests, world state as game content). This project's
-  actual need tonight was *test-harness* control: load a specific save,
+  actual need during the live test session was *test-harness* control: load a specific save,
   put the player near a target class instance, nothing about NPC behavior
   or quest state.
 - **Attack surface.** A 40-70+ tool general console-command-passthrough
@@ -325,12 +324,12 @@ which already cites both). Not adopted here because:
   v0.1, reused here regardless of process architecture. (An earlier
   version of this bullet also credited SkyLink AI's separate-process
   split as adopted; the "Architecture" section below now runs everything
-  in-process instead, per the user's explicit no-separate-process
-  preference — see that section's own superseded note for why.)
+  in-process instead, per the project's firm no-separate-process
+  requirement — see that section's own superseded note for why.)
 
-## Addendum: reviewing a user-supplied research report against the real headers
+## Addendum: reviewing an external research report against the real headers
 
-Geoff shared an external research report surveying MCP-in-Skyrim
+An external research report surveying MCP-in-Skyrim was shared
 architecture options. Per this project's standing discipline (verify
 against the real vendored headers before writing anything into this doc
 as fact), each claim was checked rather than transcribed:
@@ -357,7 +356,7 @@ as fact), each claim was checked rather than transcribed:
   `CommonLibSSE-NG/include` tree for `ConsoleUtil` and `ExecuteCommand`:
   zero matches. This class/method may exist in a different CommonLibSSE-NG
   version or fork than what's vendored here, but this project only trusts
-  what's actually in the vendored headers (project rule) — so this
+  what's actually in the vendored headers — so this
   doc does not adopt console-command execution as a mechanism until that
   API is confirmed present. The command set above already avoids needing
   it (direct API calls instead).
@@ -367,11 +366,11 @@ as fact), each claim was checked rather than transcribed:
   vendored), but the only members present in this vendored version are
   `GetDeviceKeyMapping`/`GetDeviceMappedKeycode` — read-only key-mapping
   queries, no `SendEvent`/injection method of any kind. This is a real,
-  unsolved need (tonight's actual friction was exactly this: a human
+  unsolved need (the live session's actual friction was exactly this: a human
   pressing Continue at the main menu) but this doc does NOT claim a
   mechanism for it that isn't in the headers. `load_save`'s two API-level
   methods (`Load`/`LoadMostRecentSaveGame`) already solve the *save
-  loading* half of tonight's friction without needing any menu navigation
+  loading* half of that friction without needing any menu navigation
   at all — this gap is narrower than it first sounds. True main-menu UI
   automation (if ever needed) is left as an open question for a future
   pass, not guessed at here.
@@ -390,8 +389,8 @@ as fact), each claim was checked rather than transcribed:
 
 The section originally here proposed a two-process split (thin plugin-side
 pipe listener + a separate Python MCP process on the Linux box). That
-framing was wrong: the user has stated **twice**, directly, that a separate
-MCP server process is not wanted. The real constraint was mischaracterized
+framing was wrong: a separate MCP server process is firmly out — a hard
+project requirement, stated twice. The real constraint was mischaracterized
 as "in-process vs. separate process" when it's actually "stdio vs. network
 transport" — stdio genuinely can't work embedded in Skyrim (stdout isn't a
 clean pipe once the engine/loader are writing to the console too, so a
@@ -443,8 +442,8 @@ the full MCP protocol layer in-process means a bug in that layer (a
 malformed request, a parsing crash, a threading bug in the queue) can
 crash Skyrim itself — unlike the superseded two-process design, where a
 bug in the protocol layer would take down a Python process on the Linux
-box, not the game. This is a real cost of the user's stated
-no-separate-process preference, not a hidden one. Mitigated, not
+box, not the game. This is a real cost of the no-separate-process
+requirement, not a hidden one. Mitigated, not
 eliminated, by: the MCP thread never calling `RE::*` directly (all game
 mutation happens through the queued/main-thread path, so a protocol-layer
 bug can't corrupt game state directly, only crash the plugin's own
@@ -458,14 +457,14 @@ is now a concretely relevant reference for the embedded HTTP/SSE-or-
 WebSocket server thread this architecture needs, not just a named-pipe
 alternative for a separate-process design that no longer exists.
 
-## Command set — each one tied to a real friction point from tonight, not a wishlist
+## Command set — each one tied to a real friction point from live testing, not a wishlist
 
 Every command below is backed by a real CommonLibSSE-NG API already
 present in the vendored headers (checked, not invented) or explicitly
 flagged as not yet confirmed.
 
-- **`load_save(filename_or_index)`** — solves tonight's actual blocker
-  (Geoff needing to press Continue by hand). Backed by
+- **`load_save(filename_or_index)`** — solves the live session's actual blocker
+  (a human needing to press Continue by hand). Backed by
   `BGSSaveLoadManager::Load(const char* a_fileName)` (real,
   `RE/B/BGSSaveLoadManager.h:87`) or `LoadMostRecentSaveGame()` (same
   file, `:90`) for the common "just continue" case — both real, existing
@@ -573,10 +572,10 @@ relevant to everything v0.1/v0.2 above set out to build:
 | What v0.1/v0.2 designed | What devbench already ships |
 |---|---|
 | Read-only log-tailing with `stale_seconds` honesty (v0.1) — because `RuntimeHarness` only writes a file | `inspect` tool: **synchronous, live** state reads (`scene`, `player`, `inventory`, `quests`, `effects`, `refs`, `mods`, `vm`) run on the main thread and return the real value *now*, not a log-tail snapshot from N seconds ago. Strictly better ground truth than what v0.1 could ever offer without new plugin IPC work. |
-| `load_save`/`get_control_status` (v0.2) — new C++, `BGSSaveLoadManager::Load` marshaled through a hand-built pipe/WebSocket server | `game action='loadLast'` / `action='load'` — already built, already exposed. **This is tonight's exact friction point** (a human needing to press Continue), already solved, zero new code required on our side. |
+| `load_save`/`get_control_status` (v0.2) — new C++, `BGSSaveLoadManager::Load` marshaled through a hand-built pipe/WebSocket server | `game action='loadLast'` / `action='load'` — already built, already exposed. **This is the exact friction point from live testing** (a human needing to press Continue), already solved, zero new code required on our side. |
 | `teleport_player_to` (v0.2) — new C++, `TESObjectREFR::MoveTo` | `console` tool (`player.moveto`/`coc`/`setpos` etc., with real output capture via the marker-fence technique) already covers this, and more generally than one hand-picked API call would. |
 | An embedded MCP protocol server, threading model, request queue, transport choice (the entire "Architecture (revised)" section above) | Already built and running: `ToolRegistry` + `McpAdapter`/`RestAdapter` over one `httplib` server, `MainThread::RunAndWait` for the exact same "marshal to main thread, return synchronously" pattern this doc's own revision converged on independently. Confirms that pattern was the right one to converge on — but it doesn't need re-implementing. |
-| Guessed-sleep session automation ("wait for the main menu to settle") | `scenario` tool with `waitFor` steps keyed on real Skyrim lifecycle events (`waitFor lifecycle:postLoadGame`) instead of a fixed delay — exactly the class of problem tonight's Continue-press friction belongs to, solved generally. |
+| Guessed-sleep session automation ("wait for the main menu to settle") | `scenario` tool with `waitFor` steps keyed on real Skyrim lifecycle events (`waitFor lifecycle:postLoadGame`) instead of a fixed delay — exactly the class of problem the Continue-press friction belongs to, solved generally. |
 
 ## What this project still owns, and what changes
 
@@ -621,8 +620,8 @@ devbench the plugin is GPL-3.0; we never link against or redistribute its
 GPL-3.0 code. The integration surface we'd actually consume
 (`DevBenchAPI.h`/`.cpp`) is separately, deliberately MIT-licensed by
 devbench's own author specifically so consumers avoid that entanglement —
-the same GPL-boundary reasoning this project already applies to
-CommonLibSSE-NG-derived `.gdt` archives (GPL-3.0 inherited) vs. the
+the same license-boundary discipline this project already applies to
+CommonLibSSE-NG-derived `.gdt` archives (MIT, attribution kept) vs. the
 toolkit's own code (MIT), just running the other direction here (we
 consume an MIT surface in front of someone else's GPL-3.0 plugin, rather
 than us being the GPL-3.0-derived side).
@@ -659,7 +658,7 @@ serves live queries.
    tool (e.g. `AIProcessInspector`'s current-package data) returns live,
    correct data via a real MCP call — and separately, confirm
    `game action='loadLast'` alone (no `RuntimeHarness` code involved)
-   actually solves tonight's original friction end-to-end.
+   actually solves the original friction end-to-end.
 
 ## Work breakdown (v0.3, replaces v0.2's T3-8 scope)
 

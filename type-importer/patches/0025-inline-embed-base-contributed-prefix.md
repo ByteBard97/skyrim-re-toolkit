@@ -5,8 +5,8 @@
 Patch 0007 ("inline base classes of class-template-specialization fields/
 bases") was deferred after two attempts, both blocked by what its own
 writeup concluded was a scale-dependent registration-order bug in
-`anon_tmpl_*` synthetic-type keying. Reopening that cluster this session
-(per the user's direct go-ahead) started by re-reading 0007's own
+`anon_tmpl_*` synthetic-type keying. Reopening that cluster — a deliberate
+decision, not a blind retry — started by re-reading 0007's own
 "recommendation for whoever picks this up next" -- but the codebase has
 been substantially restructured since 0007 was written (patches
 0011-0018 reworked template-field/base handling into a purely recursive

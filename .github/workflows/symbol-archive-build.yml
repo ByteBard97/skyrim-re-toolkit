@@ -26,7 +26,7 @@ name: symbol-archive build (AE/SE/VR)
 #
 # Toolchain versions match type-importer-coverage.yml (keep them in sync
 # if either is bumped): Ghidra 12.1.3, LLVM/libclang 19.1.0, JDK 25
-# (Temurin), xwin 0.10.0. Fully Linux-native.
+# (Temurin), xwin 0.10.0. Fully Linux-native — no Windows runner needed.
 
 on:
   workflow_dispatch:

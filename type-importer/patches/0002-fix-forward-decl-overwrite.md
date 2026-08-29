@@ -94,7 +94,7 @@ as a struct field) ahead of time, any class using one as a field member
 will never resolve through this tool, regardless of how correct everything
 else is.**
 
-## Next step this points to — one attempt made tonight, didn't work
+## Next step this points to — one attempt made, didn't work
 
 Wiring `generate_forced_instantiations.py`'s output into the actual
 `SourceParser.parseFiles` call was the obvious next step, so one attempt
@@ -130,7 +130,7 @@ namespace at all — plausible culprits, untested:
   enumerated as a syntactic child of the namespace the way an explicit
   declaration is.
 
-**Not chased further tonight** — this needs actual investigation (dumping
+**Not chased further in this pass** — this needs actual investigation (dumping
 the AST via `clang -Xclang -ast-dump` for a minimal repro of `using X =
 SomeTemplate<Args>; sizeof(X);` to see whether/how the instantiation shows
 up as a cursor, then checking whether `-fdelayed-template-parsing` changes

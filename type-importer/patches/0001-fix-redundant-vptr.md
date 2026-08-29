@@ -1,6 +1,6 @@
 # Patch 0001: fix redundant vptr field in GhidraClangPoweredParse
 
-**Status: written, applied, and functionally verified end-to-end tonight
+**Status: written, applied, and functionally verified end-to-end
 (2026-08-24) against a real build of the extension using JDK 21 and Ghidra
 12.1.3. This is the "redundant-vptr bug on polymorphic derived classes"
 flagged as an unresolved known limitation in DESIGN.md.**
@@ -113,7 +113,7 @@ patch -p1 < ../../patches/0001-fix-redundant-vptr.patch
 
 Verified to apply cleanly against the submodule's current pinned commit.
 
-## Toolchain notes for reproducing the build/test tonight
+## Toolchain notes for reproducing the build/test
 
 - JDK: Temurin 21.0.12.1+1 Linux x64, user-local (no sudo available on this
   box) — `~/.local/tools/jdk-21.0.12.1+1`.
