@@ -7,7 +7,7 @@ every class into:
     OK          resolved, size matches the AE-applicable static_assert
     MISMATCH    resolved, size does NOT match the static_assert
     EMPTY       resolved but size <= 1 -- the "TESForm came back as 0x1"
-                failure signature hit five times during tonight's patch
+                failure signature hit five times during early patch
                 development (patches 0001-0005), not the same as MISMATCH:
                 it means the type is a placeholder, not "subtly wrong"
     UNRESOLVED  requested/expected but never appears in the resolved set
@@ -34,9 +34,32 @@ a committed baseline in CI (see COVERAGE_SWEEP_PLAN.md's CI section).
 import argparse
 import csv
 import json
+import re
 from pathlib import Path
 
 EMPTY_THRESHOLD = 1  # size <= this is "resolved but empty"
+
+# libclang spells anonymous types as "(unnamed enum at /abs/path/file.h:L:C)".
+# The absolute path makes the name machine-specific, so a baseline recorded on
+# one machine reports 55 phantom "regressions" on any other (CI included).
+# Normalize to the path suffix after the last "/include/" (both the vendored
+# CommonLibSSE-NG headers and the xwin-splatted SDK live under an include/
+# directory), falling back to the basename, so keys are checkout-independent.
+_UNNAMED_AT_RE = re.compile(r"\(unnamed ([a-z]+) at ([^)]*)\)")
+
+
+def _stable_unnamed_path(match: re.Match) -> str:
+    kind, loc = match.group(1), match.group(2)
+    idx = loc.rfind("/include/")
+    if idx != -1:
+        loc = loc[idx + len("/include/"):]
+    elif "/" in loc:
+        loc = loc.rsplit("/", 1)[1]
+    return f"(unnamed {kind} at {loc})"
+
+
+def normalize_name(name: str) -> str:
+    return _UNNAMED_AT_RE.sub(_stable_unnamed_path, name)
 
 
 def load_expected(path: Path) -> dict:
@@ -49,7 +72,7 @@ def load_actual(path: Path) -> dict:
         for row in csv.reader(f):
             if not row:
                 continue
-            name, size = row[0], int(row[1])
+            name, size = normalize_name(row[0]), int(row[1])
             actual.setdefault(name, []).append(size)
     return actual
 
@@ -68,7 +91,7 @@ def main():
     actual = load_actual(args.actual)
     unresolved_names = set()
     if args.actual_unresolved and args.actual_unresolved.exists():
-        unresolved_names = {l.strip() for l in args.actual_unresolved.read_text().splitlines() if l.strip()}
+        unresolved_names = {normalize_name(l.strip()) for l in args.actual_unresolved.read_text().splitlines() if l.strip()}
 
     anon_tmpl = {name: sizes for name, sizes in actual.items() if name.startswith("anon_tmpl_")}
     real_actual = {name: sizes for name, sizes in actual.items() if not name.startswith("anon_tmpl_")}

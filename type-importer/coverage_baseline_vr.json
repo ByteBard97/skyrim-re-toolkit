@@ -1,15 +1,15 @@
 {
-  "(unnamed enum at WINSDK_ROOT/crt/include/atomic:79:1)": {
+  "(unnamed enum at atomic:79:1)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
-  "(unnamed enum at WINSDK_ROOT/crt/include/xthreads.h:31:1)": {
+  "(unnamed enum at xthreads.h:31:1)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
-  "(unnamed enum at WINSDK_ROOT/crt/include/xthreads.h:70:1)": {
+  "(unnamed enum at xthreads.h:70:1)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -29,7 +29,7 @@
     "expected": null,
     "status": "EMPTY"
   },
-  "ACTOR_AGGRO_RADIUS::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/T/TESAIForm.h:21:3)": {
+  "ACTOR_AGGRO_RADIUS::(unnamed enum at RE/T/TESAIForm.h:21:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -364,7 +364,7 @@
     "expected": null,
     "status": "EMPTY"
   },
-  "Actor::SlotTypes::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/A/Actor.h:145:4)": {
+  "Actor::SlotTypes::(unnamed enum at RE/A/Actor.h:145:4)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -1099,7 +1099,7 @@
     "expected": null,
     "status": "EMPTY"
   },
-  "BGSAssociationType::Members::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/B/BGSAssociationType.h:33:4)": {
+  "BGSAssociationType::Members::(unnamed enum at RE/B/BGSAssociationType.h:33:4)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -1119,7 +1119,7 @@
     "expected": null,
     "status": "EMPTY"
   },
-  "BGSAssociationType::Sexes::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/B/BGSAssociationType.h:44:4)": {
+  "BGSAssociationType::Sexes::(unnamed enum at RE/B/BGSAssociationType.h:44:4)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -3894,7 +3894,7 @@
     "expected": 176,
     "status": "OK"
   },
-  "BSBloodSplatterShaderProperty::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/B/BSBloodSplatterShaderProperty.h:18:3)": {
+  "BSBloodSplatterShaderProperty::(unnamed enum at RE/B/BSBloodSplatterShaderProperty.h:18:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -4274,7 +4274,7 @@
     "expected": 16,
     "status": "OK"
   },
-  "BSHandleRefObject::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/B/BSHandleRefObject.h:12:3)": {
+  "BSHandleRefObject::(unnamed enum at RE/B/BSHandleRefObject.h:12:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -5249,7 +5249,7 @@
     "expected": 8,
     "status": "OK"
   },
-  "BSReadWriteLock::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/B/BSAtomic.h:73:3)": {
+  "BSReadWriteLock::(unnamed enum at RE/B/BSAtomic.h:73:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -5564,7 +5564,7 @@
     "expected": 12,
     "status": "OK"
   },
-  "BSSoundHandle::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/B/BSSoundHandle.h:12:3)": {
+  "BSSoundHandle::(unnamed enum at RE/B/BSSoundHandle.h:12:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -5584,7 +5584,7 @@
     "expected": 8,
     "status": "OK"
   },
-  "BSSpinLock::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/B/BSAtomic.h:53:3)": {
+  "BSSpinLock::(unnamed enum at RE/B/BSAtomic.h:53:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -5639,7 +5639,7 @@
     "expected": 24,
     "status": "MISMATCH"
   },
-  "BSStringPool::Entry::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/B/BSStringPool.h:16:4)": {
+  "BSStringPool::Entry::(unnamed enum at RE/B/BSStringPool.h:16:4)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -6709,7 +6709,7 @@
     "expected": 1312,
     "status": "MISMATCH"
   },
-  "Clouds::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/C/Clouds.h:18:3)": {
+  "Clouds::(unnamed enum at RE/C/Clouds.h:18:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -6749,7 +6749,7 @@
     "expected": 4,
     "status": "OK"
   },
-  "Color::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/C/Color.h:10:3)": {
+  "Color::(unnamed enum at RE/C/Color.h:10:3)": {
     "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -7364,7 +7364,7 @@
     "expected": 296,
     "status": "OK"
   },
-  "ControlMap::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/C/ControlMap.h:24:3)": {
+  "ControlMap::(unnamed enum at RE/C/ControlMap.h:24:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -12114,7 +12114,7 @@
     "expected": 1612,
     "status": "OK"
   },
-  "GFxKeyboardState::KeyQueue::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/G/GFxKeyboardState.h:31:4)": {
+  "GFxKeyboardState::KeyQueue::(unnamed enum at RE/G/GFxKeyboardState.h:31:4)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -12134,7 +12134,7 @@
     "expected": null,
     "status": "EMPTY"
   },
-  "GFxLoadProcess::TimelineType::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/G/GFxLoadProcess.h:25:4)": {
+  "GFxLoadProcess::TimelineType::(unnamed enum at RE/G/GFxLoadProcess.h:25:4)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -13494,12 +13494,12 @@
     "expected": 32,
     "status": "OK"
   },
-  "GRenderer::Cxform::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/G/GRenderer.h:230:4)": {
+  "GRenderer::Cxform::(unnamed enum at RE/G/GRenderer.h:230:4)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
-  "GRenderer::Cxform::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/G/GRenderer.h:239:4)": {
+  "GRenderer::Cxform::(unnamed enum at RE/G/GRenderer.h:239:4)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -13594,7 +13594,7 @@
     "expected": 8,
     "status": "OK"
   },
-  "GRenderer::VertexXY16iC32::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/G/GRenderer.h:323:4)": {
+  "GRenderer::VertexXY16iC32::(unnamed enum at RE/G/GRenderer.h:323:4)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -13604,7 +13604,7 @@
     "expected": 12,
     "status": "OK"
   },
-  "GRenderer::VertexXY16iCF32::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/G/GRenderer.h:338:4)": {
+  "GRenderer::VertexXY16iCF32::(unnamed enum at RE/G/GRenderer.h:338:4)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -13674,7 +13674,7 @@
     "expected": 16,
     "status": "OK"
   },
-  "GString::DataDesc::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/G/GString.h:52:4)": {
+  "GString::DataDesc::(unnamed enum at RE/G/GString.h:52:4)": {
     "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -15989,7 +15989,7 @@
     "expected": 72,
     "status": "OK"
   },
-  "ImageSpaceModData::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/I/ImageSpaceData.h:95:3)": {
+  "ImageSpaceModData::(unnamed enum at RE/I/ImageSpaceData.h:95:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -17094,7 +17094,7 @@
     "expected": 44,
     "status": "OK"
   },
-  "MaxSpeeds::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/M/Movement.h:27:4)": {
+  "MaxSpeeds::(unnamed enum at RE/M/Movement.h:27:4)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -17704,7 +17704,7 @@
     "expected": 12,
     "status": "OK"
   },
-  "NiColor::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/N/NiColor.h:13:3)": {
+  "NiColor::(unnamed enum at RE/N/NiColor.h:13:3)": {
     "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -17714,7 +17714,7 @@
     "expected": 16,
     "status": "OK"
   },
-  "NiColorA::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/N/NiColor.h:278:3)": {
+  "NiColorA::(unnamed enum at RE/N/NiColor.h:278:3)": {
     "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -18634,7 +18634,7 @@
     "expected": 16,
     "status": "OK"
   },
-  "ObjectTypeInfo::NamedStateInfo::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/O/ObjectTypeInfo.h:98:5)": {
+  "ObjectTypeInfo::NamedStateInfo::(unnamed enum at RE/O/ObjectTypeInfo.h:98:5)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -18659,7 +18659,7 @@
     "expected": 8,
     "status": "OK"
   },
-  "ObjectTypeInfo::UserFlagInfo::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/O/ObjectTypeInfo.h:39:5)": {
+  "ObjectTypeInfo::UserFlagInfo::(unnamed enum at RE/O/ObjectTypeInfo.h:39:5)": {
     "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -19429,7 +19429,7 @@
     "expected": 164,
     "status": "OK"
   },
-  "RACE_DATA::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/T/TESRace.h:43:3)": {
+  "RACE_DATA::(unnamed enum at RE/T/TESRace.h:43:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -19874,7 +19874,7 @@
     "expected": null,
     "status": "EMPTY"
   },
-  "SCRIPT_FUNCTION::Commands::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/C/CommandTable.h:232:4)": {
+  "SCRIPT_FUNCTION::Commands::(unnamed enum at RE/C/CommandTable.h:232:4)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -19934,7 +19934,7 @@
     "expected": null,
     "status": "EMPTY"
   },
-  "SEASON::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/T/TESProduceForm.h:12:3)": {
+  "SEASON::(unnamed enum at RE/T/TESProduceForm.h:12:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -20789,7 +20789,7 @@
     "expected": 824,
     "status": "OK"
   },
-  "StatsMenu::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/S/StatsMenu.h:42:3)": {
+  "StatsMenu::(unnamed enum at RE/S/StatsMenu.h:42:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -20864,7 +20864,7 @@
     "expected": 16,
     "status": "OK"
   },
-  "StreamBase::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/S/StreamBase.h:17:4)": {
+  "StreamBase::(unnamed enum at RE/S/StreamBase.h:17:4)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -21059,7 +21059,7 @@
     "expected": null,
     "status": "EMPTY"
   },
-  "TESBipedModelForm::Sexes::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/T/TESBipedModelForm.h:18:4)": {
+  "TESBipedModelForm::Sexes::(unnamed enum at RE/T/TESBipedModelForm.h:18:4)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -22054,7 +22054,7 @@
     "expected": 92,
     "status": "OK"
   },
-  "TESNPC::FaceData::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/T/TESNPC.h:178:4)": {
+  "TESNPC::FaceData::(unnamed enum at RE/T/TESNPC.h:178:4)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -22064,7 +22064,7 @@
     "expected": null,
     "status": "EMPTY"
   },
-  "TESNPC::FaceData::Morphs::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/T/TESNPC.h:139:5)": {
+  "TESNPC::FaceData::Morphs::(unnamed enum at RE/T/TESNPC.h:139:5)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -22074,7 +22074,7 @@
     "expected": null,
     "status": "EMPTY"
   },
-  "TESNPC::FaceData::Parts::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/T/TESNPC.h:167:5)": {
+  "TESNPC::FaceData::Parts::(unnamed enum at RE/T/TESNPC.h:167:5)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -22104,7 +22104,7 @@
     "expected": 48,
     "status": "OK"
   },
-  "TESNPC::Skills::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/T/TESNPC.h:78:4)": {
+  "TESNPC::Skills::(unnamed enum at RE/T/TESNPC.h:78:4)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -22779,7 +22779,7 @@
     "expected": 200,
     "status": "OK"
   },
-  "TESRace::FaceRelatedData::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/T/TESRace.h:196:4)": {
+  "TESRace::FaceRelatedData::(unnamed enum at RE/T/TESRace.h:196:4)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -22814,7 +22814,7 @@
     "expected": null,
     "status": "EMPTY"
   },
-  "TESRace::MovementTypes::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/T/TESRace.h:182:4)": {
+  "TESRace::MovementTypes::(unnamed enum at RE/T/TESRace.h:182:4)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -23369,7 +23369,7 @@
     "expected": 2264,
     "status": "OK"
   },
-  "TESWeather::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/T/TESWeather.h:23:3)": {
+  "TESWeather::(unnamed enum at RE/T/TESWeather.h:23:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -23389,7 +23389,7 @@
     "expected": null,
     "status": "EMPTY"
   },
-  "TESWeather::ColorTypes::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/T/TESWeather.h:63:4)": {
+  "TESWeather::ColorTypes::(unnamed enum at RE/T/TESWeather.h:63:4)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -23809,7 +23809,7 @@
     "expected": 2944,
     "status": "OK"
   },
-  "UIMessageQueue::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/U/UIMessageQueue.h:17:3)": {
+  "UIMessageQueue::(unnamed enum at RE/U/UIMessageQueue.h:17:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -27294,7 +27294,7 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
-  "codecvt_base::(unnamed enum at WINSDK_ROOT/crt/include/xlocale:627:5)": {
+  "codecvt_base::(unnamed enum at xlocale:627:5)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -27374,7 +27374,7 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
-  "ctype_base::(unnamed enum at WINSDK_ROOT/crt/include/xlocale:2431:5)": {
+  "ctype_base::(unnamed enum at xlocale:2431:5)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -27509,7 +27509,7 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
-  "error_category::(unnamed enum at WINSDK_ROOT/crt/include/system_error:155:5)": {
+  "error_category::(unnamed enum at system_error:155:5)": {
     "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -27889,7 +27889,7 @@
     "expected": 16,
     "status": "OK"
   },
-  "hkReferencedObject::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/H/hkReferencedObject.h:23:3)": {
+  "hkReferencedObject::(unnamed enum at RE/H/hkReferencedObject.h:23:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -27939,7 +27939,7 @@
     "expected": 8,
     "status": "OK"
   },
-  "hkStringPtr::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/H/hkStringPtr.h:23:3)": {
+  "hkStringPtr::(unnamed enum at RE/H/hkStringPtr.h:23:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -29279,7 +29279,7 @@
     "expected": 144,
     "status": "OK"
   },
-  "hkpListShape::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/H/hkpListShape.h:15:3)": {
+  "hkpListShape::(unnamed enum at RE/H/hkpListShape.h:15:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -29369,7 +29369,7 @@
     "expected": 320,
     "status": "OK"
   },
-  "hkpMotion::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/H/hkpMotion.h:21:3)": {
+  "hkpMotion::(unnamed enum at RE/H/hkpMotion.h:21:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -29639,7 +29639,7 @@
     "expected": 80,
     "status": "OK"
   },
-  "hkpShapeRayCastOutput::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/H/hkpShapeRayCastOutput.h:11:3)": {
+  "hkpShapeRayCastOutput::(unnamed enum at RE/H/hkpShapeRayCastOutput.h:11:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -29789,7 +29789,7 @@
     "expected": 12,
     "status": "OK"
   },
-  "hkpTypedBroadPhaseHandle::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/H/hkpTypedBroadPhaseHandle.h:10:3)": {
+  "hkpTypedBroadPhaseHandle::(unnamed enum at RE/H/hkpTypedBroadPhaseHandle.h:10:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -29819,7 +29819,7 @@
     "expected": 1,
     "status": "OK"
   },
-  "hkpWeldingUtility::(unnamed enum at COMMONLIBSSE_ROOT/include/RE/H/hkpWeldingUtility.h:8:3)": {
+  "hkpWeldingUtility::(unnamed enum at RE/H/hkpWeldingUtility.h:8:3)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -30399,7 +30399,7 @@
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },
-  "money_base::(unnamed enum at WINSDK_ROOT/crt/include/xlocmon:24:5)": {
+  "money_base::(unnamed enum at xlocmon:24:5)": {
     "actual": 4,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
