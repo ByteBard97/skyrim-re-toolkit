@@ -75,7 +75,7 @@ Feed the `.unpacked.exe` to the driver below.
 ## Run it
 
 Prerequisites: your own legal copy of Skyrim SE/AE 1.6.1170, Ghidra 12+,
-JDK 22+, and a `.gdt` — either [download `gdt-v1`](https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-v1)
+JDK 22+, and a `.gdt` — either [download `gdt-v2`](https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-v2)
 directly, or build your own with `../type-importer/scripts/generate_gdt.sh`
 (see `symbol-archive/`'s README for the CI build workflow). Nothing from
 the game is redistributed by this demo.
