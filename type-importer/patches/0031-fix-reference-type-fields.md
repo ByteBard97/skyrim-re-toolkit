@@ -94,13 +94,29 @@ for the exact before/after OK counts.
 
 The other 6 of the 9 confirmed-wrong `EMPTY` entries (`AttachedScript`, `BGSNumericIDIndex`,
 `BSScrapArrayAllocator`, `GFxFunctionHandler::Params`, `GFxResourceLib::ResourceSlot`,
-`LogEvent`) were **not** individually root-caused this pass — a quick read of each definition
-shows different shapes (template-specialization base-class inheritance for `AttachedScript` and
-`GFxResourceLib::ResourceSlot`, own non-reference fields for the others), so they are likely a
-different mechanism (or several), not this same reference-field gap. Per this project's own
-"two focused attempts, then defer" discipline: this pass fixed the one clean, reproducible,
-shared-root-cause cluster it found; the remaining 6 are a genuinely separate investigation,
-flagged honestly rather than assumed fixed or forced into one narrative.
+`LogEvent`) were **not** individually root-caused this pass — a read of each definition shows
+at least two more distinct mechanisms, neither touched by this patch:
+
+- `AttachedScript` (`public BSTPointerAndFlags<BSTSmartPointer<Object>, 1>`, zero own fields)
+  and `GFxResourceLib::ResourceSlot` (`public GRefCountBase<ResourceSlot, ...>`, substantial own
+  fields) both derive from a template-specialization base with real content — the same *shape*
+  patch 0025 fixed for other classes, but these two still fail, so 0025's fix doesn't cover every
+  instance of the pattern (untraced why).
+- `BGSNumericIDIndex`'s real content (a `stl::enumeration<Flags, std::uint8_t> flags` member) is
+  buried three levels deep in a nested anonymous-union-inside-anonymous-struct-inside-anonymous-
+  union — a distinct nested-anonymous-type shape, unrelated to references or base classes.
+- `LogEvent` has two forward-only declarations elsewhere in the tree
+  (`IVirtualMachine.h:35`, `ErrorLogger.h:10`) plus its real definition in `RE/L/LogEvent.h` —
+  consistent with (not confirmed as) a first-registration-wins collision where the parser
+  registers the empty forward declaration before ever visiting the real one, the same *class* of
+  bug patch 0025's `isPolymorphic` fix and this project's various "wrong declaration picked"
+  patches have hit before, just not confirmed here.
+- `BSScrapArrayAllocator`/`GFxFunctionHandler::Params` not investigated this pass.
+
+None of the above was attempted as a fix — diagnosis only, to leave a precise trail rather than
+a vague "different mechanism." Per this project's own "two focused attempts, then defer"
+discipline: this pass fixed the one clean, reproducible, shared-root-cause cluster it found; the
+remaining 6 split into at least three further investigations, each its own scoped task.
 
 `coverage_report.py` was also changed (see the docs-sync commit) to print `EMPTY, CONFIRMED
 WRONG` and `EMPTY, UNVERIFIED` as two distinct sections instead of one undifferentiated `EMPTY`
