@@ -311,9 +311,9 @@ STL surface actually used in class layouts (`<cstdint>`, `<utility>` for
   Windows SDK/CRT headers solves this for `clang-cl` layout verification.
   Confirmed real CommonLibSSE-NG headers (`TESForm.h` through
   `TESObjectREFR.h`) compile with **zero errors** through this stub.
-- **MAJOR MILESTONE (2026-08-24): produced a real `.gdt` file from actual
-  CommonLibSSE-NG headers using the actual (patched) `GhidraClangPoweredParse`
-  extension** — not just a clang-cl layout dump. Installed JDK 21 + Ghidra
+- 2026-08-24: produced a real `.gdt` file from actual CommonLibSSE-NG headers
+  using the actual (patched) `GhidraClangPoweredParse` extension — not just a
+  clang-cl layout dump. Installed JDK 21 + Ghidra
   12.1.3 (both user-local), applied the patches in `patches/`, and ran
   `SourceParser.parseFiles` directly (via a standalone harness, same
   technique as the patch verification tests) against `TESForm.h`,
