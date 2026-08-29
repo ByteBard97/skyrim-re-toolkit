@@ -78,6 +78,7 @@ public class GenerateGdt {
         String output = null, runtimeDefine = "ENABLE_SKYRIM_AE=1", reportCsv = null;
         String tailPaddingHints = null;
         String reportJson = null, commonlibCommit = "unknown";
+        String annotateCoverage = null;
         List<String> headers = new ArrayList<>();
 
         for (int i = 0; i < args.length; i++) {
@@ -92,6 +93,7 @@ public class GenerateGdt {
                 case "--tail-padding-hints" -> tailPaddingHints = args[++i];
                 case "--report-json" -> reportJson = args[++i];
                 case "--commonlib-commit" -> commonlibCommit = args[++i];
+                case "--annotate-coverage" -> annotateCoverage = args[++i];
                 default -> headers.add(args[i]);
             }
         }
@@ -179,6 +181,11 @@ public class GenerateGdt {
 
         if (tailPaddingHints != null) {
             applyTailPaddingHints(fileDtMgr, tailPaddingHints);
+            fileDtMgr.save();
+        }
+
+        if (annotateCoverage != null) {
+            annotateCoverageStatus(fileDtMgr, annotateCoverage);
             fileDtMgr.save();
         }
 
@@ -671,5 +678,61 @@ public class GenerateGdt {
                 + " to " + struct.getLength() + " bytes (target " + minSize + ")");
         }
         fileDtMgr.endTransaction(txId, true);
+    }
+
+    /**
+     * Stamps each Structure/Union/Enum's Ghidra description with its
+     * verification status from the checked-in coverage baseline, so the
+     * status travels with the .gdt itself instead of living only in a
+     * separate JSON file a user has to cross-reference by hand (see
+     * COVERAGE_SWEEP_PLAN.md's "verification travels with the artifact"
+     * finding). {@code csvPath} is a plain {@code name,STATUS} file --
+     * see scripts/baseline_to_annotation_csv.py, which converts the
+     * committed coverage_baseline*.json into this format (no baseline key
+     * contains a comma, confirmed at conversion time, so a naive
+     * split(",", 2) is safe -- same convention as --tail-padding-hints).
+     * An existing description (e.g. patch 0019's tail-padding note) is
+     * preserved, with the status prepended, never overwritten outright.
+     */
+    private static void annotateCoverageStatus(FileDataTypeManager fileDtMgr, String csvPath) throws Exception {
+        Map<String, String> statusByName = new LinkedHashMap<>();
+        for (String line : Files.readAllLines(new File(csvPath).toPath())) {
+            line = line.strip();
+            if (line.isEmpty()) continue;
+            String[] parts = line.split(",", 2);
+            if (parts.length != 2) continue;
+            statusByName.put(parts[0].strip(), parts[1].strip());
+        }
+
+        int txId = fileDtMgr.startTransaction("Annotate coverage-sweep verification status");
+        int annotated = 0;
+        java.util.Iterator<DataType> it = fileDtMgr.getAllDataTypes();
+        while (it.hasNext()) {
+            DataType d = it.next();
+            if (!(d instanceof Structure) && !(d instanceof Union) && !(d instanceof ghidra.program.model.data.Enum)) {
+                continue;
+            }
+            String status = statusByName.get(d.getName());
+            if (status == null) continue;
+
+            String tag = switch (status) {
+                case "OK" -> "VERIFIED (sizeof matches the header's static_assert -- byte-accurate)";
+                case "MISMATCH" -> "WARNING -- MISMATCH: sizeof does NOT match the header's static_assert. Treat this layout as WRONG.";
+                case "EMPTY" -> "WARNING -- EMPTY: resolved with no real fields. May be a genuine zero-field type, or a parser gap -- verify before trusting.";
+                case "UNRESOLVED" -> "WARNING -- UNRESOLVED: one or more fields never resolved during parsing. Treat with caution.";
+                case "NO_GROUND_TRUTH" -> "UNVERIFIED: no static_assert exists in the header to check this layout against. Not confirmed correct or incorrect.";
+                default -> null;
+            };
+            if (tag == null) continue;
+
+            String existing = d.getDescription();
+            String combined = (existing == null || existing.isBlank())
+                ? "[skyrim-re-toolkit coverage sweep] " + tag
+                : "[skyrim-re-toolkit coverage sweep] " + tag + " -- " + existing;
+            d.setDescription(combined);
+            annotated++;
+        }
+        fileDtMgr.endTransaction(txId, true);
+        System.out.println("annotate-coverage: stamped " + annotated + " types with verification status from " + csvPath);
     }
 }

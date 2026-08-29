@@ -38,6 +38,13 @@
 # $REPORT_CSV (ClassName,SizeInBytes for every resolved type) and
 # $REPORT_CSV.unresolved.txt (names that never resolved at all).
 #
+# By default, stamps each Structure/Union/Enum's Ghidra description with
+# its verification status (VERIFIED / MISMATCH / EMPTY / UNRESOLVED /
+# UNVERIFIED) from the runtime-matching committed coverage_baseline*.json,
+# so the status is visible in Ghidra's Data Type Manager itself instead of
+# only in a separate JSON file (see baseline_to_annotation_csv.py). Set
+# ANNOTATE_COVERAGE="" explicitly to opt out.
+#
 # Example:
 #   JAVA_HOME=~/.local/tools/jdk-21.0.12.1+1 \
 #   GHIDRA_INSTALL_DIR=~/.local/tools/ghidra_12.1.3_PUBLIC \
@@ -158,6 +165,21 @@ else
 fi
 if [ -n "$TAIL_PADDING_HINTS" ]; then
     REPORT_ARGS+=(--tail-padding-hints "$TAIL_PADDING_HINTS")
+fi
+
+# Default coverage baseline to annotate from, chosen by runtime -- matches
+# the baseline_file mapping already used by symbol-archive-build.yml.
+if [ -z "${ANNOTATE_COVERAGE+x}" ]; then
+    case "${_EFFECTIVE_RUNTIME%%=*}" in
+        ENABLE_SKYRIM_SE) ANNOTATE_COVERAGE="$TYPE_IMPORTER_DIR/coverage_baseline_se.json" ;;
+        ENABLE_SKYRIM_VR) ANNOTATE_COVERAGE="$TYPE_IMPORTER_DIR/coverage_baseline_vr.json" ;;
+        *)                ANNOTATE_COVERAGE="$TYPE_IMPORTER_DIR/coverage_baseline.json" ;;
+    esac
+fi
+if [ -n "$ANNOTATE_COVERAGE" ] && [ -f "$ANNOTATE_COVERAGE" ]; then
+    ANNOTATE_CSV="$(mktemp --suffix=.csv)"
+    python3 "$TYPE_IMPORTER_DIR/scripts/baseline_to_annotation_csv.py" "$ANNOTATE_COVERAGE" "$ANNOTATE_CSV"
+    REPORT_ARGS+=(--annotate-coverage "$ANNOTATE_CSV")
 fi
 
 # LLVM installs its own SIGSEGV handler ("crash recovery") when an index is
