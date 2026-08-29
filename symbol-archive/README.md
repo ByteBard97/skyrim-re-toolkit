@@ -43,7 +43,7 @@ each resulting `.gdt` as a workflow build artifact.
   GitHub Release carrying all three runtimes (see
   `.github/workflows/symbol-archive-build.yml`'s
   `publish_release`/`release_version` inputs). **Current release:**
-  [`gdt-v4`](https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-v4)
+  [`gdt-2026-08-29`](https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-2026-08-29)
   carries the AE/SE/VR `.gdt` files built from CommonLibSSE-NG `b93280e`.
   Every `Structure`/`Union`/`Enum` in these archives has its coverage-sweep
   verification status (VERIFIED / MISMATCH / EMPTY / UNRESOLVED /
@@ -64,11 +64,13 @@ each resulting `.gdt` as a workflow build artifact.
   bug in the annotation code still left mislabeled — see `git log` for
   `GenerateGdt.java`'s `TypeDef` fix and the matching fix to
   `check_regression.py`'s regression-detection gap that let it slip past
-  review. v4 is that fix, verified against a fresh downloaded copy of the
-  rebuilt archive. Superseded releases were deleted rather than left
-  stacked up as confusing dead ends. Going forward, a new release is cut
-  when there's a real reason for one (a genuine bug fix or a
-  CommonLibSSE-NG bump), not for every incremental commit.
+  review. v4 fixed that, verified against a fresh downloaded copy of the
+  rebuilt archive. All four (v1-v4) were deleted rather than left stacked
+  up as confusing dead ends, and the archive is now published under a
+  plain date tag (`gdt-2026-08-29`) instead of a version number, so the
+  name itself doesn't imply an ongoing version history. Going forward, a
+  new release is cut when there's a real reason for one (a genuine bug
+  fix or a CommonLibSSE-NG bump), not for every incremental commit.
 - **Accuracy**: **not every class in this archive is byte-accurate.**
   `type-importer`'s own coverage sweep (see
   `../type-importer/COVERAGE_SWEEP_PLAN.md` and
@@ -132,6 +134,6 @@ File → Add Archive** and select the downloaded `.gdt`, then right-click →
 |---|---|
 | AE `.gdt` build artifact via manual CI dispatch | Done — real run confirmed (see Status above) |
 | Hotspot-list accuracy verified | Fully closed — 37/39 exact, last 2 given real inferred sizes via patch 0019 — see `type-importer/COVERAGE_SWEEP_PLAN.md` |
-| Versioned GitHub Release publishing | Done — [`gdt-v4`](https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-v4) published, carrying all three AE/SE/VR `.gdt` assets with in-archive verification-status annotations and MISMATCH-category relocation |
+| Versioned GitHub Release publishing | Done — [`gdt-2026-08-29`](https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-2026-08-29) published, carrying all three AE/SE/VR `.gdt` assets with in-archive verification-status annotations and MISMATCH-category relocation |
 | SE / VR / GOG runtime coverage | Layouts validated in `type-importer` (SE, VR) and confirmed unnecessary (AE 1.7.99, GOG); SE/VR wired into this workflow's build matrix and confirmed with a real run — see Status above |
 | Automatic *validation* on CommonLibSSE-NG submodule bump | Done — `.github/dependabot.yml` watches CommonLibSSE-NG weekly and opens a PR on a new upstream commit, which `type-importer`'s existing coverage gate then regression-checks automatically. This subproject's own `.gdt` rebuild is still manual-dispatch only (see Triggers below) — Dependabot doesn't push a new `.gdt` build artifact, only a reviewed, regression-checked PR bumping the pin |

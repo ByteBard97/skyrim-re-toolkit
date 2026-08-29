@@ -14,7 +14,7 @@ This is a collection of tools, type archives, and runtime instrumentation that l
 
 ### Get the archive
 
-**[→ Download AE/SE/VR `.gdt` files from the `gdt-v4` release](https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-v4)** — no build required. Import into Ghidra via **File → Add Archive**.
+**[→ Download AE/SE/VR `.gdt` files from the `gdt-2026-08-29` release](https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-2026-08-29)** — no build required. Import into Ghidra via **File → Add Archive**.
 
 ### The honest number, up front
 
@@ -119,7 +119,7 @@ A fourth piece, `LayoutValidator`, closes the loop the other direction: it cross
 
 ### I just want the `.gdt` — no building required
 
-1. [Download `gdt-v4`](https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-v4) (AE/SE/VR).
+1. [Download `gdt-2026-08-29`](https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-2026-08-29) (AE/SE/VR).
 2. In Ghidra: **File → Import File** (your `SkyrimSE.exe`) → **Window → Data Type Manager → File → Add Archive** → select the `.gdt` → right-click → **Apply Function Data Types**.
 3. See [`demo/`](demo/README.md) for what to actually expect on screen (a real before/after decompile), and the accuracy caveat above before trusting a specific struct.
 
