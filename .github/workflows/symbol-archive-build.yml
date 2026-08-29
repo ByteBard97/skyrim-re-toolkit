@@ -11,8 +11,10 @@ name: symbol-archive build (AE/SE/VR)
 #
 # This is NOT a quality gate (unlike type-importer-coverage.yml, which
 # fails the build on regression). type-importer's own coverage sweep
-# currently shows 1,934/3,019 (64%) of checkable classes as byte-accurate
-# (see type-importer/COVERAGE_SWEEP_PLAN.md) -- this workflow exists to
+# currently shows ~2,100/3,180 (66%) of checkable classes as byte-accurate
+# per runtime -- see the committed coverage_baseline*.json files for the
+# exact current numbers, not this comment, which will drift (see
+# type-importer/COVERAGE_SWEEP_PLAN.md) -- this workflow exists to
 # produce real, traceable build artifacts for testing/dogfooding, not to
 # assert any archive is fully trustworthy. Don't gate this on the
 # coverage sweep passing; that would block every build indefinitely
