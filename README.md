@@ -6,6 +6,8 @@
 
 This is a collection of tools, type archives, and runtime instrumentation that lowers the friction of Skyrim binary reverse engineering. If you have ever opened Ghidra to a stripped `SkyrimSE.exe` and wondered why you were hand-typing struct definitions that the community already figured out five years ago, this toolkit is for you.
 
+**Who this is for:** RE researchers, SKSE plugin authors, and engine-level patchers working in Ghidra or IDA. **Who this isn't for:** if you're looking for a gameplay mod, quest, or asset pack, this isn't it — it's infrastructure other tools and mods can be built on top of.
+
 **[→ Browse the docs site](https://bytebard97.github.io/skyrim-re-toolkit/)** for a more scannable, screenshot-driven walkthrough of what's here and how to use it (this README is the thorough version).
 
 > The Skyrim modding ecosystem has spent fifteen years mapping the Creation Engine. The accumulated knowledge lives in [CommonLibSSE-NG](https://github.com/CharmedBaryon/CommonLibSSE-NG), [meh321's Address Library](https://github.com/meh321/AddressLibraryDatabase), and a handful of pinned Discord attachments. Our goal is to turn that knowledge into versioned, reproducible, public infrastructure.
