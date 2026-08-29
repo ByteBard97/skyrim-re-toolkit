@@ -49,7 +49,9 @@ set(sources
     src/main.cpp
     src/AIProcessInspector.cpp
     src/DevBenchIntegration.cpp
-    src/HavokStepLogger.cpp
+    src/HavokStepLogger.cpp # experimental -- builds and loads, but has not logged a single
+                            # line against live gameplay; see README.md's runtime-harness
+                            # section for the open investigation
     src/LayoutValidator.cpp
     src/SavegameTracer.cpp
     vendor/devbench/DevBenchAPI.cpp)

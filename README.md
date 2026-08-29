@@ -10,6 +10,27 @@ This is a collection of tools, type archives, and runtime instrumentation that l
 
 > The Skyrim modding ecosystem has spent fifteen years mapping the Creation Engine. The accumulated knowledge lives in [CommonLibSSE-NG](https://github.com/CharmedBaryon/CommonLibSSE-NG), [meh321's Address Library](https://github.com/meh321/AddressLibraryDatabase), and a handful of pinned Discord attachments. Our goal is to turn that knowledge into versioned, reproducible, public infrastructure.
 
+### Get the archive
+
+**[→ Download AE/SE/VR `.gdt` files from the `gdt-v1` release](https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-v1)** — no build required. Import into Ghidra via **File → Add Archive**.
+
+### The honest number, up front
+
+**2,105–2,124 of ~3,200 checkable classes per runtime (66%) are byte-accurate** against the headers' own `static_assert`s — the rest are either a wrong size or resolve empty, and that's tracked, not hidden (see [known limitations](https://bytebard97.github.io/skyrim-re-toolkit/known-limitations.html)). "Byte-accurate" means `sizeof` matches; it does not mean every field offset is independently verified — two different layouts can share a total size. Per-field offsets are hand-verified for the core `TESForm`→`TESObjectREFR` chain and cross-checked against a *running* game for 11 hotspot classes by `runtime-harness`'s LayoutValidator. A curated 39-class "modder-relevant hotspot list" (`TESForm` hierarchy, `Actor`/`Character`, inventory, quests, Havok) is fully closed at 37/39 exact. Treat the archive as **a strong starting point you can cross-check**, not verified ground truth for every struct.
+
+### How this compares to doodlum/BethesdaGhidraScripts
+
+[doodlum/BethesdaGhidraScripts](https://github.com/doodlum/BethesdaGhidraScripts) proved the same core idea first — clang-parsing CommonLib headers into Ghidra types — and deserves credit for it.
+
+| | This project | BethesdaGhidraScripts |
+|---|---|---|
+| Distribution | Pre-built, versioned `.gdt` you download | Run-it-yourself local pipeline |
+| Runtimes | AE, SE, VR | Runs against whichever binary you point it at |
+| Accuracy tracking | CI-gated `static_assert` sweep, numbers published per release | Not tracked/published |
+| Patches to the parser | Vendored + patched (28 fixes, not yet upstreamed — see note below) | N/A, different toolchain |
+
+Why the patches aren't upstream PRs yet: they're pinned against a specific `GhidraClangPoweredParse` revision and several are fairly invasive (template base-class inlining, reference-field resolution) — upstreaming them is real follow-on work, tracked as an open item, not avoided on principle.
+
 ---
 
 ## What's in here
@@ -129,6 +150,8 @@ This patches the vendored `GhidraClangPoweredParse` submodule (from `type-import
 ### Load the `.gdt` into Ghidra
 
 In Ghidra: **File → Import File** (select `SkyrimSE.exe`) → **Window → Data Type Manager → File → Add Archive** → select your generated `.gdt` → right-click → **Apply Function Data Types**.
+
+This gives Ghidra the *types* — it does not by itself retype every function signature across the binary (that also needs RTTI-based class recovery or manual Address Library RVA mapping, both out of scope here). See [`demo/`](demo/README.md) for a real before/after decompile on one specific function so you know what to expect rather than guessing.
 
 ### `symbol-archive` and `runtime-harness`
 
