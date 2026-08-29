@@ -424,11 +424,12 @@ small, all enumerable, all caught by the first with-IDA run.
 ## Licensing
 
 Same rule as the `.gdt` (DESIGN.md): a `.til` generated from CommonLibSSE-NG
-headers is treated as GPL-3.0 inherited from CommonLibSSE-NG, attributed to
-the source commit hash (carried in the JSON as `commonlib_commit` so the
+headers is MIT-derived (the vendored CharmedBaryon/CommonLibSSE-NG fork is
+MIT, not GPL-3.0 — check the vendored `LICENSE` file, not folklore), attributed
+to the source commit hash (carried in the JSON as `commonlib_commit` so the
 emitter can stamp it into the TIL description via `new_til(name, desc)`).
-Tooling stays MIT. The intermediate JSON is derived data — same GPL-3.0
-treatment as the archives.
+Tooling stays MIT. The intermediate JSON is derived data — same MIT
+attribution as the archives.
 
 ## Unverified claims registry (everything here is cited doc, not tested)
 
