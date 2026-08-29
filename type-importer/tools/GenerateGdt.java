@@ -709,7 +709,18 @@ public class GenerateGdt {
         java.util.Iterator<DataType> it = fileDtMgr.getAllDataTypes();
         while (it.hasNext()) {
             DataType d = it.next();
-            if (!(d instanceof Structure) && !(d instanceof Union) && !(d instanceof ghidra.program.model.data.Enum)) {
+            // Also cover TypeDef: a C++ `using Foo = Bar::Foo;` alias (e.g.
+            // RE::TESClimate::SkyObject aliasing a nested enum) becomes a
+            // Ghidra TypeDef, not a Structure/Union/Enum -- it was silently
+            // excluded here originally, leaving it un-annotated and
+            // un-relocated even when the coverage baseline flags it
+            // MISMATCH (confirmed via direct repro: RE::SkyObject the real
+            // class and this typedef both flatten to the bare name
+            // "SkyObject", and whichever wins the registration collision
+            // still needs its status surfaced). Root-caused via targeted
+            // debug instrumentation before landing this fix, not guessed.
+            if (!(d instanceof Structure) && !(d instanceof Union)
+                && !(d instanceof ghidra.program.model.data.Enum) && !(d instanceof TypeDef)) {
                 continue;
             }
             String status = statusByName.get(d.getName());
@@ -731,6 +742,23 @@ public class GenerateGdt {
                 : "[skyrim-re-toolkit coverage sweep] " + tag + " -- " + existing;
             d.setDescription(combined);
             annotated++;
+
+            // NOTE on TypeDef: unlike Structure/Union/Enum, a TypeDef's own
+            // setDescription() call above doesn't reliably surface through
+            // Ghidra's getDescription() (it appears to read through to the
+            // underlying base type in the GUI/API instead), and attempting
+            // to also write the base type's description directly hit a
+            // confirmed Ghidra persistence quirk: EnumDB.setDescription()
+            // does not cleanly replace its stored value the way
+            // Structure/Union do, producing a garbled doubled-up
+            // description under real testing -- even with an unconditional
+            // overwrite, not just the concatenating form tried first. Not
+            // chased further than two focused attempts, per this project's
+            // own investigation discipline (see DESIGN.md). Left
+            // unresolved deliberately rather than shipping a broken-looking
+            // description: the category relocation below (for MISMATCH)
+            // is unaffected by this and remains the reliable, unmissable
+            // signal for a TypeDef's coverage status.
 
             // The description field alone is easy to miss in the normal
             // apply-a-type workflow (right-click Apply Data Type, or the
