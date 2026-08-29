@@ -5240,9 +5240,9 @@
     "status": "EMPTY"
   },
   "BSReadLockGuard": {
-    "actual": 1,
+    "actual": 8,
     "expected": 8,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "BSReadWriteLock": {
     "actual": 8,
@@ -5590,9 +5590,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "BSSpinLockGuard": {
-    "actual": 1,
+    "actual": 8,
     "expected": 8,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "BSStorage": {
     "actual": 32,
@@ -6110,9 +6110,9 @@
     "status": "NO_GROUND_TRUTH"
   },
   "BSWriteLockGuard": {
-    "actual": 1,
+    "actual": 8,
     "expected": 8,
-    "status": "EMPTY"
+    "status": "OK"
   },
   "BSXAudio2GameSound": {
     "actual": 544,
@@ -24950,9 +24950,9 @@
     "status": "EMPTY"
   },
   "_Init_once_completer": {
-    "actual": 1,
+    "actual": 16,
     "expected": null,
-    "status": "EMPTY"
+    "status": "NO_GROUND_TRUTH"
   },
   "_Inplace_merge_fn": {
     "actual": 1,
@@ -25795,9 +25795,9 @@
     "status": "EMPTY"
   },
   "_UInt_is_zero": {
-    "actual": 1,
+    "actual": 8,
     "expected": null,
-    "status": "EMPTY"
+    "status": "NO_GROUND_TRUTH"
   },
   "_Uint_type": {
     "actual": 8,
@@ -27345,6 +27345,11 @@
     "status": "EMPTY"
   },
   "const_pointer": {
+    "actual": 8,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "const_reference": {
     "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
@@ -30671,6 +30676,11 @@
   },
   "recursive_timed_mutex": {
     "actual": 20,
+    "expected": null,
+    "status": "NO_GROUND_TRUTH"
+  },
+  "reference": {
+    "actual": 8,
     "expected": null,
     "status": "NO_GROUND_TRUTH"
   },

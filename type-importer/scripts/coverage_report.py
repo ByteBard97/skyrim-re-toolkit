@@ -123,13 +123,30 @@ def main():
     else:
         print("# SCOPE: full sweep (no subset restriction specified)")
     print(f"# OK={len(ok)} MISMATCH={len(mismatch)} EMPTY={len(empty)} "
+          f"(of which {len([e for e in empty if e[1] is not None])} confirmed wrong "
+          f"vs a known static_assert, {len([e for e in empty if e[1] is None])} unverified) "
           f"UNRESOLVED={len(unresolved)} NO_GROUND_TRUTH={len(no_ground_truth)} "
           f"anon_tmpl_synthetics={len(anon_tmpl)}")
     print()
 
-    print(f"## EMPTY ({len(empty)}) -- resolved but placeholder-sized; highest priority")
-    for name, exp, act in empty:
-        print(f"{name}: actual=0x{act:x} expected={'0x%x' % exp if exp is not None else 'unknown'}")
+    # EMPTY (actual<=EMPTY_THRESHOLD) mixes two very different things: a class
+    # whose static_assert PROVES the placeholder is wrong (confirmed bug --
+    # e.g. a reference-type member the parser drops, real content lost), and
+    # a class with no static_assert to check at all. The latter is NOT
+    # necessarily a bug: many are genuinely-empty-by-design C++ types (enum-
+    # only namespacing structs, RAII guards whose only state is a reference,
+    # deleted-everything utility classes) that legitimately compile to
+    # sizeof==1. Don't conflate "can't verify" with "verified wrong."
+    empty_confirmed = [(n, e, a) for n, e, a in empty if e is not None]
+    empty_unverified = [(n, e, a) for n, e, a in empty if e is None]
+    print(f"## EMPTY, CONFIRMED WRONG ({len(empty_confirmed)}) -- static_assert proves this size is incorrect; highest priority")
+    for name, exp, act in empty_confirmed:
+        print(f"{name}: actual=0x{act:x} expected=0x{exp:x}")
+    print()
+    print(f"## EMPTY, UNVERIFIED ({len(empty_unverified)}) -- no static_assert to check against; "
+          f"NOT necessarily wrong (many are legitimately-empty C++ types)")
+    for name, exp, act in empty_unverified:
+        print(f"{name}: actual=0x{act:x} expected=unknown")
     print()
 
     print(f"## MISMATCH ({len(mismatch)})")

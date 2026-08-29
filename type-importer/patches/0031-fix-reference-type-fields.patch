@@ -1,0 +1,28 @@
+diff --git a/src/main/java/playday3008/gcpp/processing/TypePool.java b/src/main/java/playday3008/gcpp/processing/TypePool.java
+index 963d99d..e4a08fa 100644
+--- a/src/main/java/playday3008/gcpp/processing/TypePool.java
++++ b/src/main/java/playday3008/gcpp/processing/TypePool.java
+@@ -185,6 +185,23 @@ public class TypePool {
+             return new PointerDataType(this.dtm);
+         }
+ 
++        // Handle C++ reference types (trailing &): same object-layout representation as a
++        // pointer in both the Itanium and MSVC ABIs (a reference member is stored as the
++        // referent's address, same size, same bit pattern) -- Ghidra has no reference
++        // DataType, so model it the same way as the pointer case above. Before this fix,
++        // a reference-typed field (e.g. BSReadLockGuard/BSWriteLockGuard/BSSpinLockGuard's
++        // `T& _lock`) fell through this whole method returning null, silently dropping the
++        // field -- when it was the class's only field, the struct came out as an empty
++        // 1-byte placeholder instead of the correct pointer-sized member.
++        if (name.endsWith("&")) {
++            String baseName = name.substring(0, name.length() - 1).trim();
++            DataType baseType = getType(baseName);
++            if (baseType != null) {
++                return new PointerDataType(baseType, this.dtm);
++            }
++            return new PointerDataType(this.dtm);
++        }
++
+         // Handle array types: if name ends with [N], extract N, strip it, resolve element type
+         Matcher arrayMatcher = ARRAY_SUFFIX.matcher(name.trim());
+         if (arrayMatcher.matches()) {
