@@ -9,8 +9,13 @@ Thanks for considering it.
   Address Library, SKSE) has already reverse-engineered. See the README's
   "What's in here" section for where help is most useful right now
   (`type-importer`, `symbol-archive`, `runtime-harness`).
-- **Ground rules are binding, not suggestions**: no console exploits, no DRM
-  circumvention, no redistribution of game binaries/PDBs/copyrighted assets.
+- **Ground rules are binding, not suggestions**: no console exploits, no
+  distributing DRM-circumvention tools or cracked binaries, no redistribution
+  of game binaries/PDBs/copyrighted assets. (Locally unpacking your own
+  legally-purchased executable's SteamStub wrapper for static analysis —
+  the same interoperability use case as debugging or disassembling your own
+  binary — is standard RE practice and is what `demo/README.md` walks
+  through; this rule targets distribution and piracy tooling, not that.)
   Every type or offset must be derivable from public community sources
   (CommonLibSSE-NG, the Address Library, RTTI), not from acquiring or dumping
   Bethesda's own build artifacts.

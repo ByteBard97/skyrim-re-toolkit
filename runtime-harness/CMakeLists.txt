@@ -15,6 +15,12 @@
 # tree's own dependencies -- see vcpkg.json (rapidcsv, spdlog).
 cmake_minimum_required(VERSION 3.21)
 
+# HavokStepLogger is a known non-working investigation (deployed, installed
+# cleanly, zero log lines across 70+ minutes of live gameplay -- see
+# docs/HAVOK_STEP_LOGGER_INVESTIGATION.md). Off by default so the shipped
+# plugin only contains the three confirmed-working inspectors.
+option(RTK_ENABLE_HAVOK_STEP_LOGGER "Build the experimental, known non-working HavokStepLogger" OFF)
+
 project(
     RuntimeHarness
     VERSION 0.1.0
@@ -49,12 +55,13 @@ set(sources
     src/main.cpp
     src/AIProcessInspector.cpp
     src/DevBenchIntegration.cpp
-    src/HavokStepLogger.cpp # experimental -- builds and loads, but has not logged a single
-                            # line against live gameplay; see README.md's runtime-harness
-                            # section for the open investigation
     src/LayoutValidator.cpp
     src/SavegameTracer.cpp
     vendor/devbench/DevBenchAPI.cpp)
+
+if(RTK_ENABLE_HAVOK_STEP_LOGGER)
+    list(APPEND sources src/HavokStepLogger.cpp)
+endif()
 
 # Without the registry port's add_commonlibsse_plugin() helper, declare
 # the DLL directly. The SKSE plugin version data AE requires is exported
@@ -62,3 +69,6 @@ set(sources
 # citations there (SKSE/Interfaces.h in the vendored tree).
 add_library(${PROJECT_NAME} SHARED ${sources})
 target_link_libraries(${PROJECT_NAME} PRIVATE CommonLibSSE::CommonLibSSE)
+if(RTK_ENABLE_HAVOK_STEP_LOGGER)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE RTK_ENABLE_HAVOK_STEP_LOGGER)
+endif()

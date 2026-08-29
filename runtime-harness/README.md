@@ -12,8 +12,8 @@ game version at load, and logs `kDataLoaded`/`kNewGame`/`kPreLoadGame`/
 live Skyrim AE 1.6.1170 process (SKSE64 2.2.6).
 
 `AIProcessInspector` and `SavegameTracer` are both confirmed working
-against real gameplay. `HavokStepLogger` is deployed but has not yet
-produced any log output — see its entry below.
+against real gameplay. `HavokStepLogger` is a known non-working
+investigation, compiled out of the default build — see its entry below.
 
 - `AIProcessInspector` — package evaluation and AI scheduler decisions.
   Hooks `Actor::Update` via vtable (on both `RE::VTABLE_Actor` and
@@ -21,48 +21,15 @@ produced any log output — see its entry below.
   carry their own vtable array) and logs package-evaluation transitions
   for high-process actors. `RE::PlayerCharacter` has yet another vtable
   and is not covered by design (NPC-only inspector).
-- `HavokStepLogger` — collision/ragdoll state per physics step. Hooks
-  `bhkCharacterState::Update` (vfunc index 6) on all six concrete
-  character-state vtables (`OnGround`/`Jumping`/`InAir`/`Climbing`/
-  `Flying`/`Swimming` — the abstract `bhkCharacterState`/
-  `hkpCharacterState` bases are never instantiated and none of the six
-  override `Update`, so every one needs the hook) and logs physics-state
-  transitions with velocity magnitude. Not yet actor-attributed: this
-  hook's signature carries no direct pointer back to the owning `Actor`
-  or `bhkCharacterController`, so log lines are keyed by the
-  `hkpCharacterContext` instance address rather than a form ID. The
-  vfunc index (6) was verified by hand-walking the full inheritance
-  chain (`hkBaseObject`→`hkReferencedObject`→`hkpCharacterState`→
-  `bhkCharacterState`→the six concrete classes), so it's very unlikely
-  to be an indexing bug. Deployed and installed cleanly in-game, but
-  **produced zero log lines across 70+ minutes of real gameplay**
-  spanning the Helgen opening, open-world Whiterun, and combat-adjacent
-  NPC activity — long enough that "still in the scripted intro" no
-  longer explains it. `PlayerCharacter` was checked and ruled out as a
-  separate-hierarchy explanation (its header has no character-controller
-  references at all, and `AIProcess::GetCharController()`'s actual
-  implementation returns a plain `bhkCharacterController*` with no
-  player/NPC branching). Checked real prior art: [ersh1/Precision](https://github.com/ersh1/Precision)
-  (GPL-3.0), the standard reference for Havok hooking in the SKSE
-  community (melee/projectile collision, hundreds of thousands of
-  downloads, built on CommonLibSSE-NG), has **zero references to
-  `bhkCharacterState`/`hkpCharacterState`/`CharacterState` anywhere** in
-  its ~2,200-line hooking code. It doesn't vtable-hook the state
-  machine's `Update` at all -- it hooks `RE::bhkWorld`'s physics-step
-  function directly, via a genuine mid-function trampoline (Xbyak-built
-  code cave, `SKSE::Trampoline::write_branch<6>` patched at a specific
-  byte offset *inside* a larger function, at a `RELOCATION_ID` +
-  disassembly-derived offset that mod's author published). No serious
-  working Havok-hook plugin uses this project's vtable-hook approach on
-  `bhkCharacterState`, which is a much sharper finding than "unverified."
-  **Scoped follow-on path, not attempted here:** rebuild
-  `HavokStepLogger` Precision-style -- hook `bhkWorld`'s step function
-  instead, which needs Xbyak enabled in this project's build (currently
-  `OFF` in `type-importer/vendor/CommonLibSSE-NG/CMakeLists.txt`, plus a
-  vcpkg dependency), and Precision's published offsets re-verified
-  against this project's exact 1.6.1170 build before trusting them. This
-  is a real, deliberate feature task, not a quick fix. **Current vtable
-  hook: open question, not a known-good hook.**
+- `HavokStepLogger` — **known non-working, off by default.** Attempts to
+  hook `bhkCharacterState::Update` for collision/ragdoll state; builds and
+  installs cleanly but produced zero log lines across 70+ minutes of real
+  gameplay. Compiled out of the default build behind the
+  `RTK_ENABLE_HAVOK_STEP_LOGGER` CMake option — a documented negative
+  result, not a work-in-progress feature. Full investigation, root-cause
+  hypothesis (the standard community reference, `ersh1/Precision`, hooks
+  physics differently), and the scoped follow-on path:
+  [`docs/HAVOK_STEP_LOGGER_INVESTIGATION.md`](docs/HAVOK_STEP_LOGGER_INVESTIGATION.md).
 - `SavegameTracer` — `BGSSaveLoadManager` serialization. Hooks
   `BGSSaveLoadManager::ProcessEvent(const BSSaveDataEvent*)` via vtable
   (index 1 on `RE::VTABLE_BGSSaveLoadManager[0]`) — unlike the other two
@@ -111,10 +78,10 @@ devbench's own plugin code is GPL-3.0, never linked; only the MIT glue is
 vendored. `src/DevBenchIntegration.cpp` calls `DevBenchAPI::GetDevBenchInterface001()`
 on `kPostLoad` (no-ops cleanly if devbench isn't installed) and registers
 `runtimeharness.ai_package`, a read-only tool that returns
-`AIProcessInspector`'s live formID→package-formID map. **Written
-compile-plausibly, matching `LayoutValidator`'s own T3-1 precedent** — every
-symbol checked against the vendored headers, not yet run through MSVC (that's
-a separate, still-gated step).
+`AIProcessInspector`'s live formID→package-formID map. **Confirmed compiling
+cleanly through MSVC** (VS2022 Build Tools, MSVC 14.44) as part of the
+default build — not yet exercised live in-game with devbench actually
+installed (that's the remaining, still-open verification step).
 
 ## Why this builds against the vendored CommonLibSSE-NG
 

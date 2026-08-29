@@ -38,7 +38,14 @@ Ghidra project with no archive ever applied, not an undo of the "after"
 one. The Decompile panel goes from `FUN_1401e1270(longlong *param_1,
 undefined8 param_2)` with `*(uint *)(param_1 + 2)`-style raw offset
 arithmetic to `FUN_1401e1270(TESObjectREFR *self)` with
-`self->super_TESForm.formFlags` and `.formType._impl`. The
+`self->super_TESForm.formFlags` and `.formType._impl`. (`super_TESForm` is
+Ghidra's own naming convention for a flattened base-class member, not
+something this project invents — it's how Ghidra always names an embedded
+base subobject.) One honest artifact visible in the "after" shot: line 16's
+`lVar2 = __RTDynamicCast();` lost its call arguments compared to what a
+fully-typed build would show — a side effect of retyping this particular
+call in isolation rather than a full RTTI-analysis pass, not a sign the
+applied types are wrong. The
 [`examples/`](examples/README.md) directory has the same before/after as
 plain text if you want to diff it directly.
 
@@ -63,10 +70,10 @@ Feed the `.unpacked.exe` to the driver below.
 ## Run it
 
 Prerequisites: your own legal copy of Skyrim SE/AE 1.6.1170, Ghidra 12+,
-JDK 22+, and a generated `.gdt` (build one with
-`../type-importer/scripts/generate_gdt.sh` — see `symbol-archive/`'s README
-for the CI build workflow's current status, no public release artifact yet).
-Nothing from the game is redistributed by this demo.
+JDK 22+, and a `.gdt` — either [download `gdt-v1`](https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-v1)
+directly, or build your own with `../type-importer/scripts/generate_gdt.sh`
+(see `symbol-archive/`'s README for the CI build workflow). Nothing from
+the game is redistributed by this demo.
 
 ```bash
 JAVA_HOME=~/tools/jdk-25 GHIDRA_INSTALL_DIR=~/tools/ghidra \

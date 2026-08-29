@@ -27,7 +27,9 @@
 
 #include "AIProcessInspector.h"
 #include "DevBenchIntegration.h"
+#ifdef RTK_ENABLE_HAVOK_STEP_LOGGER
 #include "HavokStepLogger.h"
+#endif
 #include "LayoutValidator.h"
 #include "SavegameTracer.h"
 
@@ -111,7 +113,9 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
     }
 
     AIProcessInspector::Install();
+#ifdef RTK_ENABLE_HAVOK_STEP_LOGGER
     HavokStepLogger::Install();
+#endif
     SavegameTracer::Install();
     LayoutValidator::Install();
 
