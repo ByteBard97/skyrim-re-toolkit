@@ -50,7 +50,19 @@ def main():
         new_entry = new.get(name, {"status": "UNRESOLVED", "expected": base_entry.get("expected"), "actual": None})
         base_rank = RANK[base_entry["status"]]
         new_rank = RANK[new_entry["status"]]
-        if new_rank < base_rank:
+        if base_entry["status"] in ("MISMATCH", "OK") and new_entry["status"] == "NO_GROUND_TRUTH":
+            # NO_GROUND_TRUTH normally ranks ABOVE MISMATCH/EMPTY (a class
+            # with no assert to check is "less bad" than one we know is
+            # wrong) -- but if the BASELINE had a real `expected` value
+            # (MISMATCH or OK) and the new run has none, that means the
+            # static_assert miner failed to re-find an assert it found
+            # before, not that the archive itself improved. Treat that
+            # specific transition as a regression in the miner, not an
+            # improvement in coverage. Found while
+            # that traced a real mislabeled class (SkyObject) back to
+            # this exact blind spot.
+            regressions.append((name, base_entry, new_entry))
+        elif new_rank < base_rank:
             regressions.append((name, base_entry, new_entry))
         elif new_rank > base_rank:
             improvements.append((name, base_entry, new_entry))
