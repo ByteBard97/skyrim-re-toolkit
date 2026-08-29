@@ -1,4 +1,4 @@
-# Patch 0010: port FFM bindings to the final (JDK 22+) API — and the real story behind "-Xint"
+# Patch 0010: port FFM bindings to the final (JDK 22+) API -- and the real story behind "-Xint"
 
 ## Summary
 
@@ -20,12 +20,12 @@ already had the matching version switch.
 This patch is the delivery vehicle for the root-cause fix of the two
 worst open problems in this pipeline, both previously misattributed:
 
-### 1. "Panama FFI upcalls crash under JIT" — FALSE. It was libclang's signal handler.
+### 1. "Panama FFI upcalls crash under JIT" -- FALSE. It was libclang's signal handler.
 
 The pipeline has always run `-Xint` because it crashed under JIT.
 Reproducing the crash on JDK 25 produced an `hs_err` showing:
 
-- `SIGSEGV ... (sent by kill)` — an externally-raised signal, not a real
+- `SIGSEGV ... (sent by kill)` -- an externally-raised signal, not a real
   memory fault at the faulting pc;
 - the "problematic frame" was **JIT-compiled Ghidra database code**
   (`DataTypeManagerDB.getCategory`), nowhere near FFM or libclang, during
@@ -36,14 +36,14 @@ Root cause: LLVM installs its own SIGSEGV "crash recovery" handler when a
 benign SIGSEGVs (implicit null checks) and expects its own handler to
 receive them. LLVM's handler intercepts one, misreads it as a crash, and
 kills the JVM. Interpreter mode merely avoided emitting implicit-null-check
-traps — masking the symptom, at ~10x the runtime.
+traps -- masking the symptom, at ~10x the runtime.
 
-Fix: `export LIBCLANG_DISABLE_CRASH_RECOVERY=1` (honored by libclang —
+Fix: `export LIBCLANG_DISABLE_CRASH_RECOVERY=1` (honored by libclang --
 verified present in the LLVM 19.1.0 binary via `strings`), now set
 unconditionally in `generate_gdt.sh`. With it, the full pipeline runs
 to completion under JDK 25 with the JIT enabled.
 
-### 2. The "scale-dependent libclang misbehavior" that blocked patch 0007 — NOT libclang.
+### 2. The "scale-dependent libclang misbehavior" that blocked patch 0007 -- NOT libclang.
 
 Patch 0007 was deferred because `clang_Type_getSizeOf` and
 `clang_getCanonicalType`+`clang_Type_getTemplateArgumentAsType` returned
@@ -55,7 +55,7 @@ A pure-C probe (`scale_probe.c`, no Java/Panama at all) parsing the
 (including `-fdelayed-template-parsing`) proved libclang is deterministic
 and correct at that scale: it queried all 10 regressed classes and the
 `hkRefPtr` fields before and after sweep-scale traffic (sizeof + canonical
-+ template-arg enumeration over all 3,445 record definitions in the TU) —
++ template-arg enumeration over all 3,445 record definitions in the TU) --
 every answer identical both times, and *correct* (e.g.
 `sizeof(ArmorRatingVisitor) = 64`, canonical `BSTArray` reporting both
 template args including the 24-byte `BSScrapArrayAllocator`).

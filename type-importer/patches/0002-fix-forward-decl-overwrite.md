@@ -3,7 +3,7 @@
 **Status: written and applied; functionally correct and verified not to
 regress anything, but it did NOT turn out to be the cause of the specific
 symptom that motivated writing it (see "What this patch does NOT fix"
-below — that's a template-instantiation limitation, already documented,
+below -- that's a template-instantiation limitation, already documented,
 not a new bug).**
 
 ## The bug
@@ -18,15 +18,15 @@ public void addParsedType(ParsedType type) {
 ```
 
 `SourceParser.parseStruct` is called for **every** `STRUCT_DECL`/`CLASS_DECL`
-cursor clang visits — including bare forward declarations (`class Foo;`)
+cursor clang visits -- including bare forward declarations (`class Foo;`)
 that have zero children, which produce an empty `ParsedStructure` (zero
 fields). There is no `isDefinition()` check anywhere in `SourceParser` to
 skip these (no such binding exists on the extension's `Cursor` wrapper yet).
 
 Combined, this means: in a translation unit where a class is forward-declared
-*again* somewhere after its full definition is visited — a completely
+*again* somewhere after its full definition is visited -- a completely
 routine C++ pattern, and one CommonLibSSE-NG uses constantly (`class
-TESForm;` appears as a forward declaration in dozens of files) — the later,
+TESForm;` appears as a forward declaration in dozens of files) -- the later,
 empty forward-declaration would silently overwrite the real, already-parsed
 definition in the map, with no diagnostic.
 
@@ -44,7 +44,7 @@ if (existing instanceof ParsedStructure existingStruct
 this.parsedTypes.put(type.getName(), type);
 ```
 
-No new libclang binding needed — a real definition always has at least as
+No new libclang binding needed -- a real definition always has at least as
 many fields as any forward declaration of the same class (always zero), so
 this heuristic can't misfire in the other direction (a struct never "loses"
 fields between two full-definition visits of the same class in one TU).
@@ -59,7 +59,7 @@ applied, `TESForm` still came out as an empty (`sizeof=1`) struct in the
 final archive, despite **zero clang parse errors**. Debug tracing showed
 `addParsedType("TESForm")` was actually called correctly, in the right
 order (0 fields from a forward declaration, then 8 fields from the real
-definition) — so this patch's fix was already doing its job; the map held
+definition) -- so this patch's fix was already doing its job; the map held
 the correct 8-field entry going into `resolve()`.
 
 The real cause is one level deeper, in `TypePool.resolve()`'s dependency
@@ -69,20 +69,20 @@ type name string (`TypePool.java:328-334`, `hasType()` does a literal
 lookup by that string). `TESForm`'s 8 real fields include
 `inGameFormFlags: stl::enumeration<InGameFormFlag, std::uint16_t>` and
 `formType: stl::enumeration<FormType, std::uint8_t>` (confirmed via debug
-trace) — raw, uninstantiated template spellings. `GhidraClangPoweredParse`
+trace) -- raw, uninstantiated template spellings. `GhidraClangPoweredParse`
 has **no C++ template instantiation support** (already documented as a
 known limitation in `DESIGN.md`'s "Base tooling" section and in this
-`patches/` directory's own README context) — it never creates a
+`patches/` directory's own README context) -- it never creates a
 `ParsedType`/`DataType` for a template instantiation string like that, so
 `hasType(...)` returns false for it forever. `TESForm` therefore never
 satisfies `checkDependenciesFulfilled`, `createDataType()` is never called
 for it, and the only representation of `TESForm` that ends up in the final
 `.gdt` is the empty placeholder registered during `resolve()`'s
-forward-declaration pre-pass (`TypePool.java:41-64`) — which happens
+forward-declaration pre-pass (`TypePool.java:41-64`) -- which happens
 *unconditionally* for every struct, real definition or not, and is only
 ever replaced when the real type successfully resolves.
 
-**This is not a new, independent bug** — it's a direct, concrete, now
+**This is not a new, independent bug** -- it's a direct, concrete, now
 empirically-confirmed manifestation of the already-known "no template
 instantiation support" limitation, using our own actual v0.1 target class
 as the live reproduction. It's exactly why `DESIGN.md`'s template
@@ -94,7 +94,7 @@ as a struct field) ahead of time, any class using one as a field member
 will never resolve through this tool, regardless of how correct everything
 else is.**
 
-## Next step this points to — one attempt made, didn't work
+## Next step this points to -- one attempt made, didn't work
 
 Wiring `generate_forced_instantiations.py`'s output into the actual
 `SourceParser.parseFiles` call was the obvious next step, so one attempt
@@ -105,14 +105,14 @@ std::uint8_t>`) inside `namespace RE { ... }`, *after* the real header
 includes in the test's translation unit, and re-ran.
 
 **Result: no change.** Same 3731 resolved types, `TESForm` still empty.
-The resolved-type *count* not changing at all is the interesting part — if
+The resolved-type *count* not changing at all is the interesting part -- if
 the forced instantiation had even partially worked (e.g., registered the
 enumeration type but something else still blocked `TESForm`), the count
 should have gone up by at least the new `stl::enumeration<...>`
 specializations themselves. It didn't move, which suggests the `using` +
 `sizeof` trick isn't producing a cursor that `SourceParser`'s
 `visitDeclarations`/`visitChildren` traversal ever sees as a child of the
-namespace at all — plausible culprits, untested:
+namespace at all -- plausible culprits, untested:
 
 - `ArchitectureMapping.TargetEnvironment.WINDOWS` sets
   `-fdelayed-template-parsing` (`ArchitectureMapping.java:114-119`), an
@@ -125,19 +125,19 @@ namespace at all — plausible culprits, untested:
   cursor-visitor handling (e.g. checking
   `CursorKind.CLASS_TEMPLATE`/specialization-related kinds, or visiting via
   a different traversal option) that `visitDeclarations`/`parseStruct`
-  simply doesn't have — they only handle `STRUCT_DECL`/`CLASS_DECL`, and an
+  simply doesn't have -- they only handle `STRUCT_DECL`/`CLASS_DECL`, and an
   implicit specialization might report a different kind, or might not be
   enumerated as a syntactic child of the namespace the way an explicit
   declaration is.
 
-**Not chased further in this pass** — this needs actual investigation (dumping
+**Not chased further in this pass** -- this needs actual investigation (dumping
 the AST via `clang -Xclang -ast-dump` for a minimal repro of `using X =
 SomeTemplate<Args>; sizeof(X);` to see whether/how the instantiation shows
 up as a cursor, then checking whether `-fdelayed-template-parsing` changes
 that) rather than more blind trial-and-error. This is the concrete starting
 point for whoever picks this up next, including which two things were
 already ruled out (the STL-availability problem and the RTTI/VTABLE-stub
-problem — both solved by `stubs/layout_pch.h`) so the search space is
+problem -- both solved by `stubs/layout_pch.h`) so the search space is
 narrower than it looks.
 
 ## How this was verified
@@ -151,7 +151,7 @@ confirmed: zero clang diagnostics, 3731 real data types resolved and
 committed to an actual `.gdt` file, and (via debug tracing, since verifying
 the *absence* of a symptom needs positive confirmation the code path
 actually ran) that `addParsedType` correctly preserves the real 8-field
-`TESForm` definition in the pool — the remaining emptiness in the final
+`TESForm` definition in the pool -- the remaining emptiness in the final
 archive is the template-instantiation limitation above, not this patch's
 concern. Reverted the submodule's working tree to pristine afterward, same
 as patch 0001.

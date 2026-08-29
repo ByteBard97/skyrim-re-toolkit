@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>runtime-harness — skyrim-re-toolkit</title>
+<title>runtime-harness -- skyrim-re-toolkit</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="SKSE plugins for live Creation Engine state inspection — the AI scheduler, Havok physics step, and savegame serializer, instrumented while the game actually runs.">
+<meta name="description" content="SKSE plugins for live Creation Engine state inspection -- the AI scheduler, Havok physics step, and savegame serializer, instrumented while the game actually runs.">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -35,13 +35,13 @@
     The Skyrim RE community has excellent static tooling (IDA, Ghidra, BinDiff) and excellent animation
     introspection (Open Animation Replacer). But the engine's <strong>AI scheduler</strong>,
     <strong>Havok physics step</strong>, and <strong>savegame serializer</strong> have zero purpose-built
-    runtime visibility. Every finding about them today arrives as static RE embedded in patch code —
+    runtime visibility. Every finding about them today arrives as static RE embedded in patch code --
     nobody watches them run.
   </p>
 
   <h2>The solution</h2>
   <p>
-    SKSE plugins that hook into those subsystems and log their internal state live, in real gameplay —
+    SKSE plugins that hook into those subsystems and log their internal state live, in real gameplay --
     not just what a disassembler can infer statically.
   </p>
 
@@ -49,14 +49,14 @@
   <p>
     A real SKSE plugin (<code>RuntimeHarness</code>) builds against CommonLibSSE-NG, sets up file
     logging, and logs the plugin/game version plus <code>kDataLoaded</code>/<code>kNewGame</code>/
-    <code>kPreLoadGame</code>/<code>kPostLoadGame</code> from the messaging interface — confirmed running
+    <code>kPreLoadGame</code>/<code>kPostLoadGame</code> from the messaging interface -- confirmed running
     against a live Skyrim AE 1.6.1170 process (SKSE64 2.2.6).
   </p>
 
   <div class="card-grid">
     <div class="card">
       <h3>AIProcessInspector <span class="badge badge-good">verified in-game</span></h3>
-      <p>Package evaluation and AI scheduler decisions. Hooks <code>Actor::Update</code> via vtable — on
+      <p>Package evaluation and AI scheduler decisions. Hooks <code>Actor::Update</code> via vtable -- on
       both <code>RE::VTABLE_Actor</code> and <code>RE::VTABLE_Character</code>, since live NPCs are
       <code>Character</code> instances with their own vtable. <code>RuntimeHarness.log</code> shows a
       dozen-plus live NPCs' package-evaluation transitions during a fresh game's opening scene, changing
@@ -69,45 +69,45 @@
       physics-state transitions with velocity magnitude. Not yet actor-attributed (keyed by
       <code>hkpCharacterContext</code> address, not a form ID). Deployed and installed cleanly in-game, but
       produced zero log output across 70+ minutes of real gameplay (Helgen intro through open-world
-      Whiterun, including combat-adjacent NPC activity) — long enough to rule out timing. The vfunc index,
+      Whiterun, including combat-adjacent NPC activity) -- long enough to rule out timing. The vfunc index,
       input delivery, and a possible <code>PlayerCharacter</code>-specific hierarchy were all independently
       checked and ruled out. Checked real prior art:
       <a href="https://github.com/ersh1/Precision">ersh1/Precision</a> (GPL-3.0, the standard
       SKSE-community reference for Havok hooking) has zero references to <code>bhkCharacterState</code> or
-      <code>hkpCharacterState</code> anywhere in its ~2,200-line hooking code — it hooks
+      <code>hkpCharacterState</code> anywhere in its ~2,200-line hooking code -- it hooks
       <code>RE::bhkWorld</code>'s physics-step function directly via a mid-function Xbyak trampoline
-      instead of vtable-hooking the state machine — the standard community reference doesn't use this project's approach, which is likely why it's silent.
+      instead of vtable-hooking the state machine -- the standard community reference doesn't use this project's approach, which is likely why it's silent.
       Scoped follow-on, not attempted: rebuild Precision-style, which needs Xbyak enabled in this project's
-      build (currently off) plus a vcpkg dependency and re-verified offsets — a real feature task, not a
+      build (currently off) plus a vcpkg dependency and re-verified offsets -- a real feature task, not a
       quick fix.</p>
     </div>
     <div class="card">
       <h3>SavegameTracer <span class="badge badge-good">verified in-game</span></h3>
-      <p>Hooks <code>BGSSaveLoadManager::ProcessEvent</code> via vtable — a genuine singleton, so exactly
+      <p>Hooks <code>BGSSaveLoadManager::ProcessEvent</code> via vtable -- a genuine singleton, so exactly
       one concrete vtable. Dumps <code>saveGameList</code> (filename, player name, race, location,
       playtime) on every firing, since the actual event payload types are only ever forward-declared in
       the vendored tree. Confirmed firing live in-game: a real <code>ProcessEvent</code> call with a real
       <code>saveGameList</code> query (the list was empty at that moment, since no save existed yet in the
-      session — itself correct live data, not a failure).</p>
+      session -- itself correct live data, not a failure).</p>
     </div>
   </div>
 
   <div class="callout">
     A further idea unlocked by the rest of this repo: a struct-layout validator that checks
     <a href="type-importer.html"><code>type-importer</code></a>'s generated layouts against the
-    <strong>running</strong> game — stronger ground truth than <code>static_assert</code>s.
+    <strong>running</strong> game -- stronger ground truth than <code>static_assert</code>s.
   </div>
 
   <h2>Why this builds against the vendored CommonLibSSE-NG</h2>
   <p>
-    The plugin compiles against <code>type-importer/vendor/CommonLibSSE-NG</code> (v3.7.0) directly —
-    <strong>the exact headers the <code>.gdt</code> type archives are generated from</strong> — so the
+    The plugin compiles against <code>type-importer/vendor/CommonLibSSE-NG</code> (v3.7.0) directly --
+    <strong>the exact headers the <code>.gdt</code> type archives are generated from</strong> -- so the
     runtime harness and the type archives can never disagree about a struct layout.
   </p>
 
   <h2>Platform: Windows-only, no exceptions</h2>
   <p>
-    SKSE plugins are Windows DLLs built against Skyrim's Windows PE ABI — this piece cannot be built or
+    SKSE plugins are Windows DLLs built against Skyrim's Windows PE ABI -- this piece cannot be built or
     tested on Linux the way <a href="type-importer.html">type-importer</a> can. Builds happen on a
     dedicated Windows machine (Visual Studio + SKSE64) driven over SSH from the rest of this project's
     Linux-native workflow.

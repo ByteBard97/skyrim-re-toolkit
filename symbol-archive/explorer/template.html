@@ -350,7 +350,7 @@ const DATA = __DATA__;
       + `<span class="rname">${qname(t.name)}</span>`
       + `<span class="badge ${t.status}" title="${t.status}"></span></button>`
     ).join("");
-    if (matches.length > CAP) html += `<div class="more-note">${matches.length}+ matches — keep typing to narrow.</div>`;
+    if (matches.length > CAP) html += `<div class="more-note">${matches.length}+ matches -- keep typing to narrow.</div>`;
     if (shown.length === 0) html = `<div class="more-note">No type matches “${q}”.</div>`;
     results.innerHTML = html;
     sel = -1;

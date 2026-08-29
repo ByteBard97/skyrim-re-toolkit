@@ -4,15 +4,15 @@
 missing from `playday3008.gcpp.clang`. One (`Type.visitFields`) is the
 actual fix wired into patch 0003. The other (`Cursor.definition`) was
 added mid-investigation to test a hypothesis that turned out to be wrong
-— kept anyway as real, correctly-implemented, generally useful
+-- kept anyway as real, correctly-implemented, generally useful
 infrastructure.**
 
-## `Type.visitFields` — the actual fix
+## `Type.visitFields` -- the actual fix
 
 Adds a binding for `clang_Type_visitFields`, following the exact existing
 pattern for `Cursor.visitChildren`/`clang_visitChildren` (same upcall-stub
 approach, same ThreadLocal visitor-bridge pattern, just a different
-callback signature — `CXFieldVisitor` takes a single cursor and returns
+callback signature -- `CXFieldVisitor` takes a single cursor and returns
 `CXVisitorResult`, vs. `CXCursorVisitor`'s cursor+parent pair and
 `CXChildVisitResult`).
 
@@ -21,12 +21,12 @@ problem described in `patches/0003-inline-template-specialization-fields.md`:
 `clang_visitChildren` never enumerates the members of an
 implicitly-instantiated template specialization, no matter how complete
 the type is (confirmed: `clang_isCursorDefinition` true, correct
-`clang_Type_getSizeOf`) — but `clang_Type_visitFields` (which walks
+`clang_Type_getSizeOf`) -- but `clang_Type_visitFields` (which walks
 `CXXRecordDecl::field_begin()`/`field_end()` directly) does.
 
-## `Cursor.definition` — added mid-investigation, kept as infrastructure
+## `Cursor.definition` -- added mid-investigation, kept as infrastructure
 
-Adds a binding for `clang_getCursorDefinition` — given a declaration
+Adds a binding for `clang_getCursorDefinition` -- given a declaration
 cursor, returns the cursor that actually defines it (or a null cursor if
 there's no definition in the translation unit).
 
@@ -38,9 +38,9 @@ definition cursor would have real children.
 
 **What testing it found:** for the real `TESForm::inGameFormFlags` case,
 `fieldType.declaration()` and `fieldType.declaration().definition()`
-returned the **identical** cursor — same kind, same spelling. This ruled
+returned the **identical** cursor -- same kind, same spelling. This ruled
 out the declaration-vs-definition distinction as the cause (it was the
-4th of 5 hypotheses ruled out before finding the real answer — see patch
+4th of 5 hypotheses ruled out before finding the real answer -- see patch
 0003's "Investigation history" section for the full list).
 
 **Why keep it despite not being the fix:** it's real, generally-useful,
@@ -48,7 +48,7 @@ correctly-implemented libclang capability that any future cursor-resolution
 work will likely need, implemented by mirroring the exact working pattern
 for `Type.declaration()`/`clang_getTypeDeclaration`. Removing it would
 just mean re-adding it the next time someone needs to check a
-declaration/definition distinction — better to keep working, tested
+declaration/definition distinction -- better to keep working, tested
 infrastructure than throw it away because it answered "no" to the
 question it was built to test.
 
@@ -61,7 +61,7 @@ Both bindings compile cleanly standalone (before patches 0001-0003 are
 applied) and together with the full patch stack. `Type.visitFields` was
 verified two ways: (1) a minimal libclang C program, completely outside
 this Java layer, using `clang-c/Index.h` directly against `libclang.so`
-— confirmed `clang_Type_visitFields` finds the field where
+-- confirmed `clang_Type_visitFields` finds the field where
 `clang_visitChildren` does not; (2) a standalone Java harness
 (`VisitFieldsTest`, not committed) exercising the actual
 `Type.visitFields()` Java method against the real vendored headers,

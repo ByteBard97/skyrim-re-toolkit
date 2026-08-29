@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>symbol-archive — skyrim-re-toolkit</title>
+<title>symbol-archive -- skyrim-re-toolkit</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="CI-driven builds of pre-built Ghidra .gdt type archives per Skyrim runtime — AE, SE, VR.">
+<meta name="description" content="CI-driven builds of pre-built Ghidra .gdt type archives per Skyrim runtime -- AE, SE, VR.">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -30,7 +30,7 @@
   <h1>symbol-archive</h1>
   <p class="lede"><span class="badge badge-warn">early scaffold</span> &nbsp; CI-driven builds of <code>.gdt</code> type archives for every supported Skyrim runtime, so you don't have to run the pipeline yourself.</p>
 
-  <p><a href="https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-2026-08-29"><strong>&rarr; Download the <code>gdt-2026-08-29</code> release</strong></a> — AE/SE/VR <code>.gdt</code> files, no build required. Every struct's verification status is stamped into its Ghidra description at generation time, and confirmed-wrong (MISMATCH) structs are additionally relocated into an unmissable <code>/NEEDS_VERIFICATION_MISMATCH</code> category in the Data Type Manager tree — not just a tooltip you have to go looking for.</p>
+  <p><a href="https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-2026-08-29"><strong>&rarr; Download the <code>gdt-2026-08-29</code> release</strong></a> -- AE/SE/VR <code>.gdt</code> files, no build required. Every struct's verification status is stamped into its Ghidra description at generation time, and confirmed-wrong (MISMATCH) structs are additionally relocated into an unmissable <code>/NEEDS_VERIFICATION_MISMATCH</code> category in the Data Type Manager tree -- not just a tooltip you have to go looking for.</p>
 
   <h2>The problem</h2>
   <p>
@@ -44,7 +44,7 @@
   <p>
     A GitHub Actions workflow that wraps <a href="type-importer.html"><code>type-importer</code></a>'s
     pipeline, runs a full-namespace sweep of <code>CommonLibSSE-NG/include/RE/</code> per runtime, and
-    publishes each resulting <code>.gdt</code> as a build artifact — with opt-in publishing to a versioned
+    publishes each resulting <code>.gdt</code> as a build artifact -- with opt-in publishing to a versioned
     GitHub Release.
   </p>
 
@@ -55,12 +55,12 @@
   </div>
   <p>
     Runtime coverage mirrors <code>type-importer</code>'s own CI matrix now that AE, SE 1.5.97, and VR
-    1.4.15 layouts are validated. AE 1.7.99/GOG need no separate build entry — they share AE 1.6.1170's
+    1.4.15 layouts are validated. AE 1.7.99/GOG need no separate build entry -- they share AE 1.6.1170's
     macro and Address Library ID scheme.
   </p>
   <div class="callout">
     <strong>Confirmed with a real run.</strong> All three matrix legs (AE, SE, VR) completed a real
-    <code>workflow_dispatch</code> run successfully — real <code>.gdt</code> artifacts, ~3.7MB each,
+    <code>workflow_dispatch</code> run successfully -- real <code>.gdt</code> artifacts, ~3.7MB each,
     traceable to a specific CommonLibSSE-NG commit. Published as
     <a href="https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-2026-08-29"><code>gdt-2026-08-29</code></a>.
   </div>
@@ -68,20 +68,20 @@
   <h2>Accuracy: read this before trusting a class blindly</h2>
   <p>
     <strong>Not every class in this archive is byte-accurate.</strong> <code>type-importer</code>'s own
-    coverage sweep tracks this precisely — as of the last full sweep,
+    coverage sweep tracks this precisely -- as of the last full sweep,
     <strong>2,105 of 3,181 checkable classes (66%)</strong> resolve byte-accurate; the rest are either a
     wrong size or resolve empty.
   </p>
   <p>
     A curated <strong>hotspot list</strong> of 39 commonly-modded classes (<code>TESForm</code> hierarchy,
     <code>Actor</code>/<code>Character</code>/<code>PlayerCharacter</code>, inventory, item types,
-    quests/packages, Havok, etc.) is a much stronger accuracy signal than the archive's raw class count —
+    quests/packages, Havok, etc.) is a much stronger accuracy signal than the archive's raw class count --
     that list is fully closed: <strong>37/39 are exact</strong>, and the remaining 2 have real inferred
     sizes rather than silent 1-byte placeholders.
   </p>
   <div class="callout">
     Still don't treat every struct in this archive as trustworthy without cross-checking against a real
-    <code>static_assert</code> or independent verification outside the hotspot list — that remains true
+    <code>static_assert</code> or independent verification outside the hotspot list -- that remains true
     until <code>type-importer</code>'s overall pass rate is much higher. See
     <a href="type-importer.html#accuracy">type-importer's accuracy section</a> for what's tracked and how.
   </div>
@@ -95,7 +95,7 @@
 
   <h2>What this buys you, visually</h2>
   <p>
-    See <a href="type-importer.html#demo">type-importer's before/after screenshots</a> — a real
+    See <a href="type-importer.html#demo">type-importer's before/after screenshots</a> -- a real
     <code>.gdt</code> from this same pipeline applied to a real <code>SkyrimSE.exe</code> in Ghidra,
     showing typed field access instead of raw offsets.
   </p>

@@ -2,7 +2,7 @@
 
 **Status: written, applied, and functionally verified end-to-end against
 the real CommonLibSSE-NG header chain (2026-08-24). This is a complete
-fix, not a partial one — see the update at the bottom; an earlier version
+fix, not a partial one -- see the update at the bottom; an earlier version
 of this patch (same day) was real infrastructure but didn't work, and the
 investigation of *why* led directly to the working version below.**
 
@@ -24,31 +24,31 @@ layer problem"):
 
 1. **`c-index-test`** (libclang's own cursor-inspection CLI) on a minimal
    repro showed that a class template specialization is *never* exposed
-   as a visitable declaration cursor via `clang_visitChildren` — traversal
+   as a visitable declaration cursor via `clang_visitChildren` -- traversal
    only reaches the uninstantiated primary template (`ClassTemplate=...`)
    plus a `TemplateRef` at the use site. Comparing against Clang's
    internal AST (`-ast-dump`, which DOES show a real
    `ClassTemplateSpecializationDecl`) confirmed the specialization
-   genuinely exists in the AST — it's just not reachable by top-down
+   genuinely exists in the AST -- it's just not reachable by top-down
    cursor traversal.
 
 2. **A minimal, from-scratch libclang C program** (not using this
-   extension, not using `c-index-test` — direct calls against
+   extension, not using `c-index-test` -- direct calls against
    `libclang.so` via `clang-c/Index.h`) pinned this down further against
    the *real* `TESForm::inGameFormFlags` field:
    - `clang_getTypeDeclaration(fieldType)` returns a `CLASS_DECL` cursor.
    - `clang_isCursorDefinition()` on that cursor returns **true**.
-   - `clang_Type_getSizeOf(fieldType)` returns **2** (the correct size —
+   - `clang_Type_getSizeOf(fieldType)` returns **2** (the correct size --
      `std::uint16_t`), proving the type is genuinely, fully instantiated.
    - `clang_visitChildren()` on that same cursor still finds **zero**
      children.
-   - `clang_Type_visitFields()` on the field's `Type` — a *different*
+   - `clang_Type_visitFields()` on the field's `Type` -- a *different*
      libclang API, which walks `CXXRecordDecl::field_begin()`/
      `field_end()` directly rather than the general declaration-child
-     iterator — **finds the field correctly** (`_impl`, a `FieldDecl`).
+     iterator -- **finds the field correctly** (`_impl`, a `FieldDecl`).
 
 **Conclusion:** this is a genuine, confirmed libclang-level quirk (or
-deliberate design choice) — `clang_visitChildren` simply does not
+deliberate design choice) -- `clang_visitChildren` simply does not
 enumerate members of an implicitly-instantiated class template
 specialization, no matter how complete and well-formed the type is.
 `clang_Type_visitFields` is the correct API for this case and libclang
@@ -67,8 +67,8 @@ Two coordinated changes:
    - `SourceParser.parseStruct`'s `FIELD_DECL` case detects when a
      (non-anonymous) field's type is a class template specialization
      (`fieldType.kind() == RECORD || UNEXPOSED`, spelling contains `<`),
-     resolves its declaration, and — instead of the broken
-     `declCursor.visitChildren(...)` approach — calls a new
+     resolves its declaration, and -- instead of the broken
+     `declCursor.visitChildren(...)` approach -- calls a new
      `parseFieldsFromType(Type, CategoryPath)` method that uses
      `type.visitFields(...)` to collect the real fields.
    - The result is inlined via the *same* mechanism already used for
@@ -76,7 +76,7 @@ Two coordinated changes:
      `anonymousType`), which conveniently already bypasses the
      string-keyed dependency system entirely
      (`ParsedStructure.getDependencies()` filters out `isAnonymous()`
-     fields) — no mangled synthetic name needs to be registered in the
+     fields) -- no mangled synthetic name needs to be registered in the
      pool anywhere.
    - `ParsedStructure.createDataType()`'s anonymous-embedding code path
      always used `""` as the field name (correct for a truly anonymous
@@ -84,7 +84,7 @@ Two coordinated changes:
      since these reused fields DO have one (`inGameFormFlags`, not blank).
 
    One quirk along the way: **template specialization field types report
-   `TypeKind.UNEXPOSED` in libclang's C API, not `TypeKind.RECORD`** — the
+   `TypeKind.UNEXPOSED` in libclang's C API, not `TypeKind.RECORD`** -- the
    type-kind check has to test for both (confirmed via debug tracing
    against real CommonLibSSE-NG headers).
 
@@ -96,14 +96,14 @@ Getting to the actual fix took four ruled-out hypotheses, each tested
 individually against the real header chain, not guessed:
 
 1. Force-instantiation via `using X = Template<Args>; sizeof(X);` at the
-   source level — resolved-type count didn't move at all. Ruled out.
+   source level -- resolved-type count didn't move at all. Ruled out.
 2. `-fdelayed-template-parsing` (an MSVC-compat flag this codebase sets)
-   — negated it, no change. Ruled out.
-3. `.skipFunctionBodies()` on the `TranslationUnit.Builder` — removed it,
+   -- negated it, no change. Ruled out.
+3. `.skipFunctionBodies()` on the `TranslationUnit.Builder` -- removed it,
    no change. Ruled out.
-4. `.parseIncomplete()` — removed it too, no change. Ruled out.
+4. `.parseIncomplete()` -- removed it too, no change. Ruled out.
 5. Declaration-vs-definition cursor distinction (added
-   `clang_getCursorDefinition`, see patch 0004) — confirmed it returns
+   `clang_getCursorDefinition`, see patch 0004) -- confirmed it returns
    the *identical* cursor `clang_getTypeDeclaration` already gives. Ruled
    out.
 
@@ -113,18 +113,18 @@ build entirely) reveal the real answer: `clang_Type_visitFields` vs.
 `clang_visitChildren`. The lesson for next time: when a Java/Panama-level
 binding produces a surprising result, drop straight to a minimal C
 program against the same C API before assuming the binding layer itself
-is at fault — it would have saved four rounds of Java-level flag toggling.
+is at fault -- it would have saved four rounds of Java-level flag toggling.
 
 ## What this does NOT fix
 
 While verifying this fix end-to-end, `TESForm` as a *whole* still doesn't
-fully resolve in the real header test — but for a completely different,
+fully resolve in the real header test -- but for a completely different,
 unrelated reason discovered in the same verification pass: `FormID`
 (`using FormID = std::uint32_t;`, a simple typedef) appears in the
 "unresolved dependencies" list, suggesting Ghidra's `DataTypeParser`
 and/or this tool's `TypePool.getType()` doesn't resolve namespace-qualified
 builtin type spellings like `"std::uint32_t"` correctly in some code path.
-This is a **separate, distinct, not-yet-investigated bug** — not chased
+This is a **separate, distinct, not-yet-investigated bug** -- not chased
 further this pass. `TESObjectREFR (RUNTIME_DATA_CONTENT tail sizing, see
 DESIGN.md) and BaseFormComponent both resolved fine, isolating the
 remaining blocker specifically to typedef/builtin-type-name resolution,
@@ -132,7 +132,7 @@ not to anything this patch touches.
 
 ## How this was verified
 
-Standalone harness (`VisitFieldsTest`, not committed — throwaway
+Standalone harness (`VisitFieldsTest`, not committed -- throwaway
 validation tool) confirmed `Type.visitFields()` finds `TESForm`'s real
 `inGameFormFlags` field (`_impl`, type `underlying_type`) directly against
 the real vendored headers, independent of the full `SourceParser` pipeline.
@@ -141,7 +141,7 @@ via debug tracing that `parseFieldsFromType(enumeration<InGameFormFlag,
 std::uint16_t>) -> 1 fields` fires correctly for every `stl::enumeration<...>`
 usage across the real header chain (9 distinct instantiations observed).
 Ran the full regression suite (`VptrFixTest`, `RealHeaderTest`) after
-removing debug logging — zero clang diagnostics, no regressions, 3746
+removing debug logging -- zero clang diagnostics, no regressions, 3746
 resolved types (matches the count with all patches applied). Reverted the
 submodule's working tree to pristine afterward.
 

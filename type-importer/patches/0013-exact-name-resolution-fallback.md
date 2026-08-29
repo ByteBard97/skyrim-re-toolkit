@@ -15,7 +15,7 @@ the actual blocker:
 
     [DEPS] 'BGSDirectionalAmbientLightingColors' blocked by 'Color'
 
-`Color` — a plain, top-level RE class — fails to resolve on the runner.
+`Color` -- a plain, top-level RE class -- fails to resolve on the runner.
 `resolveType` had exactly one lookup path for plain names: Ghidra's
 `DataTypeParser.parse(name)`, which can fail or go ambiguous when
 multiple same-named types exist across DTM categories (the WinSDK splat
@@ -37,6 +37,6 @@ entry, so any future divergence self-diagnoses in one CI dispatch.
 ## Verification
 
 - Local full sweep: byte-identical to the committed baseline
-  (0 regressions, 0 improvements) — pure robustness, no value change
+  (0 regressions, 0 improvements) -- pure robustness, no value change
   where resolution already worked.
 - Runner validation: see the CI run for the commit adding this patch.

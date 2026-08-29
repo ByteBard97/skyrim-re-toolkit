@@ -260,7 +260,7 @@ made, since the identical API call (`clang_getCanonicalType` +
 `clang_Type_getTemplateArgumentAsType`) behaves correctly in isolation
 and incorrectly at scale regardless of which code path invokes it.
 
-## THIRD investigation (2026-08-24, after the JDK/toolchain fix): the "scale-dependent libclang/Panama behavior" theory is DISPROVEN — this is a deterministic pipeline logic bug
+## THIRD investigation (2026-08-24, after the JDK/toolchain fix): the "scale-dependent libclang/Panama behavior" theory is DISPROVEN -- this is a deterministic pipeline logic bug
 
 Two platform-level root causes were found and fixed (see
 `patches/0010-jdk22-ffm-final-api.md` for the full story):
@@ -281,18 +281,18 @@ Two platform-level root causes were found and fixed (see
 
 Then the critical experiment: the minimally-scoped canonicalType fix was
 re-applied and full-swept **on JDK 25 + JIT + final FFM**. Result:
-`ArmorRatingVisitor` measures **40 — the exact same wrong number as on
+`ArmorRatingVisitor` measures **40 -- the exact same wrong number as on
 JDK 21 -Xint preview FFM.** Two completely different JVM/FFM
 implementations produce identical wrong output, and pure C proves the
 clang answers feeding it are right. Conclusion: **this was never
-nondeterminism and never libclang — it is a deterministic, scale-dependent
+nondeterminism and never libclang -- it is a deterministic, scale-dependent
 logic bug in this pipeline's own composition step** (the reported sizes
 are Ghidra-composed struct sizes, not clang sizeof values; "isolated
 test" vs "full sweep" differ in header/type registration order, not in
 clang behavior).
 
 Where to look (unverified but specific): 40 = 64 - 24 = exactly
-sizeof(BSScrapArrayAllocator) — the canonical fix correctly *finds* the
+sizeof(BSScrapArrayAllocator) -- the canonical fix correctly *finds* the
 allocator base, but its embedded contribution resolves to nothing at full
 scale. Canonical spellings are fully qualified
 (`RE::BSTArray<RE::TESObjectARMO *, RE::BSScrapArrayAllocator>`) while
@@ -301,25 +301,25 @@ naming and TypePool's string-keyed dedup/normalization (which only strips
 a *leading* `RE::`, not the ones inside template argument lists) treat
 these as different types, so first-registration-wins caching can pin an
 empty/opaque variant registered earlier in the sweep. In isolation the
-target header parses first and the good variant registers first — exactly
+target header parses first and the good variant registers first -- exactly
 the observed isolation-vs-scale asymmetry, with no nondeterminism needed.
 
 The current `0007-*.patch` on disk includes the canonicalType revision
 (correct per the C probe); full-sweep numbers for it on JDK 25:
-16 regressions / 7 improvements vs. the same patch-set-without-0007 —
+16 regressions / 7 improvements vs. the same patch-set-without-0007 --
 still net-negative, still NOT merged, but now for a debuggable reason.
 
-## Recommendation for whoever picks this up next (revised again — supersedes both earlier recommendations)
+## Recommendation for whoever picks this up next (revised again -- supersedes both earlier recommendations)
 
-Do NOT investigate JVM modes, libclang versions, or FFI bindings — that
+Do NOT investigate JVM modes, libclang versions, or FFI bindings -- that
 avenue is closed (see above). Instead debug the composition path:
 instrument `TypePool`'s registration/normalization for the
 `anon_tmpl_*` synthetics and the plain-named-base path with both sugared
 and canonical spellings of the same instantiation, and check what the
 full sweep registers first for `BSScrapArrayAllocator`-embedding
 synthetics. Normalizing ALL `RE::` qualifiers (not just leading) out of
-spellings before hashing/keying — or keying synthetics on canonical
-spellings exclusively — are the obvious candidate fixes. Sweeps now take
+spellings before hashing/keying -- or keying synthetics on canonical
+spellings exclusively -- are the obvious candidate fixes. Sweeps now take
 ~3-4 minutes, so iteration is cheap.
 
 ## Original (obsolete) recommendation, kept for the record

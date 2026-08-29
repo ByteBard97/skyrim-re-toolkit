@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Known Limitations — skyrim-re-toolkit</title>
+<title>Known Limitations -- skyrim-re-toolkit</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Every honest caveat about skyrim-re-toolkit's current accuracy and coverage, in one place, with links to the underlying evidence.">
 <link rel="stylesheet" href="assets/css/style.css">
@@ -30,34 +30,34 @@
   <h1>Known Limitations</h1>
   <p class="lede">
     Every honest caveat about this toolkit's current accuracy and coverage, gathered in one place
-    instead of scattered across five READMEs and a dozen patch docs. Nothing here is new — it's all
+    instead of scattered across five READMEs and a dozen patch docs. Nothing here is new -- it's all
     already documented elsewhere; this page just saves you the hunt.
   </p>
 
-  <h2>type-importer — parser accuracy</h2>
+  <h2>type-importer -- parser accuracy</h2>
 
   <div class="callout">
     <strong>Not every class is byte-accurate yet.</strong> Coverage is measured against
-    <code>coverage_baseline.json</code> per runtime via <code>scripts/check_regression.py</code> — see
+    <code>coverage_baseline.json</code> per runtime via <code>scripts/check_regression.py</code> -- see
     <a href="type-importer.html">type-importer</a> for the current OK/checkable counts.
   </div>
 
   <div class="callout warn">
     <strong>About the ~1,041 classes reported as "EMPTY" (resolved but 1 byte, 0 fields):</strong>
     this is not the same as "wrong." A large share of them are C++ types that genuinely compile
-    to 1 byte by design — enum-only namespacing structs (e.g. <code>struct ACTOR_AGGRO_RADIUS { enum
+    to 1 byte by design -- enum-only namespacing structs (e.g. <code>struct ACTOR_AGGRO_RADIUS { enum
     { kWarn, kWarnAndAttack, kAttack }; };</code>, which really is <code>sizeof==1</code>), RAII lock
     guards and utility classes with no data members. Of the full EMPTY bucket, only <strong>6 classes
     have a header-provided <code>static_assert</code> proving the placeholder is actually wrong</strong>
-    — down from 9, after patch 0031 fixed the shared root cause behind 3 of them
+    -- down from 9, after patch 0031 fixed the shared root cause behind 3 of them
     (<code>BSReadLockGuard</code>/<code>BSWriteLockGuard</code>/<code>BSSpinLockGuard</code> each hold a
     single reference-type (<code>T&amp;</code>) member; the parser had a branch to resolve a pointer-typed
     field but none for a reference-typed one, so the field silently dropped). The remaining 6
     (<code>AttachedScript</code>, <code>BGSNumericIDIndex</code>, <code>BSScrapArrayAllocator</code>,
     <code>GFxFunctionHandler::Params</code>, <code>GFxResourceLib::ResourceSlot</code>, <code>LogEvent</code>)
-    were checked and are a different, unrelated mechanism (or several) — not chased further this pass,
+    were checked and are a different, unrelated mechanism (or several) -- not chased further this pass,
     per this project's own "two focused attempts, then defer" discipline. The other ~1,035 EMPTY entries
-    have no static_assert to check against either way — genuinely unverified, not confirmed either correct
+    have no static_assert to check against either way -- genuinely unverified, not confirmed either correct
     or wrong. <code>coverage_report.py</code>'s sweep output now prints these as two separate sections
     (<code>EMPTY, CONFIRMED WRONG</code> vs. <code>EMPTY, UNVERIFIED</code>) instead of one undifferentiated
     bucket, so this distinction is checkable in every future sweep, not just asserted here. See
@@ -69,33 +69,33 @@
       <strong>The patch-0008 cluster (deferred; reopening needs a fresh lead, not a retry).</strong>
       <code>isPolymorphic()</code> is template-blind for a base class that's itself a class-template
       specialization (e.g. <code>FxDelegateHandler : public GRefCountBase&lt;FxDelegateHandler, ...&gt;</code>)
-      — root-caused, not fixed. See
+      -- root-caused, not fixed. See
       <a href="https://github.com/ByteBard97/skyrim-re-toolkit/blob/master/type-importer/patches/0008-isPolymorphic-investigation-DEFERRED.md">patches/0008-isPolymorphic-investigation-DEFERRED.md</a>.
     </li>
     <li>
       <strong>13 classes remain UNRESOLVED by design</strong> after patches 0026–0028 worked the bucket
       down from 27 (typedef-of-template-specialization reporting gap, a <code>RUNTIME_DATA2</code>
-      ground-truth name collision, and nested-type recursion bugs — all root-caused and fixed). The
+      ground-truth name collision, and nested-type recursion bugs -- all root-caused and fixed). The
       remaining 13 are members of uninstantiated class templates, which the inline-embed architecture
-      never registers as independent types — traced structurally, not just labeled. See
+      never registers as independent types -- traced structurally, not just labeled. See
       <a href="https://github.com/ByteBard97/skyrim-re-toolkit/blob/master/type-importer/patches/0028-fix-parseunion-nested-types.md">patches/0028</a>.
     </li>
     <li>
       <strong>Patch 0007 is superseded, not applied.</strong> Its original diagnosis (a TypePool
-      first-registration-wins keying bug on synthetic template names) turned out to be stale — later
-      patches reworked the mechanism entirely — but the coverage gap it was chasing
+      first-registration-wins keying bug on synthetic template names) turned out to be stale -- later
+      patches reworked the mechanism entirely -- but the coverage gap it was chasing
       (<code>hkInplaceArray&lt;T,N&gt;</code>, <code>BSTObjectDictionary&lt;...&gt;</code> as a base, etc.)
       is now closed by patch 0025 via a different, current root cause. 0007's own doc carries a
       superseded-by note; nothing from it is in the accepted patch set.
     </li>
   </ul>
 
-  <h2>runtime-harness — live verification status</h2>
+  <h2>runtime-harness -- live verification status</h2>
 
   <div class="stat-grid">
-    <div class="stat"><span class="num">✓</span><span class="label">AIProcessInspector — confirmed live</span></div>
-    <div class="stat"><span class="num">✓</span><span class="label">SavegameTracer — confirmed live</span></div>
-    <div class="stat"><span class="num">?</span><span class="label">HavokStepLogger — silent, root cause unresolved</span></div>
+    <div class="stat"><span class="num">✓</span><span class="label">AIProcessInspector -- confirmed live</span></div>
+    <div class="stat"><span class="num">✓</span><span class="label">SavegameTracer -- confirmed live</span></div>
+    <div class="stat"><span class="num">?</span><span class="label">HavokStepLogger -- silent, root cause unresolved</span></div>
   </div>
 
   <ul class="plain">
@@ -105,7 +105,7 @@
       the full inheritance chain and is very unlikely to be an indexing bug. Checked against real prior
       art (<a href="https://github.com/ersh1/Precision">ersh1/Precision</a>, the standard Havok-hooking
       reference in the SKSE community): it doesn't vtable-hook <code>bhkCharacterState::Update</code> at
-      all — it hooks <code>bhkWorld</code>'s physics-step function directly via an Xbyak mid-function
+      all -- it hooks <code>bhkWorld</code>'s physics-step function directly via an Xbyak mid-function
       trampoline. <strong>Current vtable hook: open question, not a known-good hook.</strong> Scoped
       follow-on (rebuild Precision-style) identified but not attempted. See
       <a href="https://github.com/ByteBard97/skyrim-re-toolkit/blob/master/runtime-harness/README.md">runtime-harness/README.md</a> (search "HavokStepLogger").
@@ -113,14 +113,14 @@
     <li>
       <strong>SavegameTracer can't read its own event payloads.</strong> <code>BSSaveDataEvent</code> and
       <code>BGSSaveLoadManagerEvent</code> are only ever forward-declared in the vendored tree, never
-      defined — so the inspector dumps <code>BGSSaveLoadManager::saveGameList</code> (fully defined)
+      defined -- so the inspector dumps <code>BGSSaveLoadManager::saveGameList</code> (fully defined)
       instead, which is a real and useful substitute but not the event payload itself.
     </li>
     <li>
       <strong>LayoutValidator's live checks cover only the classes it compiles in</strong> (11 hotspot
       classes plus the game-session checks: <code>PlayerCharacter</code> sanity,
       <code>ACTOR_RUNTIME_DATA</code> plausibility, an <code>ExtraDataList</code> walk, RTTI readback,
-      and a vtable-pointer identity check — all verified against a real save load). It is a spot-check
+      and a vtable-pointer identity check -- all verified against a real save load). It is a spot-check
       against the running game, not a full-archive live diff. See
       <a href="https://github.com/ByteBard97/skyrim-re-toolkit/blob/master/runtime-harness/docs/T3-3_LAYOUTVALIDATOR_REPORT.md">T3-3_LAYOUTVALIDATOR_REPORT.md</a>.
     </li>
@@ -130,19 +130,19 @@
   <ul class="plain">
     <li>
       <strong>IDA <code>.til</code> export execution (T1-4)</strong> is blocked on IDA access. The design
-      and intermediate-JSON format are done and don't need it — only running the actual export against
+      and intermediate-JSON format are done and don't need it -- only running the actual export against
       real IDA does. See
       <a href="https://github.com/ByteBard97/skyrim-re-toolkit/blob/master/type-importer/TIL_EXPORT_DESIGN.md">TIL_EXPORT_DESIGN.md</a>.
     </li>
     <li>
       <strong>Publishing a real public GitHub Release</strong> is wired and dry-run-safe but has never
-      been dispatched for real — it's a public action, gated on a human decision, not a technical blocker.
+      been dispatched for real -- it's a public action, gated on a human decision, not a technical blocker.
     </li>
   </ul>
 
   <div class="callout warn">
     <strong>If a number on another page looks stale relative to this one, this page is not necessarily
-    wrong</strong> — coverage numbers move as patches land. Check the linked patch docs and
+    wrong</strong> -- coverage numbers move as patches land. Check the linked patch docs and
     <code>coverage_baseline*.json</code> for the current state; this page tracks known <em>categories</em>
     of limitation, not a live number feed.
   </div>

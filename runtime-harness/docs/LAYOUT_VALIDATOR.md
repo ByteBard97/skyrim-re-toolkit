@@ -1,8 +1,8 @@
-# LayoutValidator — design doc
+# LayoutValidator -- design doc
 
 **Status: built, deployed, and live-verified (2026-08-26).** See
 [`T3-3_LAYOUTVALIDATOR_REPORT.md`](T3-3_LAYOUTVALIDATOR_REPORT.md) for
-the full first-compile report — two real bugs found and fixed (a wrong
+the full first-compile report -- two real bugs found and fixed (a wrong
 build-config assumption in this doc's original text, corrected below;
 and a messaging-listener conflict with `main.cpp`), plus the actual
 three-way diff result against `coverage_baseline.json` (0 confirmed
@@ -18,7 +18,7 @@ game process**, closing the loop with type-importer's static analysis:
   into Ghidra `.gdt` archives and tracks layout accuracy in
   `type-importer/coverage_baseline.json` (2,082 of 3,017 checkable
   classes byte-accurate against the headers' own `static_assert`s; the
-  39-class modder-relevant hotspot list is closed — 37/39 byte-exact,
+  39-class modder-relevant hotspot list is closed -- 37/39 byte-exact,
   `BaseExtraList`/`ExtraDataList` deferred with documented reasons in
   `type-importer/COVERAGE_SWEEP_PLAN.md`).
 - runtime-harness compiles those **same headers** into a live SKSE
@@ -35,7 +35,7 @@ So what does an in-process validator add that `static_assert` doesn't?
    into the shipped DLL. If the DLL was ever built against the wrong
    CommonLibSSE-NG revision, wrong macro configuration
    (`ENABLE_SKYRIM_AE` leaking in), or stale headers, the logged numbers
-   diverge from the expected values immediately — visible in a log file,
+   diverge from the expected values immediately -- visible in a log file,
    no disassembler needed. It is a build-config fingerprint.
 
 2. **Address Library resolution is anchored to real code.** Phase 2a
@@ -51,9 +51,9 @@ So what does an in-process validator add that `static_assert` doesn't?
    identity check.
 
 3. **Live instances match the compiled layout.** Phase 2b reads fields
-   of a live object twice — once through the typed accessor (compiled
+   of a live object twice -- once through the typed accessor (compiled
    layout + `RelocateMember` plumbing), once as raw bytes at the
-   compiled `offsetof` — and flags disagreement. Static asserts compare
+   compiled `offsetof` -- and flags disagreement. Static asserts compare
    the headers against *themselves*; this compares the headers against
    *the shipping binary's actual objects*. A wrong `formID` offset in
    `TESForm` (the single most-depended-on layout in the ecosystem) would
@@ -73,7 +73,7 @@ So what does an in-process validator add that `static_assert` doesn't?
    three-way comparison: **parser vs. header assert vs. compiled
    plugin**, plus the LIVE lines as a fourth, ground-truth leg for the
    few classes with reachable instances. The `off.*` values have no
-   baseline counterpart today — the baseline tracks sizes only — so the
+   baseline counterpart today -- the baseline tracks sizes only -- so the
    runtime report is strictly richer there; extending type-importer's
    coverage tooling to track member offsets would make the diff total.
 
@@ -85,13 +85,13 @@ So what does an in-process validator add that `static_assert` doesn't?
   `ENABLE_SKYRIM_SE`, `ENABLE_SKYRIM_AE`, **and** `ENABLE_SKYRIM_VR` all
   `ON` simultaneously (dynamic multi-runtime dispatch), not with none of
   them defined as originally assumed here. That combination lands every
-  runtime-guarded class in a narrower `#else` branch of the headers —
+  runtime-guarded class in a narrower `#else` branch of the headers --
   different from a plain SE-only *or* AE-only view. Measured compiled
   sizes: `Actor` `0x78`, `TESObjectREFR` `0x78`, `BaseExtraList` `0x1`
   (its `data`/`presence` members aren't even offsetof-able in this
-  branch — accessor-only), `TESObjectCELL` `0x50`. Real AE live-object
+  branch -- accessor-only), `TESObjectCELL` `0x50`. Real AE live-object
   field access still has to go through `REL::RelocateMemberIfNewer`
-  accessors like `Actor::GetActorRuntimeData()` (Actor.h:710) — the
+  accessors like `Actor::GetActorRuntimeData()` (Actor.h:710) -- the
   logged offsets for these classes are ground truth for *this specific
   compiled plugin*, not for any one real runtime's live memory.
   Validating the AE layout of divergent classes requires
@@ -99,11 +99,11 @@ So what does an in-process validator add that `static_assert` doesn't?
 - **Member semantics.** Proving `currentProcess` sits at some offset
   does not prove it points at the right `AIProcess`. Pointer-plausibility
   checks (non-null, `race->formType == FormType::Race`) are the planned
-  approximation — heuristics, not proofs.
+  approximation -- heuristics, not proofs.
 - **Vtable *contents*.** Resolving a vtable's address proves the ID
   resolves; it does not prove vfunc ordering inside the table. Checking
   that would need per-vfunc Address Library IDs and disassembly-level
-  ground truth — out of scope.
+  ground truth -- out of scope.
 - **Tail padding, alignment, bitfield packing, and
   empty-base-optimization details** beyond what `sizeof` already
   captures.
@@ -114,7 +114,7 @@ So what does an in-process validator add that `static_assert` doesn't?
   precisely because the form map gives free, enumerable instances.
 - **`BaseExtraList`/`ExtraDataList` remain thin.** These are the two
   hotspot classes type-importer's baseline still marks EMPTY
-  (`sizeof == 1` under AE-mode parsing is *correct* — the real members
+  (`sizeof == 1` under AE-mode parsing is *correct* -- the real members
   are macro-guarded and accessor-relocated; see
   `type-importer/COVERAGE_SWEEP_PLAN.md`). In-process, `ExtraDataList`'s members
   are private and `BaseExtraList`'s are the SE view, so the compile-time
@@ -131,7 +131,7 @@ So what does an in-process validator add that `static_assert` doesn't?
 ## Phases
 
 1. **Compile-time report** (`Install()`, plugin load): logs
-   `sizeof` + key `offsetof` for 11 classes — `TESForm`, `TESObjectREFR`,
+   `sizeof` + key `offsetof` for 11 classes -- `TESForm`, `TESObjectREFR`,
    `Actor` (+`Actor::ACTOR_RUNTIME_DATA`), `Character`, `BaseExtraList`,
    `ExtraDataList`, `TESObjectCELL`, `NiAVObject`, `BGSLocation`,
    `TESQuest`, `bhkCharacterState`. Selection rationale: the first seven
@@ -139,7 +139,7 @@ So what does an in-process validator add that `static_assert` doesn't?
    touches (and include both baseline-EMPTY classes and all the
    SE/AE-divergent ones); `NiAVObject` is the scene-graph root with a
    VR-divergent guarded branch; `BGSLocation`/`TESQuest` are unguarded
-   classes already byte-exact in the baseline (cross-validation anchors —
+   classes already byte-exact in the baseline (cross-validation anchors --
    if *these* ever mismatch, suspect the toolchain, not the class);
    `bhkCharacterState` proves the abstract/vtable-only case.
 2. **Live check** (message listener, `kDataLoaded`): 2a resolves
@@ -156,26 +156,26 @@ which fires at the main menu):
 
 - ~~RTTI type_descriptor decorated-name readback~~ **Done**: reads
   `RE::RTTI::TypeDescriptor::mangled_name()` at the resolved
-  `RTTI_TESForm` address and string-compares against `.?AVTESForm@@` —
+  `RTTI_TESForm` address and string-compares against `.?AVTESForm@@` --
   a real positive identity check, not just address resolution. Passed
   clean on the real run (`mangled_name=.?AVTESForm@@(OK)`).
 - ~~Live instance vtable-pointer identity check against resolved
   `RE::VTABLE_*` addresses~~ **Investigated, reclassified as an invalid
   invariant, not implemented as designed.** `TESForm` is an abstract
-  base — every live instance is actually some derived class (the player
+  base -- every live instance is actually some derived class (the player
   base at formID `0x00000007` is a live `TESNPC`, confirmed by its own
   `formType` check passing), so its vptr correctly points to ITS OWN
   class's vtable, never `TESForm`'s. Comparing against
   `RE::VTABLE_TESForm[0]` reported `MISMATCH` on the very first real run
   (`raw=0x7FF792114D50` vs `VTABLE_TESForm[0]=0x7FF7920B0B00`) while the
-  `formID`/`formType` checks on the same instance both read `OK` — a
+  `formID`/`formType` checks on the same instance both read `OK` -- a
   wrong check design, not a layout defect. The log now reports the raw
   vptr + RVA with no pass/fail verdict; a real version of this check
   would need the live instance's *actual* class's own `VTABLE_*`
   Address Library ID, which isn't among the ones this pass resolves.
 
 Three more done since T3-3 (build 7, same session), needing an actual
-game session past `kDataLoaded` — closed by loading a save via
+game session past `kDataLoaded` -- closed by loading a save via
 `kNewGame`/`kPostLoadGame`:
 
 - ~~`PlayerCharacter::GetSingleton()` checks at `kNewGame` /
@@ -184,11 +184,11 @@ game session past `kDataLoaded` — closed by loading a save via
   (`formID=00000014(raw=00000014,OK) formType=0x3E(raw=0x3E,OK)`).
 - ~~Live `Actor::ACTOR_RUNTIME_DATA` sanity via `GetActorRuntimeData()`~~
   **Done**: `currentProcess=non-null`, `race` resolves to a non-null,
-  correctly-typed (`GetFormType() == Race`) pointer — the AE
+  correctly-typed (`GetFormType() == Race`) pointer -- the AE
   `RelocateMemberIfNewer<T>` path lands on real data on this build, not
   garbage or a wrong-runtime offset.
 - ~~`ExtraDataList` live walk~~ **Done**: `player->extraList.GetCount()`
-  executed on a live instance without crashing, returned `1` — that's
+  executed on a live instance without crashing, returned `1` -- that's
   the ground truth this check needed (a specific count was never the
   bar).
 
@@ -204,7 +204,7 @@ real log lines.
   hand-written sample logs in `runtime-harness/tools/sample_logs/`
   (`RuntimeHarness_layout_ok.log.txt` passes with exit 0; a deliberately
   injected `TESForm` size mismatch in `RuntimeHarness_layout_mismatch.log.txt`
-  is correctly caught with exit 1) — built and tested entirely
+  is correctly caught with exit 1) -- built and tested entirely
   Linux-side, before any Windows compile exists to produce a real log.
   **Since re-run against the real log** (`RuntimeHarness_T3-3_layoutvalidator.log.txt`,
   T3-3): all 11 classes parsed correctly, 0 confirmed mismatches against
@@ -212,8 +212,8 @@ real log lines.
   `T3-3_LAYOUTVALIDATOR_REPORT.md`.
 
 All items from the original live-verify TODO list are now closed. The
-real, better-scoped vtable-pointer identity check (T3-7) — against
+real, better-scoped vtable-pointer identity check (T3-7) -- against
 `RE::VTABLE_PlayerCharacter[0]`, the live instance's own class, not the
-invalid `VTABLE_TESForm` comparison reclassified above — passed clean:
+invalid `VTABLE_TESForm` comparison reclassified above -- passed clean:
 `vtbl=0x7FF7921DB9C0 expected=0x7FF7921DB9C0(OK)`, an exact match. See
 `T3-3_LAYOUTVALIDATOR_REPORT.md`'s Addendum 3.

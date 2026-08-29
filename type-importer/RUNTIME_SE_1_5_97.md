@@ -1,8 +1,8 @@
-# v0.2 — Skyrim SE 1.5.97 runtime validation
+# v0.2 -- Skyrim SE 1.5.97 runtime validation
 
 First runtime beyond AE 1.6.1170 validated end-to-end, following the same
 self-checking methodology as the AE coverage sweep (headers' own
-`static_assert`s as ground truth — no Address Library data needed for this
+`static_assert`s as ground truth -- no Address Library data needed for this
 first pass, since CommonLibSSE-NG's SE-guarded `static_assert`s are
 sufficient to confirm the parser resolves the SE-specific layout branches
 correctly).
@@ -21,7 +21,7 @@ hardcoded to AE:
   ENABLE_SKYRIM_AE|ENABLE_SKYRIM_SE|ENABLE_SKYRIM_VR` (default unchanged: AE).
 
 No changes to the vendored `GhidraClangPoweredParse` patches or `stubs/` were
-needed — the existing stub's `RelocateMember` hardcoding the AE offset is
+needed -- the existing stub's `RelocateMember` hardcoding the AE offset is
 still correct for SE (it's a reference into existing storage, adds no bytes
 regardless of runtime; see the comment in `stubs/layout_pch.h`).
 
@@ -33,7 +33,7 @@ set (2149 entries): **all 2149 AE-applicable asserts have an identical-value
 SE-applicable counterpart** (the vast majority of layouts are
 runtime-invariant, and no class asserts a *different* size under the two
 runtimes); the other **19 SE-applicable asserts have no AE-applicable
-counterpart at all** (AE simply has no `static_assert` for these classes —
+counterpart at all** (AE simply has no `static_assert` for these classes --
 their layout depends on `REL::RelocateMember`/`#ifndef ENABLE_SKYRIM_AE`
 branches that are compiled out, not compared, under AE:
 `TESObjectREFR`, `Actor`, `Character`, `PlayerCharacter`, `Projectile` and its
@@ -64,15 +64,15 @@ Of the 19 SE-only-asserted classes: **16 resolve byte-accurate
 under SE** (all the `Actor`/`Character`/`Projectile`-family and
 `TESObjectREFR`/`TESObjectCELL`/`Explosion`/`Hazard`/
 `BSAnimationGraphVariableCache` classes), 2 `MISMATCH`
-(`BSAnimationGraphManager`, `Inventory3DManager` — pre-existing parser gaps,
+(`BSAnimationGraphManager`, `Inventory3DManager` -- pre-existing parser gaps,
 not SE-specific regressions), and 1 `NO_GROUND_TRUTH`
-(`ExtraDataList` — no SE-applicable assert exists for it either).
+(`ExtraDataList` -- no SE-applicable assert exists for it either).
 
-**Bonus finding:** `BaseExtraList` — one of the two classes permanently
+**Bonus finding:** `BaseExtraList` -- one of the two classes permanently
 deferred for AE (`COVERAGE_SWEEP_PLAN.md`'s "BaseExtraList / ExtraDataList"
 section; AE's real members are accessed via a `REL::RelocateMember`-style
 runtime trick, not compiled struct members, so AE has no
-`static_assert` for it and the parser correctly emits `sizeof==1`) —
+`static_assert` for it and the parser correctly emits `sizeof==1`) --
 resolves **byte-accurate under SE** (`sizeof(BaseExtraList) == 16`, matching
 SE's own `static_assert`). This confirms DESIGN.md's diagnosis that the
 AE gap is a genuine AE-only accessor-pattern limitation, not a general
@@ -82,7 +82,7 @@ SE-specific work.
 
 Output artifacts: `/tmp/CommonLibSSE_SE.gdt` (2,892,611 bytes, 25743 types
 committed, 0 failed), full snapshot saved as `coverage_baseline_se.json`
-(same schema as `coverage_baseline.json`, not yet wired into CI — see
+(same schema as `coverage_baseline.json`, not yet wired into CI -- see
 "Not done" below).
 
 ## AE 1.7.99 / GOG 1.6.1179: no separate layout work needed
@@ -90,7 +90,7 @@ committed, 0 failed), full snapshot saved as `coverage_baseline_se.json`
 Checked whether these two remaining v0.2 targets need their own runtime
 macro/sweep, the same way SE and VR did. They don't: CommonLibSSE-NG has
 no `ENABLE_SKYRIM_AE_1799` / `SKYRIM_GOG`-style macro anywhere in
-`include/RE` or `include/REL` — grepping confirms every `AE`-guarded
+`include/RE` or `include/REL` -- grepping confirms every `AE`-guarded
 `static_assert`/`REL::VariantID` branch uses the single `ENABLE_SKYRIM_AE`
 macro already covering 1.6.1170. AE 1.7.99 and GOG 1.6.1179 share that
 same macro (and, per `REL::VariantID`'s single `a_aeOffset` argument, the
@@ -111,10 +111,10 @@ sourced in this repo yet -- see "Not done" below.
   still gates AE only). `check_regression.py` works unmodified against
   `coverage_baseline_se.json` for local verification of future SE-targeted
   patches; wiring a second CI job is a small follow-up, not attempted here.
-- No cross-check against real SE 1.5.97 Address Library offsets — this pass
+- No cross-check against real SE 1.5.97 Address Library offsets -- this pass
   validates class *layout* (sizes/fields) against the headers' own
   static_asserts, not runtime *addresses*. Address Library cross-checking
   (per the original v0.2 milestone description) is future work.
-- AE 1.7.99, VR, and GOG runtimes not attempted — same mechanism
+- AE 1.7.99, VR, and GOG runtimes not attempted -- same mechanism
   (`RUNTIME_DEFINE=ENABLE_SKYRIM_VR=1` / a version-specific header set)
   should apply, not verified here.

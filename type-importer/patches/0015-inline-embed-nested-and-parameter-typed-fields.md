@@ -4,15 +4,15 @@
 
 The "small consistent-delta cluster" from this investigation's internal working notes:
 `TESNPC` (-16), `TESFaction` (-32), `EffectSetting` (-16), `BGSLocation`
-(-8), `CombatController` (-8), `TESWorldSpace` (-144) — all resolved,
+(-8), `CombatController` (-8), `TESWorldSpace` (-144) -- all resolved,
 all short of their real `static_assert`-confirmed size by a small,
 consistent amount.
 
 ## Root cause, confirmed empirically (two distinct sub-cases, one shared fix)
 
 `SourceParser.parseFieldsFromType`'s field-visiting loop (used both for
-inline-embedding template-specialization *fields* — patches 0003/0005 —
-and template-specialization *base classes* — patch 0005/0007) only
+inline-embedding template-specialization *fields* -- patches 0003/0005 --
+and template-specialization *base classes* -- patch 0005/0007) only
 inline-embedded a field when its **raw** type resolved directly to a
 `STRUCT_DECL`/`CLASS_DECL` cursor. Two related-but-distinct shapes were
 falling through that check and going to a doomed plain string lookup
@@ -20,7 +20,7 @@ instead, both confirmed via a standalone libclang C probe (no Java
 involved) built against a minimal repro:
 
 1. **A field typed as a struct nested INSIDE the template itself.**
-   `BSSimpleList<T>`'s own `Node _listHead;` member (`RE/B/BSTList.h`) —
+   `BSSimpleList<T>`'s own `Node _listHead;` member (`RE/B/BSTList.h`) --
    `Node` IS a real `STRUCT_DECL`, so the raw-type check actually caught
    it, but the code was using its *canonical* spelling
    (`"BSSimpleList<Foo *>::Node"`) as a string lookup key instead of
@@ -28,14 +28,14 @@ involved) built against a minimal repro:
    the pool, and `TypePool.normalizeTypeName`'s namespace-strip fallback
    deliberately refuses to touch any name containing `<` (per its own
    comment, to avoid corrupting template-argument spellings like
-   `"RE::NiPointer<Actor>"`) — so this lookup could never succeed. The
+   `"RE::NiPointer<Actor>"`) -- so this lookup could never succeed. The
    field was silently dropped by `ParsedStructure.createDataType()`'s
    `if (fieldType != null)` guard. Confirmed via probe:
    `clang_Type_visitFields` reports `_listHead` with the correct
-   `sizeof` (16, matching the enclosing type's own real `sizeof`) — this
+   `sizeof` (16, matching the enclosing type's own real `sizeof`) -- this
    was a pool-resolution bug in this Java layer, not a libclang
    limitation. `TESReactionForm::reactions` and `TESFaction::rankData`
-   both use `BSSimpleList<T>` — this alone accounts for `TESFaction`'s
+   both use `BSSimpleList<T>` -- this alone accounts for `TESFaction`'s
    full -32 (-16 from its own base `TESReactionForm`, -16 from its own
    `rankData` field) and `EffectSetting`'s -16 (`counterEffects`).
 
@@ -43,22 +43,22 @@ involved) built against a minimal repro:
    `BSPointerHandle<T, Handle = BSUntypedPointerHandle<>>`'s own
    `Handle _handle;` member (`RE/B/BSPointerHandle.h`). The raw type's
    `declaration()` cursor is a `TEMPLATE_TYPE_PARAMETER`, not a record,
-   so the existing raw-type check correctly falls through — but
+   so the existing raw-type check correctly falls through -- but
    `parseFieldsFromType` is always invoked on a fully-instantiated
    specialization (e.g. `BSPointerHandle<Actor>`, never the
    uninstantiated primary template), so `clang_getCanonicalType`
    resolves `Handle` through to its actual substituted type for this
-   instantiation: `"RE::BSUntypedPointerHandle<>"` — itself just another
+   instantiation: `"RE::BSUntypedPointerHandle<>"` -- itself just another
    template specialization, with exactly the same "never independently
    registered by name" problem. Confirmed via debug trace against the
    real header: this canonical spelling went through the plain
-   string-lookup path, could never resolve, and was silently dropped —
+   string-lookup path, could never resolve, and was silently dropped --
    shrinking `ActorHandle`/`ObjectRefHandle` (both
    `using X = BSPointerHandle<...>;` typedefs, `RE/B/BSPointerHandle.h`)
    from their real 4-byte size to 0, and every enclosing struct with a
    field of that type by the same amount each:
    `CombatController::attackerHandle/targetHandle/previousTargetHandle`
-   (3 fields, all overlapping at the same now-zero offset — accounts for
+   (3 fields, all overlapping at the same now-zero offset -- accounts for
    `CombatController`'s -8, since MSVC packing still rounds the trailing
    bytes) and `BGSLocation`'s two `ObjectRefHandle` members (its -8).
 
@@ -73,7 +73,7 @@ in its base chain; `TESWorldSpace` has multiple `ObjectRefHandle`/
 In `parseFieldsFromType`'s `type.visitFields` callback:
 
 1. Keep the existing raw-type `STRUCT_DECL`/`CLASS_DECL` check (case 1
-   above already partially worked here) — but when it matches, inline-
+   above already partially worked here) -- but when it matches, inline-
    embed via `parseFieldsFromType` on the **raw** type instead of using
    its canonical spelling as a lookup key.
 2. **New**: when the raw-type check doesn't match (case 2 above), check
@@ -106,7 +106,7 @@ one shared fix, matching the pattern already established by patches
 
 Full 1630-header sweep (real submodule, real toolchain, via
 `generate_gdt.sh` with 0015 added to its patch glob): 18776 resolved
-data types, 1142 clang diagnostics (unchanged from baseline — this is a
+data types, 1142 clang diagnostics (unchanged from baseline -- this is a
 resolution fix, not a parse fix).
 
 `scripts/check_regression.py` against `coverage_baseline.json`
@@ -114,7 +114,7 @@ resolution fix, not a parse fix).
 OK count 1701 → **1832** (+131 net). MISMATCH dropped sharply,
 365 → 238.
 
-## The 2 regressions — root-caused, both pre-existing bugs unmasked
+## The 2 regressions -- root-caused, both pre-existing bugs unmasked
 
 Same pattern as patches 0006 and 0009's own regressions (documented
 there as "coincidental error cancellation," see those `.md` files):
@@ -127,19 +127,19 @@ there as "coincidental error cancellation," see those `.md` files):
   `GFxExternalInterface` (→ `GFxState` → `GRefCountBase<GFxState, ...>`)
   was **already independently wrong before this patch**
   (`coverage_baseline.json` shows `GFxState`/`GFxExternalInterface` both
-  at `MISMATCH: actual=32, expected=24` in the PRE-0015 baseline) — a
+  at `MISMATCH: actual=32, expected=24` in the PRE-0015 baseline) -- a
   redundant-vptr bug: `GFxState` gets its own synthetic vptr on top of
   an already-polymorphic `GRefCountBase<...>` base (which itself has a
   real vptr from `GRefCountImplCore`, several template layers down).
   This is the exact same `isPolymorphic()` template-blindness gap
   already root-caused and deferred in patch 0006's writeup ("Root cause
-  #3") and `patches/0008-isPolymorphic-investigation-DEFERRED.md` — not
+  #3") and `patches/0008-isPolymorphic-investigation-DEFERRED.md` -- not
   a new bug, and not something this patch's field-embedding fix touches
   (verified: `GFxState`'s embedded `GRefCountBase` base is still the
   same `char[16]` opaque fallback before and after 0015, unchanged).
   Before this patch, `FxDelegate`'s own `callbacks` bug happened to be
   under-sized by exactly the same 8 bytes `GFxExternalInterface`'s
-  pre-existing redundant-vptr bug over-sizes it — a coincidental
+  pre-existing redundant-vptr bug over-sizes it -- a coincidental
   cancellation, not a correct result. Fixing `callbacks` removed one
   side of that cancellation and exposed the pre-existing base-class bug.
 - **`MenuTopicManager`**: OK (216) → MISMATCH (224, expected 216).
@@ -175,6 +175,6 @@ patch -p1 < ../../patches/0015-inline-embed-nested-and-parameter-typed-fields.pa
   2 regressions (already tracked in patch 0008's deferred investigation)
   remains open.
 - `MenuTopicManager`'s regression wasn't root-caused to the same
-  component-level detail as `FxDelegate`'s — worth a closer look if
+  component-level detail as `FxDelegate`'s -- worth a closer look if
   patch 0008's `isPolymorphic()` fix is ever picked back up, since it's
   likely the same underlying cause.

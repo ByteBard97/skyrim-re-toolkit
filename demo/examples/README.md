@@ -5,7 +5,7 @@ Both files are real Ghidra decompiler output for the **same function** at
 reached by walking the binary's own MSVC RTTI). The only difference is
 whether this repo's generated `.gdt` type archive was applied.
 
-## Before — no types (`before_TESObjectREFR_vfunc.c`)
+## Before -- no types (`before_TESObjectREFR_vfunc.c`)
 
 ```c
 void FUN_1401e1270(longlong *param_1,undefined8 param_2)
@@ -20,11 +20,11 @@ void FUN_1401e1270(longlong *param_1,undefined8 param_2)
 }
 ```
 
-Raw offset arithmetic. `param_1 + 2` is byte offset `0x10` — but of *what*?
+Raw offset arithmetic. `param_1 + 2` is byte offset `0x10` -- but of *what*?
 `0x4000` is a magic number. The `(**(code **)(*param_1 + 0x120))(param_1)`
 call is an unlabeled vtable slot.
 
-## After — archive applied, `this` typed as `TESObjectREFR*`
+## After -- archive applied, `this` typed as `TESObjectREFR*`
 
 ```c
 void FUN_1401e1270(TESObjectREFR *self)

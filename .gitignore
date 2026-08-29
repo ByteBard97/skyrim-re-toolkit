@@ -60,7 +60,6 @@ Thumbs.db
 *.log
 
 # --- Local working notes (session scratch, never intended for commit) ---
-
 BACKLOG.md
 HANDOFF-*.md
 TRACK[0-9]_*.md

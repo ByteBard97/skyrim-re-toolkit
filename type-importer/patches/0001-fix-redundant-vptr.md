@@ -27,13 +27,13 @@ for (String[] base : baseClasses) {
 ```
 
 In MSVC/Itanium ABI, overriding a base class's virtual method does **not**
-add a new vptr — it changes an entry in the vtable already inherited from
+add a new vptr -- it changes an entry in the vtable already inherited from
 the primary base. Any class that overrides even one virtual from a
 polymorphic base gets a spurious extra field here, on top of the correct
 vptr already embedded as the first member of that base's own field. Every
 subsequent field shifts by 8 bytes, and the total struct size is wrong.
 
-This isn't an edge case — it fires on essentially every override in an
+This isn't an edge case -- it fires on essentially every override in an
 inheritance chain, including CommonLibSSE-NG's `TESObjectREFR` (our actual
 v0.1 target), which overrides base `TESForm` virtuals.
 
@@ -61,7 +61,7 @@ Full diff: `0001-fix-redundant-vptr.patch` in this directory.
 that declares virtual methods (when it's the vtable root). It does not model
 "this class's overrides replace specific slots in the inherited vtable, and
 its new virtuals append to it." For pure layout/size purposes (what the
-type-importer needs for a `.gdt`) this is fine — the fix's job was only to
+type-importer needs for a `.gdt`) this is fine -- the fix's job was only to
 stop the field-count/offset corruption. A fully accurate vtable *contents*
 model (which slots are overridden vs. new) is a separate, larger piece of
 work, not attempted here.
@@ -72,7 +72,7 @@ work, not attempted here.
    createDistribution_linux_x86_64`) against JDK 21 (Temurin
    21.0.12.1+1, user-local install, no sudo) and Ghidra 12.1.3 (also
    user-local, no sudo).
-2. Wrote a standalone Java harness (not committed — it's a throwaway
+2. Wrote a standalone Java harness (not committed -- it's a throwaway
    validation tool, see below if you want to reproduce it) that:
    - Initializes Ghidra's `Application` framework headlessly
      (`GhidraApplicationLayout` + `ApplicationConfiguration`) so
@@ -89,13 +89,13 @@ work, not attempted here.
      JDK).
    - Loaded libclang via the system's existing `libclang-14.so.13`
      (symlinked locally to the versioned name the extension's Linux
-     fallback loader searches for — the extension's own bundled
+     fallback loader searches for -- the extension's own bundled
      `os/linux_x86_64/libclang.so` needs a running Ghidra `Application`
      module-resource system to locate, which this standalone harness
      doesn't have).
 3. **Before the fix:** the harness showed a `vptr` field at offset 0x0 on
    the derived class, in addition to the primary base's own already-correct
-   vptr embedded in its field right after — the bug, reproduced live.
+   vptr embedded in its field right after -- the bug, reproduced live.
 4. **After the fix:** zero `vptr` fields directly on the derived class; it
    correctly relies on the inherited one from its primary base. Ran a clean
    A/B: reverted to the unpatched file, rebuilt, reproduced the bug;
@@ -116,13 +116,13 @@ Verified to apply cleanly against the submodule's current pinned commit.
 ## Toolchain notes for reproducing the build/test
 
 - JDK: Temurin 21.0.12.1+1 Linux x64, user-local (no sudo available on this
-  box) — `~/.local/tools/jdk-21.0.12.1+1`.
-- Ghidra: 12.1.3 (`Ghidra_12.1.3_build`), user-local —
+  box) -- `~/.local/tools/jdk-21.0.12.1+1`.
+- Ghidra: 12.1.3 (`Ghidra_12.1.3_build`), user-local --
   `~/.local/tools/ghidra_12.1.3_PUBLIC`.
 - Build: `GHIDRA_INSTALL_DIR=... JAVA_HOME=... ./gradlew
   createDistribution_linux_x86_64 --offline` (add `--offline` after the
   first run once Gradle's own wrapper distribution and dependencies are
   cached).
-- Neither JDK nor Ghidra are vendored in this repo — same reasoning as the
+- Neither JDK nor Ghidra are vendored in this repo -- same reasoning as the
   Windows SDK/CRT headers in `DESIGN.md`'s toolchain note: large,
   license-bearing or simply huge, and trivially re-downloadable.

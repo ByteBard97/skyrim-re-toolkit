@@ -21,7 +21,7 @@ any single parameter name in `paramNames`, so 0021's bare-name substitution
 never fires, and `STAT` stays unresolved one level down. 0021 concluded this
 needs "textual/structural substitution into a template-id (rewriting `STAT`
 to `2` inside `GRefCountBaseStatImpl<GRefCountImpl, STAT>` to get a genuine
-instantiation to look up or re-derive)" — a "comparably-sized follow-on
+instantiation to look up or re-derive)" -- a "comparably-sized follow-on
 investigation", the same conclusion patch 0007 reached for the analogous
 `hkArray<T> : public hkArrayBase<T>` field-embedding case.
 
@@ -30,13 +30,13 @@ investigation", the same conclusion patch 0007 reached for the analogous
 ## The actual root cause: an unnecessary gate, not a missing mechanism
 
 `clang_Type_getNumTemplateArguments`/`clang_Type_getTemplateArgumentAsType`
-operate on a `Type`'s own `TemplateSpecializationType` structure directly —
+operate on a `Type`'s own `TemplateSpecializationType` structure directly --
 they read the argument list right off `type` itself, independent of whether
 `type.declaration()` happens to resolve to a genuine
 `ClassTemplateSpecializationDecl`. 0021's code gated the whole extraction
 behind `isSpecialization` (exactly that declaration check), which is
 **false** for a partially-dependent type like
-`GRefCountBaseStatImpl<GRefCountImpl, STAT>` — one argument (`GRefCountImpl`)
+`GRefCountBaseStatImpl<GRefCountImpl, STAT>` -- one argument (`GRefCountImpl`)
 is concrete, the other (`STAT`) is still a symbolic reference to an enclosing
 template's own parameter, and that's enough to make `isSpecialization` return
 false, even though the concrete argument is sitting right there.
@@ -49,11 +49,11 @@ the `isSpecialization` gate) before committing to the fix: for
 specialization, so `isSpecialization=false`), yet
 `type.canonicalType().numTemplateArguments()` still correctly reports `2`
 and `.templateArgumentType(0)` still correctly resolves to `GRefCountImpl`
-— entirely independent of `STAT` (argument 1) being unresolved. This is
+-- entirely independent of `STAT` (argument 1) being unresolved. This is
 precisely the "nested parameter inside a template-id" case 0021/0008/0007
 all separately hit and assumed required structural substitution: it doesn't.
 The base's own spelling (`GRefCountBaseStatImpl<GRefCountImpl, STAT>`) was
-never the thing being substituted — the fix substitutes the **next level
+never the thing being substituted -- the fix substitutes the **next level
 down**'s bare parameter reference (`Base` inside `GRefCountBaseStatImpl`'s
 own primary body) using argument data read directly off *this* type, gate
 removed.
@@ -87,12 +87,12 @@ if (baseSpelling != null) {
         ...
 ```
 
-A plain, non-template type simply reports `numArgs=0` either way — a safe
+A plain, non-template type simply reports `numArgs=0` either way -- a safe
 no-op for the substitution loop, so this isn't gated behind any new
 condition, it just always runs. `canonicalType()` is kept (not the raw
 `type`) for the same reason 0006/0007 established: `clang_Type_getNumTemplateArguments`
 only reports explicitly-specified arguments on the raw/sugared type, not ones
-resolved from a parameter's own default — `canonicalType()` reports the full,
+resolved from a parameter's own default -- `canonicalType()` reports the full,
 positionally-correct list including defaults, and the same `GCPP_DEBUG_POLY`
 trace confirmed it also correctly reports `numArgs=2`/`arg[0]=GRefCountImpl`
 for the partially-dependent case, so this doesn't reintroduce the gating bug
@@ -113,13 +113,13 @@ Full 1630-header sweep, all three runtimes, against the committed
 - **VR**: 88 improvements (identical set), 2 regressions (same two classes), 0 newly-seen.
 
 All three runtimes hit the exact same 88 improvements and the exact same 2
-regressions — no runtime-specific divergence. Improvements include
+regressions -- no runtime-specific divergence. Improvements include
 `FxDelegateHandler` and `IMenu` (0008's own original examples, both now
 `OK`), the entire menu hierarchy (`AlchemyMenu`, `BarterMenu`, `BookMenu`,
 `ContainerMenu`, `CraftingMenu`, `DialogueMenu`, `FavoritesMenu`, and ~20
 more `*Menu` classes), and most of the `GFx*`/`GAS*` Scaleform UI layer
 (`GFxMovie`, `GFxMovieView`, `GFxSprite`, `GFxTranslator`,
-`GASGlobalContext`, `GASStringManager`, and dozens more) — all of which
+`GASGlobalContext`, `GASStringManager`, and dozens more) -- all of which
 route through the same `GRefCountBase<T, STAT>` -> `GRefCountBaseStatImpl<GRefCountImpl, STAT>`
 private-inheritance chain this fix unblocks. `ArmorRatingVisitor`,
 `BaseExtraList`, `ExtraDataList`, and `BGSPackageDataBool` (0021's own
@@ -132,10 +132,10 @@ unrelated prior patches.
 
 `GFxMovieRoot : public GFxMovieView, public GFxActionPriority`. Before this
 patch, `GFxMovieView` (a base of `GFxMovieRoot`) itself measured `0x20` (32
-bytes) embedded — **wrong**, since `GFxMovieView`'s own
+bytes) embedded -- **wrong**, since `GFxMovieView`'s own
 `static_assert(sizeof(GFxMovieView) == 0x18)` says it should be exactly `0x18`
 (24). After this patch, the same embedded `GFxMovieView` correctly measures
-`0x18` — byte-exact against its own static_assert. `GFxMovieRoot`'s reported
+`0x18` -- byte-exact against its own static_assert. `GFxMovieRoot`'s reported
 total dropping from 11248 to 11240 is this same 8-byte correction propagating
 up one level; the previous 11248 was two errors cancelling (an oversized
 `GFxMovieView` masking an independent 8-byte shortfall elsewhere in
@@ -162,21 +162,21 @@ static_assert(sizeof(GFxLoaderImpl) == 0x78);
 ```
 
 The header's own annotated offsets place `GFxStateBag` at `0x10` and the next
-base, `GFxLogBase<GFxLoaderImpl>`, at `0x20` — a 16-byte span. But
+base, `GFxLogBase<GFxLoaderImpl>`, at `0x20` -- a 16-byte span. But
 `GFxStateBag`'s own `static_assert(sizeof(GFxStateBag) == 0x8)` says it's
 only 8 bytes, and `GFxLogBase<void*>`'s own `static_assert(sizeof(GFxLogBase<void*>) == 0x8)`
 confirms the same for the third base. There is a genuine, pre-existing 8-byte
 gap between `GFxStateBag` and `GFxLogBase` in the real MSVC layout (secondary
 polymorphic base alignment, unrelated to this patch) that this pipeline has
-never modeled — this fix doesn't touch base-offset/padding computation at
+never modeled -- this fix doesn't touch base-offset/padding computation at
 all, only the yes/no `isPolymorphic()` decision. Before this patch,
 `GFxLoaderImpl` got a spurious 8-byte vptr from the old blindness to
 `GRefCountBase`'s chain, which happened to supply exactly the 8 bytes the
-unmodeled `GFxStateBag`/`GFxLogBase` gap needed — another case of two errors
+unmodeled `GFxStateBag`/`GFxLogBase` gap needed -- another case of two errors
 cancelling into a coincidentally-correct total. Confirmed the redundant vptr
 correctly disappears after this fix (verified via direct `.gdt` component
 inspection) and that `GRefCountBase`'s own embedded size is unchanged
-(`0x10` both before and after) — the regression is entirely attributable to
+(`0x10` both before and after) -- the regression is entirely attributable to
 this separate, pre-existing, unrelated base-offset gap, not to anything this
 patch changed.
 
@@ -196,7 +196,7 @@ to lock in the 88 improvements and the two accepted regressions.
 
 `patches/0008-isPolymorphic-investigation-DEFERRED.md` (and 0021's own
 writeup) describe the nested-parameter wall as needing "textual/structural
-substitution into a template-id" — a real follow-on investigation. It
+substitution into a template-id" -- a real follow-on investigation. It
 wasn't: it was a one-line gating bug (`isSpecialization` guarding argument
 extraction that works fine without it). Filed here so the next reader
 doesn't re-derive the same "this needs bigger machinery" conclusion 0007,

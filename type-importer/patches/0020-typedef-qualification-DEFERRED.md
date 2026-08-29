@@ -1,6 +1,6 @@
 # Patch 0020 (DEFERRED): qualify nested typedef registration
 
-**Status: deferred.** No `.patch` file — the candidate fix below is a net
+**Status: deferred.** No `.patch` file -- the candidate fix below is a net
 regression and was not merged. This document exists so the next attempt
 doesn't repeat the same investigation from scratch.
 

@@ -21,10 +21,10 @@ Which Skyrim runtime this concerns (SE 1.5.97 / AE 1.6.1170 / AE 1.7.99 /
 VR 1.4.15 / GOG 1.6.1179), if relevant.
 
 **Expected behavior**
-What you expected instead, and — if you have it — the community source
+What you expected instead, and -- if you have it -- the community source
 (CommonLibSSE-NG header, Address Library entry, a real disassembly) that
 supports the expected value. Project rule: offsets and layouts are never
-invented, only derived from public community sources — citing one speeds up
+invented, only derived from public community sources -- citing one speeds up
 triage a lot.
 
 **Environment**

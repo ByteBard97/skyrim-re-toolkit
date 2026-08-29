@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Contributing — skyrim-re-toolkit</title>
+<title>Contributing -- skyrim-re-toolkit</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="How to contribute to skyrim-re-toolkit: reliable engineering on top of community RE, not novel research.">
 <link rel="stylesheet" href="assets/css/style.css">
@@ -30,7 +30,7 @@
   <h1>Contributing</h1>
   <p class="lede">
     We're not looking for novel RE research. We're looking for <strong>reliable engineering</strong> on
-    top of what the community — CommonLibSSE-NG, meh321's Address Library, SKSE — has already
+    top of what the community -- CommonLibSSE-NG, meh321's Address Library, SKSE -- has already
     reverse-engineered.
   </p>
 
@@ -52,19 +52,19 @@
     </div>
   </div>
 
-  <h2>Ground rules — binding, not suggestions</h2>
+  <h2>Ground rules -- binding, not suggestions</h2>
   <ul class="plain">
-    <li>No console exploits, no distributing DRM-circumvention tools or cracked binaries, no redistribution of game binaries, PDBs, or copyrighted assets. (Locally unpacking your own legally-purchased executable for static analysis — see the demo — is standard RE practice and isn't what this targets.)</li>
-    <li>Every type or offset must be derivable from public community sources (CommonLibSSE-NG, Address Library, RTTI) — not from acquiring or dumping Bethesda's own build artifacts.</li>
+    <li>No console exploits, no distributing DRM-circumvention tools or cracked binaries, no redistribution of game binaries, PDBs, or copyrighted assets. (Locally unpacking your own legally-purchased executable for static analysis -- see the demo -- is standard RE practice and isn't what this targets.)</li>
+    <li>Every type or offset must be derivable from public community sources (CommonLibSSE-NG, Address Library, RTTI) -- not from acquiring or dumping Bethesda's own build artifacts.</li>
     <li>Don't invent offsets, struct layouts, or version numbers. Pull them from CommonLibSSE-NG or the Address Library, or open an issue if the source isn't available to you.</li>
-    <li>Don't commit generated type archives (<code>.gdt</code>/<code>.til</code>) or built binaries — these are CI-published artifacts, not source.</li>
+    <li>Don't commit generated type archives (<code>.gdt</code>/<code>.til</code>) or built binaries -- these are CI-published artifacts, not source.</li>
   </ul>
 
   <h2>Platform split matters</h2>
   <p>
     <code>type-importer</code> and <code>symbol-archive</code> are Linux-native (Ghidra, libclang,
     GitHub Actions <code>ubuntu-latest</code> all work fine). <code>runtime-harness</code> is Windows +
-    MSVC only, no exceptions — SKSE plugins are Windows DLLs built against Skyrim's PE ABI and cannot
+    MSVC only, no exceptions -- SKSE plugins are Windows DLLs built against Skyrim's PE ABI and cannot
     be built or tested on Linux.
   </p>
 
@@ -79,14 +79,14 @@
     <li>Write up the patch following the numbering/format already established in <code>type-importer/patches/*.md</code>.</li>
   </ol>
   <div class="callout">
-    <strong>Zero regressions required.</strong> A fix that unmasks a pre-existing bug is fine — but
+    <strong>Zero regressions required.</strong> A fix that unmasks a pre-existing bug is fine -- but
     document it; never merge a net-negative patch.
   </div>
 
   <h2>Licensing</h2>
   <p>
     The toolkit code itself is MIT. Generated <code>.gdt</code>/<code>.til</code> archives are derived
-    from CommonLibSSE-NG's headers, which are MIT-licensed — keep the attribution intact. The vendored
+    from CommonLibSSE-NG's headers, which are MIT-licensed -- keep the attribution intact. The vendored
     parser extension (GhidraClangPoweredParse) is Apache-2.0; patches to it stay Apache-2.0-compatible.
   </p>
 
