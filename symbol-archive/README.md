@@ -43,7 +43,7 @@ each resulting `.gdt` as a workflow build artifact.
   GitHub Release carrying all three runtimes (see
   `.github/workflows/symbol-archive-build.yml`'s
   `publish_release`/`release_version` inputs). **Current release:**
-  [`gdt-v3`](https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-v3)
+  [`gdt-v4`](https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-v4)
   carries the AE/SE/VR `.gdt` files built from CommonLibSSE-NG `b93280e`.
   Every `Structure`/`Union`/`Enum` in these archives has its coverage-sweep
   verification status (VERIFIED / MISMATCH / EMPTY / UNRESOLVED /
@@ -120,6 +120,6 @@ File → Add Archive** and select the downloaded `.gdt`, then right-click →
 |---|---|
 | AE `.gdt` build artifact via manual CI dispatch | Done — real run confirmed (see Status above) |
 | Hotspot-list accuracy verified | Fully closed — 37/39 exact, last 2 given real inferred sizes via patch 0019 — see `type-importer/COVERAGE_SWEEP_PLAN.md` |
-| Versioned GitHub Release publishing | Done — [`gdt-v3`](https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-v3) published, carrying all three AE/SE/VR `.gdt` assets with in-archive verification-status annotations and MISMATCH-category relocation |
+| Versioned GitHub Release publishing | Done — [`gdt-v4`](https://github.com/ByteBard97/skyrim-re-toolkit/releases/tag/gdt-v4) published, carrying all three AE/SE/VR `.gdt` assets with in-archive verification-status annotations and MISMATCH-category relocation |
 | SE / VR / GOG runtime coverage | Layouts validated in `type-importer` (SE, VR) and confirmed unnecessary (AE 1.7.99, GOG); SE/VR wired into this workflow's build matrix and confirmed with a real run — see Status above |
 | Automatic *validation* on CommonLibSSE-NG submodule bump | Done — `.github/dependabot.yml` watches CommonLibSSE-NG weekly and opens a PR on a new upstream commit, which `type-importer`'s existing coverage gate then regression-checks automatically. This subproject's own `.gdt` rebuild is still manual-dispatch only (see Triggers below) — Dependabot doesn't push a new `.gdt` build artifact, only a reviewed, regression-checked PR bumping the pin |
