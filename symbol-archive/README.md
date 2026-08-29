@@ -54,9 +54,21 @@ each resulting `.gdt` as a workflow build artifact.
   Confirmed-wrong (MISMATCH) structs are additionally relocated into a
   `/NEEDS_VERIFICATION_MISMATCH` category — unmissable in the tree, not
   just a description tooltip you have to go looking for.
-  (v1/v2, published and superseded within the same 90-minute window while
-  fixing early bugs before any real usage, were deleted rather than left
-  stacked up as confusing dead ends.)
+
+  **Release history, stated plainly rather than hidden:** v1-v3 no longer
+  exist. v1/v2 were published and superseded within the same 90-minute
+  window while fixing early bugs in the annotation feature itself, before
+  either had real usage. v3 added the `/NEEDS_VERIFICATION_MISMATCH`
+  relocation, but a manual check against v3's own downloaded archive
+  (not an automated test) found one specific class, `SkyObject`, that a
+  bug in the annotation code still left mislabeled — see `git log` for
+  `GenerateGdt.java`'s `TypeDef` fix and the matching fix to
+  `check_regression.py`'s regression-detection gap that let it slip past
+  review. v4 is that fix, verified against a fresh downloaded copy of the
+  rebuilt archive. Superseded releases were deleted rather than left
+  stacked up as confusing dead ends. Going forward, a new release is cut
+  when there's a real reason for one (a genuine bug fix or a
+  CommonLibSSE-NG bump), not for every incremental commit.
 - **Accuracy**: **not every class in this archive is byte-accurate.**
   `type-importer`'s own coverage sweep (see
   `../type-importer/COVERAGE_SWEEP_PLAN.md` and
