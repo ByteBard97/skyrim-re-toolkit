@@ -58,9 +58,8 @@ def main():
             # static_assert miner failed to re-find an assert it found
             # before, not that the archive itself improved. Treat that
             # specific transition as a regression in the miner, not an
-            # improvement in coverage. Found while
-            # that traced a real mislabeled class (SkyObject) back to
-            # this exact blind spot.
+            # improvement in coverage. Found while tracing a real
+            # mislabeled class (SkyObject) back to this exact blind spot.
             regressions.append((name, base_entry, new_entry))
         elif new_rank < base_rank:
             regressions.append((name, base_entry, new_entry))
