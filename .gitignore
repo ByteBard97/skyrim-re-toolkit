@@ -58,3 +58,12 @@ Thumbs.db
 
 # --- Logs ---
 *.log
+
+# --- Local working notes (session scratch, never intended for commit) ---
+CLAUDE.md
+BACKLOG.md
+HANDOFF-*.md
+TRACK[0-9]_*.md
+*_TODO.md
+goals-*.md
+*-goal.md

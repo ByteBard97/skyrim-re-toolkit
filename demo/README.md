@@ -30,6 +30,11 @@ binary *readable*, it does not prevent crashes.)
 
 ![Ghidra decompiler window showing the same function retyped to TESObjectREFR, with self->super_TESForm.formFlags and formType._impl instead of raw offsets](screenshots/ghidra_typed_decompile.png)
 
+*Note the one visible artifact in this shot: `__RTDynamicCast()` on line 16
+lost its call arguments — a side effect of retyping this call in isolation
+rather than a full RTTI-analysis pass, not a sign the applied types are
+wrong. Explained further below.*
+
 Both are real screenshots of a real `SkyrimSE.exe` (Steamless-unpacked, AE
 build 24604991) opened in Ghidra 12.1.3, same function
 (`FUN_1401e1270`), same address — not mockups, not the same image edited
