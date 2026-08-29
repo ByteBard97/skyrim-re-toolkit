@@ -731,6 +731,28 @@ public class GenerateGdt {
                 : "[skyrim-re-toolkit coverage sweep] " + tag + " -- " + existing;
             d.setDescription(combined);
             annotated++;
+
+            // The description field alone is easy to miss in the normal
+            // apply-a-type workflow (right-click Apply Data Type, or the
+            // datatype chooser dialog, neither surfaces it by default) --
+            // a MISMATCH struct (confirmed WRONG size, not just unverified)
+            // is the one status actively dangerous to apply unknowingly,
+            // so additionally relocate it to a category folder that's
+            // impossible to miss in the Data Type Manager tree. Small,
+            // fixed set (25/3181 for AE) -- confirmed by direct test this
+            // doesn't collide with any other category's same-named type.
+            // Deliberately NOT done for EMPTY/UNRESOLVED/NO_GROUND_TRUTH:
+            // those are "unconfirmed", not "confirmed wrong", and moving
+            // roughly half the archive's classes would make the tree
+            // useless rather than safer.
+            if (status.equals("MISMATCH")) {
+                try {
+                    d.setCategoryPath(new CategoryPath("/NEEDS_VERIFICATION_MISMATCH"));
+                } catch (Exception e) {
+                    System.out.println("annotate-coverage: could not relocate '" + d.getName()
+                        + "' to warning category (" + e + "), description-only annotation stands");
+                }
+            }
         }
         fileDtMgr.endTransaction(txId, true);
         System.out.println("annotate-coverage: stamped " + annotated + " types with verification status from " + csvPath);
