@@ -147,7 +147,7 @@ same scope as the corrected baseline in `coverage_baseline.json`):
 <this-run's-snapshot>`: **383 improvements, 5 regressions** (all 5
 root-caused above, all pre-existing/unmasked, not introduced by this
 patch's own two fixes), 1 newly-seen class. Full regression list and the
-383-improvement list are in this session's run output.
+383-improvement list are in this pass's run output.
 
 ## Regression found and root-caused (NOT fixed here — see below)
 

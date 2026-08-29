@@ -105,7 +105,7 @@ committing to a real `.gdt` gives:
 | `TESForm` | `0x20`, full field-by-field layout matches DESIGN.md's independently clang-cl-verified dump exactly | ✅ Exact match, including `stl::enumeration` field sizes/offsets |
 | `TESObject` | `0x20` | ✅ Matches `static_assert` |
 | `TESBoundObject` | `0x30` | ✅ Matches `static_assert` |
-| `TESObjectREFR` | `0x70` (112) | ⚠️ See below — 8 bytes short of the `0x78` clang-cl gave, for an already-understood reason unrelated to this session's fixes |
+| `TESObjectREFR` | `0x70` (112) | ⚠️ See below — 8 bytes short of the `0x78` clang-cl gave, for an already-understood reason unrelated to this pass's fixes |
 
 ### The one remaining, pre-existing, well-understood discrepancy
 
@@ -127,7 +127,7 @@ work — it's the same "invisible relocated member" pattern already
 extensively documented in `DESIGN.md`'s TESObjectREFR field-map section
 (the true game object size is larger than any of these numbers, due to
 runtime-relocated fields CommonLibSSE-NG doesn't declare as real compiled
-members at all). Not chased further this session — flagged precisely so
+members at all). Not chased further this pass — flagged precisely so
 it isn't mistaken for a new mystery.
 
 ## How this was verified
@@ -138,7 +138,7 @@ checkout (zero fuzz, zero rejects), ran both `VptrFixTest` and
 `RealHeaderTest` — zero clang diagnostics, no regressions, resolved-type
 count increased from 3746 → 3908 across these two fixes. Printed and
 manually cross-checked the full field-by-field layout of all four target
-classes against both the headers' own `static_assert`s and this session's
+classes against both the headers' own `static_assert`s and this pass's
 earlier independent `clang-cl` verification. Reverted the submodule's
 working tree to pristine afterward.
 

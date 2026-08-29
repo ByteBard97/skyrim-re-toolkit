@@ -473,7 +473,7 @@ flagged as not yet confirmed.
   `kPostLoadGame` lifecycle events v0.1's `get_lifecycle_status()` already
   tracks, so a client can poll load completion with a tool it already has.
 - **`teleport_player_to(form_id)`** — solves "need to be near X to test
-  a code path" (this session's own T3-3 work needed a real save load to
+  a code path" (this pass's own T3-3 work needed a real save load to
   reach `PlayerCharacter`/`ACTOR_RUNTIME_DATA` state; teleporting to a
   specific reference is the general form of that need). Backed by
   `TESObjectREFR::MoveTo(TESObjectREFR* a_target)` (real,
@@ -543,7 +543,7 @@ backlog framing, deferred honestly rather than guessed):**
    the requested one; `teleport_player_to` against a real, known form ID,
    confirm `PlayerCharacter`'s position actually changes (readable via the
    same `LayoutValidator`-style live field read this project already has
-   working). This is real implementation work (T3-8, BACKLOG.md) — this
+   working). This is real implementation work (tracked as T3-8) — this
    doc is the design that work executes against, not a claim that any of
    it has run yet.
 
@@ -674,6 +674,6 @@ serves live queries.
 - [ ] Verify per the plan above.
 - [ ] Once proven, register `LayoutValidator`'s live diff and
       `SavegameTracer`'s save-list data the same way.
-- [ ] Update `BACKLOG.md`'s T3-8 row and this doc's status line to drop
+- [ ] Update the T3-8 task entry and this doc's status line to drop
       the "blocked/ready" framing tied to the superseded pipe/WebSocket
       plan.

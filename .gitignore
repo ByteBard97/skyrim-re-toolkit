@@ -58,10 +58,3 @@ Thumbs.db
 
 # --- Logs ---
 *.log
-
-# Local working notes -- never ship
-BACKLOG.md
-HANDOFF-*.md
-TRACK[0-9]_*.md
-type-importer/LOOP_GOAL.md
-REDDIT_PREP_TODO.md

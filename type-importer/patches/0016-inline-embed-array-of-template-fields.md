@@ -22,7 +22,7 @@ This produced a genuinely confusing symptom during investigation: debug
 tracing showed `bhkCharacterController` and `TESQuest` being parsed
 correctly (63 fields/bases and 29 fields/bases respectively) and
 successfully registered in `TypePool` — i.e. the bug was NOT in parsing
-or registration (contrary to this session's initial assumption while
+or registration (contrary to this pass's initial assumption while
 investigating the Havok cluster and, in an earlier pass, `TESQuest`
 independently). It was strictly downstream, in dependency resolution:
 `resolve()`'s fixed-point loop never called `createDataType()` for
@@ -30,7 +30,7 @@ either class because `checkDependenciesFulfilled` never returned true.
 
 **This is one shared root cause for both the Havok cluster
 (`bhkCharacterController`) and `TESQuest`** — not two separate bugs, as
-this session's own earlier investigation notes had assumed while they
+this pass's own earlier investigation notes had assumed while they
 were being looked at independently.
 
 ## Fix

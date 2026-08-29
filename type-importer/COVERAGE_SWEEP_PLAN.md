@@ -494,7 +494,7 @@ silently left broken:
 **One concrete, high-leverage lead worth flagging**: `NiAVObject`,
 `NiNode`, and `NiCamera` (a base/derived chain) are *all* short by
 exactly **-48 bytes** — the same cascading-from-a-shared-base pattern
-already proven twice this session (patch 0006's `BSCriticalSection` fix
+already proven twice this pass (patch 0006's `BSCriticalSection` fix
 rippled into `AbstractHeap`/`AIProcess`; patch 0006's regression
 analysis found `GFxValue` rippling into 5 menu classes). Whoever chases
 this next should look at `NiAVObject`'s own base chain
@@ -519,7 +519,7 @@ patch 0006's proven cascade pattern).
 - `type-importer-coverage.yml`: its exact steps (`list_re_headers.sh` →
   `generate_gdt.sh` with `REPORT_CSV` → `mine_static_asserts.py` →
   `coverage_report.py` → `check_regression.py`) have been run locally,
-  by hand, many times over the course of this session against the
+  by hand, many times over the course of this pass against the
   current committed `coverage_baseline.json` (0001-0006) — most recently
   producing OK=1234/MISMATCH=461/EMPTY=1032, matching the committed
   baseline exactly, i.e. `check_regression.py` would report zero
@@ -815,7 +815,7 @@ this investigation's internal working notes guessed `TESQuest` was blocked by `B
 neither of which references `BaseExtraList`/`ExtraDataList` anywhere,
 and both resolve correctly and independently.
 
-An earlier pass in this session deferred `TESQuest` after one focused
+An earlier pass in this pass deferred `TESQuest` after one focused
 attempt that ruled out missing dependencies, forward-decl collision, and
 dependent array-size expressions, but did not find the actual cause. A
 follow-up investigation (using a debug-instrumented copy of the parser

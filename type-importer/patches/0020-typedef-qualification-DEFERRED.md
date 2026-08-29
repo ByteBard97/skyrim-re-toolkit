@@ -132,7 +132,7 @@ must answer first).
 
 ## Bigger picture from this grinding pass
 
-Across this session's broader-than-hotspot-list coverage-sweep sampling
+Across this pass's broader-than-hotspot-list coverage-sweep sampling
 (patch 0019 plus the investigations documented in `patches/0008-*-DEFERRED.md`'s
 two updates and this document), essentially every remaining `MISMATCH`
 cluster sampled traces back to one of three root causes, all in the same
@@ -189,7 +189,7 @@ bugs -- they're the intended, load-bearing mechanism by which a
 every field/base/return-type that references it as `Alias` rather than
 `RealType`. Refusing that overwrite breaks every one of those (`TESClass`,
 `TESNPC`, `TESObjectARMO`, `bhkCollisionFilter`, and ~230 more), while
-fixing only the one genuine collision this session was looking for
+fixing only the one genuine collision this pass was looking for
 (`SkyObject` and its 4 direct beneficiaries, `Sun`/`Moon`/`Stars`/
 `Atmosphere`/`Clouds`).
 

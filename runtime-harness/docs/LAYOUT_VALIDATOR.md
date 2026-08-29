@@ -20,7 +20,7 @@ game process**, closing the loop with type-importer's static analysis:
   classes byte-accurate against the headers' own `static_assert`s; the
   39-class modder-relevant hotspot list is closed — 37/39 byte-exact,
   `BaseExtraList`/`ExtraDataList` deferred with documented reasons in
-  `type-importer/LOOP_GOAL.md` / `COVERAGE_SWEEP_PLAN.md`).
+  `type-importer/COVERAGE_SWEEP_PLAN.md`).
 - runtime-harness compiles those **same headers** into a live SKSE
   plugin. Every layout claim in the headers is therefore already
   compile-time-checked: `static_assert(sizeof(TESForm) == 0x20)` etc.
@@ -116,7 +116,7 @@ So what does an in-process validator add that `static_assert` doesn't?
   hotspot classes type-importer's baseline still marks EMPTY
   (`sizeof == 1` under AE-mode parsing is *correct* — the real members
   are macro-guarded and accessor-relocated; see
-  `type-importer/LOOP_GOAL.md`). In-process, `ExtraDataList`'s members
+  `type-importer/COVERAGE_SWEEP_PLAN.md`). In-process, `ExtraDataList`'s members
   are private and `BaseExtraList`'s are the SE view, so the compile-time
   report logs only what's compilable. Real AE ground truth for these
   needs the planned live walk: grab a loaded refr's `extraList`, read a

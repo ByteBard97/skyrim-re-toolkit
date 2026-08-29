@@ -8,7 +8,7 @@ into the same sequence for traceability (it was found investigating
 T1-6, the same session as patch 0025) and because it changes
 `coverage_baseline*.json` the same way a submodule patch would.
 
-## Task: T1-6 (BACKLOG.md), investigate the 27 `UNRESOLVED` classes
+## Task: T1-6, investigate the 27 `UNRESOLVED` classes
 
 `BSString` -- a load-bearing type used everywhere in CommonLibSSE-NG --
 was one of 27 classes the coverage sweep reported as `UNRESOLVED`
@@ -104,7 +104,7 @@ Of the original 27 `UNRESOLVED`:
 - **`IHandlerFunctor`, `BSTObjectDictionary`** -- expected to stay
   UNRESOLVED by design (base class templates never independently
   registered as standalone types in the inline-embed architecture; see
-  BACKLOG.md's T1-6 entry).
+  the T1-6 task entry).
 - **10 nested-type entries** (`Argument::Type`,
   `AutoRegisterFactory::AutoRegisterFactory`,
   `BGSNamedPackageData::Data`, `BGSRefAlias::GenericFillData::Padding`,
@@ -130,5 +130,5 @@ Of the original 27 `UNRESOLVED`:
 
 These remaining ~17 are a smaller, more varied set than the original 27
 and don't share one root cause the way the typedef-of-template-
-specialization family did -- a good stopping point for this session
+specialization family did -- a good stopping point for this pass
 rather than forcing a single narrative across unrelated shapes.

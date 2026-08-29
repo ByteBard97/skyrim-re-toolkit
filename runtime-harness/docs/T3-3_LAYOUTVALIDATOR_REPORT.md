@@ -149,7 +149,7 @@ build 5's log was not retained, see below).
   (`raw=0x7FF792114D50` vs `VTABLE_TESForm[0]=0x7FF7920B0B00`) on build
   5's run — **that intermediate log was not saved before the next
   relaunch overwrote it**, so this exact pairing isn't in any committed
-  file; treat it as a recorded observation from this session, not
+  file; treat it as a recorded observation from this pass, not
   re-derivable evidence. The mismatch is expected, not a bug: `TESForm`
   is an abstract base, so the live instance at formID `0x00000007` is
   actually a `TESNPC` (its own `formType` check reads `OK` on the same
@@ -291,5 +291,5 @@ Deploying this build required killing the previous long-running
 `SavegameTracer`/`HavokStepLogger` session, ~26,800s+ accumulated CPU) to
 overwrite the loaded DLL. That process's 70+-minute `HavokStepLogger`
 silence run was already concluded and documented in `README.md` before
-this session started — nothing was lost by ending it, but a future reader
+this pass started — nothing was lost by ending it, but a future reader
 should not assume that PID is still accumulating evidence.

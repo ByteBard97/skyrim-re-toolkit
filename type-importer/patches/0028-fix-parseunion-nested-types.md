@@ -10,7 +10,7 @@ following the precedent set by patches 0026/0027.
 
 ## Task
 
-BACKLOG.md's T1-8: patch 0026 closed the `BSString`-shaped typedef-of-
+Task T1-8: patch 0026 closed the `BSString`-shaped typedef-of-
 template-specialization family (27 -> 17/18 `UNRESOLVED`) but only
 *categorized* the remaining bucket in one paragraph -- it never
 root-caused individual members the way patch 0027 did for the

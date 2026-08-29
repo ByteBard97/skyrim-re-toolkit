@@ -63,32 +63,32 @@
   <h2 id="what-do-you-want-to-do">What do you want to do?</h2>
   <div class="card-grid">
     <div class="card">
-      <h3>🧩 Get a <code>.gdt</code> for Ghidra</h3>
+      <h3>Get a <code>.gdt</code> for Ghidra</h3>
       <p>Run one script against real CommonLibSSE-NG headers and get a type archive you can load straight into your own Ghidra project.</p>
       <a class="card-cta" href="type-importer.html#quick-start">Quick Start →</a>
     </div>
     <div class="card">
-      <h3>📖 Understand the project</h3>
+      <h3>Understand the project</h3>
       <p>Three subprojects, one pipeline: parse headers, distribute archives, inspect the live game. What's done, what's honest-caveat, what's next.</p>
       <a class="card-cta" href="#architecture">Architecture →</a>
     </div>
     <div class="card">
-      <h3>🛠️ Contribute</h3>
+      <h3>Contribute</h3>
       <p>Not looking for novel RE research — looking for reliable engineering on top of what the community already found.</p>
       <a class="card-cta" href="contributing.html">Contributing guide →</a>
     </div>
     <div class="card">
-      <h3>📦 Watch for pre-built archives</h3>
+      <h3>Watch for pre-built archives</h3>
       <p>A CI pipeline builds AE/SE/VR type archives automatically. Early scaffold today — see the accuracy caveat before trusting a class blindly.</p>
       <a class="card-cta" href="symbol-archive.html">symbol-archive →</a>
     </div>
     <div class="card">
-      <h3>🔬 See the live game's internals</h3>
+      <h3>See the live game's internals</h3>
       <p>SKSE plugins that log the AI scheduler, Havok physics step, and savegame serializer while the game actually runs — not just static analysis.</p>
       <a class="card-cta" href="runtime-harness.html">runtime-harness →</a>
     </div>
     <div class="card">
-      <h3>🐛 Something's wrong / missing</h3>
+      <h3>Something's wrong / missing</h3>
       <p>File an issue with the specific class or offset. We track accuracy openly — this helps close real gaps.</p>
       <a class="card-cta" href="https://github.com/ByteBard97/skyrim-re-toolkit/issues">GitHub Issues →</a>
     </div>
@@ -130,7 +130,7 @@
 symbol-archive (distribute)    ──┼──►  CommonLibSSE-NG (source of truth)
 runtime-harness (inspect live) ──┘      + meh321 Address Library + SKSE</code></pre>
 
-  <h2 id="numbers">The honest numbers</h2>
+  <h2 id="numbers">Current coverage</h2>
   <div class="stat-grid">
     <div class="stat"><span class="num">2,102 / 3,183</span><span class="label">classes byte-accurate, full-namespace sweep (66%)</span></div>
     <div class="stat"><span class="num">37 / 39</span><span class="label">modder-relevant "hotspot" classes byte-exact (rest have real inferred sizes, not placeholders)</span></div>

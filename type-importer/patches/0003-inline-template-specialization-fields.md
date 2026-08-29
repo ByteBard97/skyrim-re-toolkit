@@ -125,7 +125,7 @@ unrelated reason discovered in the same verification pass: `FormID`
 and/or this tool's `TypePool.getType()` doesn't resolve namespace-qualified
 builtin type spellings like `"std::uint32_t"` correctly in some code path.
 This is a **separate, distinct, not-yet-investigated bug** — not chased
-further this session. `TESObjectREFR (RUNTIME_DATA_CONTENT tail sizing, see
+further this pass. `TESObjectREFR (RUNTIME_DATA_CONTENT tail sizing, see
 DESIGN.md) and BaseFormComponent both resolved fine, isolating the
 remaining blocker specifically to typedef/builtin-type-name resolution,
 not to anything this patch touches.

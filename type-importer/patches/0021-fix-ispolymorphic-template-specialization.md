@@ -50,7 +50,7 @@ down to their real polymorphic root.
 Patch 0007 attempted this SAME substitution machinery for base-class
 **field embedding** (constructing real `ParsedStructure` content for a
 template-specialization base) and was deferred after a confirmed
-regression: re-testing it directly this session showed it regresses
+regression: re-testing it directly this pass showed it regresses
 `ArmorRatingVisitor` (`OK` in the current baseline) from 64 down to 40 --
 see the "0007 disproven as prerequisite" correction below and the amended
 note in `patches/0008-*-DEFERRED.md`. This patch deliberately does **not**
@@ -162,7 +162,7 @@ list, not a difference in the fix's actual effect between runtimes).
 fixes (`BaseExtraList`, `ExtraDataList`) are all unchanged, confirming no
 interaction with unrelated prior patches.
 
-**1052 "newly seen" entries** (present in this session's fresh sweep,
+**1052 "newly seen" entries** (present in this pass's fresh sweep,
 absent from the prior baseline -- not a regression per `check_regression.py`'s
 own definition) are `<ClassName>_vtable` structs that previously were never
 created at all for any class whose `isPolymorphic()` already correctly

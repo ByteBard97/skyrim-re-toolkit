@@ -10,7 +10,7 @@ investigating T1-7, flagged as a "future pass" lead in patch 0026's own
 writeup) and because it changes `coverage_baseline*.json` the same way a
 submodule patch would.
 
-## Task: T1-7 (BACKLOG.md) -- the `RUNTIME_DATA2` name collision
+## Task: T1-7 -- the `RUNTIME_DATA2` name collision
 
 Patch 0026's writeup flagged a loose end: three unrelated classes
 (`Console`, `MapMenu`, `NiCamera`) each declare their own nested
