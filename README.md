@@ -50,6 +50,8 @@ Two related projects deserve credit and an honest feature split:
 
 The target is feature parity with verification gates on top; today the symbols side is at demo scale, and the gap list above is the roadmap -- see `type-importer/FUNCTION_SIGNATURE_DESIGN.md` for how the function-signature piece is being closed.
 
+Mapped to this repo's three subprojects: **type-importer** is the one with a direct counterpart in the fork (same header-parsing idea, different machinery, and their PDB merge gives them more structs while our static_assert gate tells you which of ours are proven). **symbol-archive** (CI-built downloadable `.gdt`s) has no counterpart -- they distribute scripts you run yourself, not verified artifacts. **runtime-harness** (live-game validation via SKSE plugins) has no counterpart anywhere -- their validation is entirely static. In short: they went wide (six game targets, PDB mining, cross-version porting), this project went deep (correctness gates, distributable archives, live validation).
+
 | | This project | BethesdaGhidraScripts (doodlum / alandtse fork) |
 |---|---|---|
 | Distribution | Pre-built, versioned `.gdt` you download | Run-it-yourself local pipeline |
