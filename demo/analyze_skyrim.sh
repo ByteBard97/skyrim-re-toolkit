@@ -48,6 +48,17 @@ echo "== Pass 2: apply $GDT (types persist to the project DB)" >&2
     -scriptPath "$SCRIPT_DIR/ghidra_scripts" \
     -postScript ApplyGdt.java "$GDT"
 
+# Optional: create named/typed functions + labels at Address-Library-resolved
+# addresses (FUNCTION_SIGNATURE_DESIGN.md). SYMBOLS_JSON points at a
+# symbols.json produced by type-importer/scripts/mine_function_ids.py.
+if [ -n "${SYMBOLS_JSON:-}" ]; then
+    echo "== Pass 2c: apply address-library symbols ($SYMBOLS_JSON)" >&2
+    "$HEADLESS" "$WORK" SkyrimDemo \
+        -process "$PROG" -noanalysis \
+        -scriptPath "$SCRIPT_DIR/ghidra_scripts" \
+        -postScript ApplySymbols.java "$SYMBOLS_JSON"
+fi
+
 # Optional: type the first parameter of each demo function as a struct from
 # the archive, so member accesses render as named fields. Pairs are given as
 # RETYPE="<hex-addr>=<TypeName> ..." in the environment.

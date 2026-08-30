@@ -94,11 +94,40 @@ Pass 1 imports and auto-analyzes the binary (30–90 minutes, one-time) and
 exports the untyped decompilation to `work/before.c`. Pass 2 applies the
 type archive and exports `work/after.c`. Diff them.
 
+## Address-library symbols (named, typed functions)
+
+Pass 2c (`SYMBOLS_JSON`) goes further: it creates **named, typed `Function`
+objects at real addresses** -- CommonLib functions, singletons, and
+RTTI/vtable labels resolved through meh321's Address Library for your exact
+exe version (see `../type-importer/FUNCTION_SIGNATURE_DESIGN.md`).
+
+Generate `symbols.json` (needs the `.bin` matching your exe, e.g.
+`versionlib-1-6-1170-0.bin` for AE 1.6.1170):
+
+```bash
+python3 ../type-importer/scripts/mine_function_ids.py \
+  ../type-importer/vendor/CommonLibSSE-NG/include \
+  ../type-importer/vendor/CommonLibSSE-NG/src \
+  --addrlib /path/to/versionlib-1-6-1170-0.bin --format 2 --column ae \
+  -o symbols_ae.json
+```
+
+Then run the driver with `SYMBOLS_JSON=symbols_ae.json` in the environment.
+Verified on a 4-header test .gdt: 577 functions named, 14,610 labels placed,
+103 full signatures applied, 0 failures. The 103 is not the ceiling -- it's
+what a 4-header test archive covers; closing the rest (full-sweep .gdt +
+vtable-walk pass) is tracked in
+`../type-importer/FUNCTION_SIGNATURE_DESIGN.md`.
+
 ## Pieces
 
-- `analyze_skyrim.sh` -- the driver (two headless Ghidra passes)
+- `analyze_skyrim.sh` -- the driver (two headless Ghidra passes, plus
+  optional RETYPE and SYMBOLS_JSON passes)
 - `ghidra_scripts/ApplyGdt.java` -- bulk-imports every type from the `.gdt`
   into the program
+- `ghidra_scripts/ApplySymbols.java` -- creates named/typed functions and
+  labels at Address-Library-resolved addresses from a `symbols.json`
+  (`SYMBOLS_JSON` pass)
 - `ghidra_scripts/DumpDecomp.java` -- exports the pseudo-C of the
   function(s) containing given addresses
 
