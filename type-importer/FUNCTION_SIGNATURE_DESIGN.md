@@ -6,10 +6,11 @@ user-supplied SkyrimSE.exe AE 1.6.1170. Closes the gap defined in
 
 ## What changed since the problem statement
 
-A working reference run now exists. `function-signature-shit/` (alandtse's
-BethesdaGhidraScripts fork -- pipeline code MIT per its NOTICE.md -- with
-local fixes: pinned externs, winsdk clang target, CommonLib-before-fallback
-pass ordering, py3.12-safe deps; untracked) was set up against a
+A working reference run now exists. A local checkout of alandtse's
+BethesdaGhidraScripts fork (commit `702c932`; pipeline code offered as MIT
+via its `NOTICE.md` -- see Constraints) with local fixes (pinned externs,
+winsdk clang target for Linux, CommonLib-before-fallback pass ordering,
+py3.12-safe deps; checkout deliberately untracked here) was set up against a
 user-supplied `SkyrimSE.exe` AE 1.6.1170 and passes its own verification
 suite:
 
@@ -35,10 +36,11 @@ what we must NOT copy (see Constraints).
    extended fork dual-grants its pipeline code (`run.py`, `scripts/`,
    `tools/`) as MIT via its `NOTICE.md` (copyright BethesdaGhidraScripts
    contributors; the fork's top-level GPL-3.0 is aggregate-only, via
-   CommonLibSF, which we do not use). The components below are original
-   implementations written against the stricter doodlum constraint and thus
-   satisfy both; if code is ever taken from the fork instead, its MIT
-   copyright+permission notice must be preserved.
+   CommonLibSF, which we do not use). Caveat: since the original repo is
+   unlicensed, the fork's MIT offer cannot cleanly cover doodlum-derived
+   portions, so we treat the whole chain as not-vendorable until upstream
+   resolves it. The components below are original implementations written
+   against the stricter doodlum constraint and thus satisfy both readings.
 2. **Ground rules.** No DRM-circumvention tooling shipped or automated by this
    repo; no PDBs. The toolkit takes the user's exe as given (unpacking their
    own legally purchased game locally is the user's step, documented but not
@@ -109,9 +111,8 @@ vtable-anchored function naming in (D).
 delta-encoded `.bin` format and builds the full `{id: offset}` dict; it just
 only uses it for membership tests. Add an emit mode. The user supplies the
 `.bin` matching their exe version (per-version offsets shift between AE point
-releases; a `versionlib-1-6-1170-0.bin` now sits in
-`function-signature-shit/addresslibrary/sse/` for local use). PE version
-detection: trivial `VS_FIXEDFILEINFO` read (~40 lines, stdlib).
+releases; a 1.6.1170 database is present in the local reference checkout).
+PE version detection: trivial `VS_FIXEDFILEINFO` read (~40 lines, stdlib).
 
 ### (D) Ghidra-side application -- NEW, the deliverable
 
@@ -184,5 +185,5 @@ labels when the resolved address is not in an executable block.
 
 - No Steamless/DRM handling, no PDB consumption, no IDA imports.
 - No Fallout 4 leg in v1 (no local exe, no CommonLibF4 vendored).
-- Not vendoring or copying doodlum's code (constraint 1); the
-  `function-signature-shit/` copy stays untracked reference material.
+- Not vendoring or copying BethesdaGhidraScripts code (constraint 1); the
+  local fork checkout stays untracked reference material.

@@ -31,8 +31,9 @@ Usage:
         --addrlib versionlib-1-6-1170-0.bin --format 2 --column ae \
         -o symbols.json
 
-Clean-room implementation for the MIT skyrim-re-toolkit; shares no code with
-third-party pipelines that use the same technique.
+Independent implementation for the MIT skyrim-re-toolkit, informed by a
+local reference run of the BethesdaGhidraScripts pipeline (alandtse fork,
+commit 702c932); no code copied from it.
 """
 import argparse
 import glob

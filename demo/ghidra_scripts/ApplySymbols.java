@@ -140,6 +140,11 @@ public class ApplySymbols extends GhidraScript {
         println("  signatures applied : " + sigsApplied);
         println("  no signature in DTM: " + sigsMissing + " (named only)");
         println("  failures           : " + failures);
+        int funcTotal = sigsApplied + sigsMissing;
+        if (funcTotal > 0) {
+            println(String.format("  signature coverage : %d/%d function symbols typed (%.1f%%)",
+                sigsApplied, funcTotal, 100.0 * sigsApplied / funcTotal));
+        }
         for (String s : createFails) println("  create-fail: " + s);
         for (String s : sigFails) println("  sig-fail   : " + s);
     }

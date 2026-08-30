@@ -37,26 +37,26 @@ written, `SkyrimSE.exe` in Ghidra still shows
 `FUN_1401e1270(longlong *param_1, undefined8 param_2)` for most functions --
 same as before the `.gdt` import, just with better struct field names when a
 function happens to dereference a known type. This gap was flagged directly
-by a hostile-reviewer pass (`goals-august-29-2026.md`): *"Apply Function Data
+by a hostile review of the demo: *"Apply Function Data
 Types on a stripped exe does nothing without symbols, did you even try
 this?"* -- and the response chosen at the time was to add a `demo/`
 walkthrough clarifying what actually changes on screen, not to close the gap.
 
 ## Why this project doesn't have it yet
 
-Not a hard technical blocker. Three prior-session artifacts declared this
+Not a hard technical blocker. Three earlier project documents declared this
 "out of scope" and treated that as settled project policy, which it was not
-(the user's words: *"i never said out of scope... that was something that
-early claude reviewers decided for whatever reason"*):
+(the project author never declared it out of scope; that label came from
+earlier review tooling, not from them):
 
 - `TIL_EXPORT_DESIGN.md`: called it "`symbol-archive`'s problem" --
   `symbol-archive` never built it either; the work was punted between
   subprojects and landed nowhere.
 - `README.md`: called RTTI-based class recovery "out of scope here."
-- `TRACK1_TYPE_IMPORTER.md`: called Address Library *RVA-level* cross-checks
-  "out of scope per this project's ground rules (no acquiring Bethesda
-  binaries)" -- but the project already validates generated `.gdt`s against
-  a real `SkyrimSE.exe` locally elsewhere (this is exactly how the
+- An internal track-planning doc called Address Library *RVA-level*
+  cross-checks "out of scope per this project's ground rules (no acquiring
+  Bethesda binaries)" -- but the project already validates generated `.gdt`s
+  against a real `SkyrimSE.exe` locally elsewhere (this is exactly how the
   SkyObject/TypeDef bug and the demo screenshots got verified), so the
   binaries-acquisition rule doesn't actually forbid this the way it was
   cited to.
@@ -71,8 +71,8 @@ Given:
   placement)
 - A real, user-supplied `SkyrimSE.exe`/`Fallout4.exe` (not acquired or
   redistributed by this project -- supplied locally by whoever runs the
-  tool, same posture as ------ pipeline and this project's own local
-  PE-validation work)
+  tool, same posture as the BethesdaGhidraScripts pipeline and this
+  project's own local PE-validation work)
 
 Produce: a Ghidra headless-import step (or `.gdt`-adjacent artifact) that
 creates named, correctly-typed `Function` objects at the right addresses in

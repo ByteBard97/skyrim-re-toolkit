@@ -101,8 +101,11 @@ objects at real addresses** -- CommonLib functions, singletons, and
 RTTI/vtable labels resolved through meh321's Address Library for your exact
 exe version (see `../type-importer/FUNCTION_SIGNATURE_DESIGN.md`).
 
-Generate `symbols.json` (needs the `.bin` matching your exe, e.g.
-`versionlib-1-6-1170-0.bin` for AE 1.6.1170):
+Generate `symbols.json` (needs the Address Library `.bin` matching your exe
+version -- e.g. `versionlib-1-6-1170-0.bin` for AE 1.6.1170, from the
+"Address Library for SKSE Plugins" Nexus release or a community
+AddressLibraryDatabase checkout; note the upstream database carries no
+explicit license, we link rather than ship it):
 
 ```bash
 python3 ../type-importer/scripts/mine_function_ids.py \
@@ -133,10 +136,9 @@ vtable-walk pass) is tracked in
 
 ## Roadmap
 
-- Function *names*: chain CommonLibSSE-NG's `REL::RelocationID` usages
-  through the Address Library database to rename functions with their
-  CommonLibSSE symbol names (Address Library `.relib`/`.rename` formats are
-  read by meh321's Windows-only Manager; a parser or export path is a
-  follow-up).
+- Function *names*: ✅ landed via the `SYMBOLS_JSON` pass above
+  (Address Library ID → RVA → named function). Remaining follow-up: the
+  vtable-walk pass that names virtual functions never given a `REL::ID`
+  (see `../type-importer/FUNCTION_SIGNATURE_DESIGN.md`, phase 4).
 - Auto-retyping of function signatures via RTTI-recovered class names
   matched against archive types.

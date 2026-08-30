@@ -30,11 +30,11 @@ Why this over a pinned Discord `types.h`: not because newer beats older -- a wel
 ## How this compares to BethesdaGhidraScripts
 
 Two related projects deserve credit and an honest feature split:
-[doodlum/BethesdaGhidraScripts](https://github.com/doodlum/BethesdaGhidraScripts), which proved the clang-to-Ghidra idea first, and [alandtse/BethesdaGhidraScripts](https://github.com/alandtse/BethesdaGhidraScripts), a heavily extended fork (Skyrim VR, Fallout 4 OG/NG/VR, Starfield, New Vegas, PDB-derived signatures). Their pipeline code is MIT-licensed per the fork's `NOTICE.md`.
+[doodlum/BethesdaGhidraScripts](https://github.com/doodlum/BethesdaGhidraScripts), which proved the clang-to-Ghidra idea first, and [alandtse/BethesdaGhidraScripts](https://github.com/alandtse/BethesdaGhidraScripts), a heavily extended fork (Skyrim VR, Fallout 4 OG/NG/VR, Starfield, New Vegas, PDB-derived signatures). Licensing note: the fork's `NOTICE.md` offers its pipeline code under MIT, but the original repo carries no license, so the upstream-derived portions' status is genuinely unresolved -- this project ships none of that code either way.
 
 **What they do that this project doesn't (yet):**
 
-- **One-shot symbolled project**: named, typed functions at real addresses across the whole binary -- ~32k named functions and ~11k applied signatures on Skyrim AE 1.6.1170 (numbers verified locally on our own run of their fork; this project's own symbols pass covers the same ground at smaller scale so far -- see `type-importer/FUNCTION_SIGNATURE_DESIGN.md`)
+- **One-shot symbolled project**: named, typed functions at real addresses across the whole binary -- ~32k named functions and ~11k applied signatures on Skyrim AE 1.6.1170 (their reported numbers, reproduced by us locally on fork commit `702c932` with Linux compatibility patches; this project's own symbols pass is at demo scale so far -- 577 functions named on a 4-header test archive -- see `type-importer/FUNCTION_SIGNATURE_DESIGN.md`)
 - **More games**: Fallout 4 (OG/NG/AE/VR), Starfield, New Vegas pipelines
 - **PDB-derived extras**: ~19k internal Bethesda struct layouts and ~19k function signatures mined from a user-supplied `SkyrimSE.pdb`
 - **Cross-version machinery**: byte-signature porting between builds, GOG re-keying, VR vtable shift maps with hand-verified anchors
@@ -44,24 +44,24 @@ Two related projects deserve credit and an honest feature split:
 
 - **Pre-built, versioned archives** -- download a `.gdt`, no toolchain, no build, no exe required for types-only work
 - **Correctness gates, not just coverage**: full-sweep `static_assert` layout verification with committed baselines and a zero-regression CI gate; per-type VERIFIED/MISMATCH/EMPTY status stamped into the archive itself; confirmed-wrong types quarantined in `/NEEDS_VERIFICATION_MISMATCH`
-- **Three independent verification layers**, including a live-game runtime harness -- theirs self-reports field *typedness* (~99.75%), which is not the same as layout *correctness* (a fully-typed field can still be at the wrong offset)
+- **Three independent verification layers**, including a live-game runtime harness (11 hotspot classes live-checked so far -- the other two layers carry the coverage) -- theirs self-reports field *typedness* (~99.75%), which is not the same as layout *correctness* (a fully-typed field can still be at the wrong offset)
 - **Linux-native end to end** -- their pipeline is Windows-oriented; this project's builds, verification, and demo all run on Linux
 - **The rest of the toolkit**: symbol-archive explorer, IDA `.til` export design, docs site
 
-The goal is parity-plus: everything they do, with verification gates on top. The gap list above is the roadmap -- see `type-importer/FUNCTION_SIGNATURE_DESIGN.md` for how the function-signature piece is being closed.
+The target is feature parity with verification gates on top; today the symbols side is at demo scale, and the gap list above is the roadmap -- see `type-importer/FUNCTION_SIGNATURE_DESIGN.md` for how the function-signature piece is being closed.
 
 | | This project | BethesdaGhidraScripts (doodlum / alandtse fork) |
 |---|---|---|
 | Distribution | Pre-built, versioned `.gdt` you download | Run-it-yourself local pipeline |
 | Runtimes | AE, SE, VR | Skyrim SE/AE/VR, F4 OG/NG/AE/VR, Starfield, FNV |
-| Function signatures / address-library symbols | Yes (new, symbols pass verified locally; vtable-walk pass pending) | Yes (mature, incl. PDB-derived) |
+| Function signatures / address-library symbols | Partial -- symbols pass verified at demo scale (4-header .gdt); full-sweep + vtable walk pending | Yes (mature, incl. PDB-derived) |
 | Accuracy tracking | CI-gated `static_assert` layout sweep, published per release | Self-reported field-typedness + vtable anchor checks |
-| Parser patches | 28 fixes, public `.patch` + writeup, not yet upstreamed | N/A |
+| Parser patches | 26 patch files + root-cause writeups, not yet upstreamed | Different parser architecture; not comparable |
 | Platform | Linux / Windows | Windows-oriented |
 
 The two accuracy approaches aren't measuring the same thing: their percentage is how many struct fields got a concrete type instead of `void *` (typedness); this project's number is how many types pass a `static_assert`-gated check against the real compiled layout (correctness). A field can be fully typed and still be wrong if the layout's off -- different claims, not directly comparable.
 
-The 28 patches aren't hidden -- every one is a `.patch` file plus a root-cause `.md` writeup in `type-importer/patches/`, free for anyone to cherry-pick. Opening them as upstream PRs is real follow-on work (several are invasive and pinned to a specific revision) -- tracked, not avoided on principle.
+The patches aren't hidden -- 26 `.patch` files plus a root-cause `.md` writeup each in `type-importer/patches/` (series numbered to 0031; a few entries are documentation-only or deferred, counted honestly in each writeup). Opening them as upstream PRs is real follow-on work (several are invasive and pinned to a specific revision) -- tracked, not avoided on principle.
 
 ---
 
@@ -76,7 +76,7 @@ skyrim-re-toolkit/
 
 ### 1. type-importer
 
-Parses CommonLibSSE-NG headers and emits Ghidra `.gdt` archives (IDA `.til` planned), built on [`GhidraClangPoweredParse`](https://github.com/playday3008/GhidraClangPoweredParse), patched with 28 accepted fixes (see `type-importer/patches/`, full accounting in `COVERAGE_SWEEP_PLAN.md`).
+Parses CommonLibSSE-NG headers and emits Ghidra `.gdt` archives (IDA `.til` planned), built on [`GhidraClangPoweredParse`](https://github.com/playday3008/GhidraClangPoweredParse), patched with 26 recorded fixes (see `type-importer/patches/`, full accounting in `COVERAGE_SWEEP_PLAN.md`).
 
 - **Approach:** libclang preprocessing → flattened C-compatible structs → Ghidra's Java type-manager API
 - **Handles:** `BSTArray<T>`, `REL::Relocation`, `stl::enumeration`, multiple inheritance, MSVC bitfield packing
@@ -145,7 +145,7 @@ SKSE plugins that hook under-instrumented engine subsystems and log their intern
 2. In Ghidra: **File → Import File** (your `SkyrimSE.exe`) → **Window → Data Type Manager → File → Add Archive** → select the `.gdt` → right-click → **Apply Function Data Types**.
 3. See [`demo/`](demo/README.md) for a real before/after so you know what to expect.
 
-*(This gives Ghidra the types -- full function-signature retyping across the binary needs RTTI-based class recovery too, out of scope here.)*
+*(This gives Ghidra the types. Naming/typing functions across the binary needs addresses too -- the demo's `SYMBOLS_JSON` pass does this from Address Library IDs at demo scale; see [`demo/README.md`](demo/README.md).)*
 
 ### Building the pipeline yourself
 
@@ -211,7 +211,7 @@ A packaging layer around fifteen years of community labor:
 
 - **Ryan-rsm-McKenzie** -- CommonLibSSE (2018)
 - **doodlum** -- [BethesdaGhidraScripts](https://github.com/doodlum/BethesdaGhidraScripts), which proved out the clang-to-Ghidra idea first
-- **alandtse, 1001Bits** -- the [extended BethesdaGhidraScripts fork](https://github.com/alandtse/BethesdaGhidraScripts) (VR/F4/SF/FNV targets, PDB-derived signatures, vtable shift maps); its pipeline code is MIT-licensed per its `NOTICE.md` and is referenced here as prior art and local reference tooling
+- **alandtse, 1001Bits** -- the [extended BethesdaGhidraScripts fork](https://github.com/alandtse/BethesdaGhidraScripts) (VR/F4/SF/FNV targets, PDB-derived signatures, vtable shift maps), referenced here as prior art and local reference tooling; see the licensing note in the comparison section above
 - **powerof3, CharmedBaryon, alandtse** -- CommonLibSSE-NG and multi-runtime maintenance
 - **meh321** -- Address Library and IDADiffCalculator
 - **ianpatt / behippo** -- SKSE
@@ -221,7 +221,7 @@ A packaging layer around fifteen years of community labor:
 
 ## License
 
-MIT. Generated type archives derive from [CommonLibSSE-NG](https://github.com/CharmedBaryon/CommonLibSSE-NG)'s MIT-licensed headers, attribution intact. The vendored [GhidraClangPoweredParse](https://github.com/playday3008/GhidraClangPoweredParse) extension is Apache-2.0. No BethesdaGhidraScripts code is redistributed here; where that pipeline (MIT per its `NOTICE.md`, copyright BethesdaGhidraScripts contributors) is ever vendored in the future, its copyright and permission notice will be included. No GPL-licensed components (e.g. CommonLibSF) are used.
+MIT. Generated type archives derive from [CommonLibSSE-NG](https://github.com/CharmedBaryon/CommonLibSSE-NG)'s MIT-licensed headers, attribution intact. The vendored [GhidraClangPoweredParse](https://github.com/playday3008/GhidraClangPoweredParse) extension is Apache-2.0. No BethesdaGhidraScripts code is redistributed here (its license chain is unresolved upstream -- see the comparison section), and the shipped toolkit contains no GPL-licensed components (e.g. CommonLibSF); a local reference run of the fork used its full GPL-v3 aggregate, which never touches this repo.
 
 > No game binaries, PDBs, or copyrighted assets are shipped -- only community-derived facts about memory layout (struct fields, enum values, function signatures).
 
